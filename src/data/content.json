@@ -1,0 +1,123 @@
+{
+  "header": {
+    "logoText": "Portfolio IA",
+    "logoUrl": null,
+    "contactEmail": "contact@example.com",
+    "siteUrl": "https://example.com"
+  },
+
+  "hero": {
+    "title": "Formateur & Developpeur Web Fullstack",
+    "tagline": "J'enseigne le developpement web et je construis des applications modernes. Augmente par l'IA pour vous servir mieux.",
+    "subtitle": "Symfony + Vue.js, integration IA pragmatique, preuves concretes.",
+    "primaryLabel": "IA detective de competences",
+    "primaryHref": "#skills",
+    "secondaryLabel": "Me contacter",
+    "secondaryHref": "#contact"
+  },
+
+  "about": {
+    "title": "A propos",
+    "subtitle": "Qui suis-je ?",
+    "bio": "Developpeur web fullstack et formateur passionne, j'accompagne les apprenants dans leur montee en competences depuis plusieurs annees. Mon approche : des bases solides, des projets concrets, et une veille constante sur les meilleures pratiques."
+  },
+
+  "trust": {
+    "items": [
+      "Bootcamp 2020",
+      "1 an de formation",
+      "Symfony + Vue.js + React",
+      "Portfolio augmente IA",
+      "Projets en production"
+    ]
+  },
+
+  "stack": {
+    "title": "Stack & pratiques",
+    "subtitle": "L'essentiel, sans jargon.",
+    "items": [
+      "Front : Vue + React, Vite, composants reutilisables",
+      "Back : Symfony API, auth, CRUD, uploads",
+      "WordPress : plugins personnalises",
+      "Qualite : Docker, migrations, Git propre"
+    ]
+  },
+
+  "teaching": {
+    "title": "Enseignement",
+    "subtitle": "Technologies que j'enseigne en formation",
+    "items": [
+      {
+        "name": "HTML",
+        "topics": ["Semantique HTML5", "Accessibilite", "SEO basics", "Formulaires"]
+      },
+      {
+        "name": "CSS",
+        "topics": ["Flexbox & Grid", "Responsive design", "Animations", "Sass/SCSS", "Variables CSS"]
+      },
+      {
+        "name": "JavaScript",
+        "topics": ["ES6+", "DOM manipulation", "Async/Await", "Fetch API", "Modules"]
+      },
+      {
+        "name": "PHP",
+        "topics": ["POO", "MVC", "PDO/MySQL", "Securite", "Sessions"]
+      },
+      {
+        "name": "Symfony",
+        "topics": ["Architecture", "API REST", "Doctrine ORM", "Twig", "Security", "Forms"]
+      },
+      {
+        "name": "Docker",
+        "topics": ["Containers", "Docker Compose", "Volumes", "Networks", "Dockerfile"]
+      },
+      {
+        "name": "WordPress",
+        "topics": ["Themes", "Plugins", "Hooks", "Custom Post Types", "WooCommerce"]
+      },
+      {
+        "name": "React",
+        "topics": ["Components", "Hooks", "State management", "React Router"]
+      },
+      {
+        "name": "Vue.js",
+        "topics": ["Composition API", "Composables", "Vue Router", "Pinia", "TypeScript"]
+      },
+      {
+        "name": "Git",
+        "topics": ["Branches", "Merge & Rebase", "Pull Requests", "Conflits", "Git Flow"]
+      }
+    ]
+  },
+
+  "projects": {
+    "title": "Incubateur de projets",
+    "subtitle": "Progression visible, bulletins clairs, preuves concretes."
+  },
+
+  "skills": {
+    "title": "IA detective de competences",
+    "subtitle": "Analyse basee sur les donnees GitHub.",
+    "summary": "Profil fullstack oriente pedagogie, fort en Symfony/Vue et structuration de contenus.",
+    "evidence": [
+      { "label": "Commits tests", "value": "47" },
+      { "label": "PR reviews", "value": "12" },
+      { "label": "Modules crees", "value": "3" }
+    ]
+  },
+
+  "cta": {
+    "title": "Disponible pour collaboration ou formation",
+    "subtitle": "Discutons de votre besoin et voyons comment je peux aider.",
+    "primaryLabel": "Me contacter",
+    "secondaryLabel": "Voir le site"
+  },
+
+  "footer": {
+    "tagline": "Formateur & Dev Fullstack",
+    "links": [
+      { "label": "GitHub", "url": "https://github.com/cundovar" },
+      { "label": "LinkedIn", "url": "https://www.linkedin.com/in/facundo-varas/" }
+    ]
+  }
+}
