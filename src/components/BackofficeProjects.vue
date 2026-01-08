@@ -172,7 +172,7 @@ const uploadImage = async (projectId: string | number): Promise<string | null> =
   const formData = new FormData();
   formData.append("file", selectedFile.value);
 
-  const response = await fetch(`/api/admin/projects/${projectId}/image`, {
+  const response = await api.fetch(`/api/admin/projects/${projectId}/image`, {
     method: "POST",
     headers: {
       Authorization: token ? `Bearer ${token}` : "",
@@ -227,7 +227,7 @@ const save = async (): Promise<void> => {
       if (!isNumericId(editingId.value)) {
         error.value = "Impossible de mettre a jour: ID non numerique.";
       } else {
-        const response = await fetch(`/api/admin/projects/${editingId.value}`, {
+        const response = await api.fetch(`/api/admin/projects/${editingId.value}`, {
           method: "PUT",
           headers: adminHeaders(),
           body: JSON.stringify(payload),
@@ -288,7 +288,7 @@ const remove = async (id: string): Promise<void> => {
     return;
   }
 
-  const response = await fetch(`/api/admin/projects/${id}`, {
+  const response = await api.fetch(`/api/admin/projects/${id}`, {
     method: "DELETE",
     headers: adminHeaders(),
   });
@@ -312,7 +312,7 @@ const generateBulletin = async (project: ProjectCard): Promise<void> => {
   }
   generatingId.value = project.id;
   try {
-    const response = await fetch(`/api/admin/projects/${project.id}/bulletin`, {
+    const response = await api.fetch(`/api/admin/projects/${project.id}/bulletin`, {
       method: "POST",
       headers: adminHeaders(),
     });
