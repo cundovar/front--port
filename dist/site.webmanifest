@@ -1,0 +1,22 @@
+{
+  "name": "Facundo Varas - Portfolio",
+  "short_name": "FV Portfolio",
+  "description": "Formateur et developpeur web fullstack specialise en Symfony et Vue.js",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0d1117",
+  "theme_color": "#facc15",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
