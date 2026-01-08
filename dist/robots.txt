@@ -1,0 +1,10 @@
+# Robots.txt for facundovaras.dev
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://facundovaras.dev/sitemap.xml
+
+# Disallow admin/backoffice
+Disallow: /admin
+Disallow: /admin/

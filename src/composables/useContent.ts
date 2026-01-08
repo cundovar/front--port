@@ -1,6 +1,7 @@
 import { onMounted, ref } from "vue";
 import type { ContentData } from "../types";
 import defaultContent from "../data/content.json";
+import { api } from "../utils/api";
 
 const mergeContent = (base: ContentData, incoming: Partial<ContentData>): ContentData => {
   const hasKey = <T extends object>(obj: T, key: keyof T): boolean =>
@@ -25,14 +26,14 @@ export const useContent = () => {
 
   const load = async (): Promise<void> => {
     try {
-      const response = await fetch("/api/content");
+      const response = await api.fetch("/api/content");
       if (!response.ok) return;
 
       const data = (await response.json()) as Partial<ContentData>;
       content.value = mergeContent(defaultContent as ContentData, data);
 
       // Charger les skills depuis l'API dédiée si disponible
-      const skillsResponse = await fetch("/api/skills");
+      const skillsResponse = await api.fetch("/api/skills");
       if (skillsResponse.ok) {
         const skills = await skillsResponse.json();
         content.value = {

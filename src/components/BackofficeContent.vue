@@ -167,6 +167,7 @@ import { onMounted, reactive, ref, watch } from "vue";
 import type { ContentData } from "../types";
 import defaultContent from "../data/content.json";
 import RichTextEditor from "./RichTextEditor.vue";
+import { api } from "../utils/api";
 
 const tabs = [
   { key: "header", label: "Header" },
@@ -204,7 +205,7 @@ const applyRawJson = (): void => {
 
 const load = async (): Promise<void> => {
   try {
-    const response = await fetch("/api/content");
+    const response = await api.fetch("/api/content");
     if (!response.ok) return;
     const data = (await response.json()) as ContentData;
     Object.assign(content, data);
@@ -236,7 +237,7 @@ const save = async (): Promise<void> => {
   saving.value = true;
 
   const token = localStorage.getItem("admin_token") ?? "";
-  const response = await fetch("/api/admin/content", {
+  const response = await api.fetch("/api/admin/content", {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",

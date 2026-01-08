@@ -22,12 +22,13 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
+import { api } from "../utils/api";
 
 const email = ref("");
 const password = ref("");
 
 const submit = async (): Promise<void> => {
-  const response = await fetch("/api/admin/login", {
+  const response = await api.fetch("/api/admin/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email: email.value, password: password.value }),

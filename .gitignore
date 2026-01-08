@@ -3,4 +3,11 @@ node_modules
 .env.local
 .env.production
 .env.development
-dist
+src
+index.html
+package.json
+package-lock.json
+vite.config.js
+tsconfig.json
+public
+documentation

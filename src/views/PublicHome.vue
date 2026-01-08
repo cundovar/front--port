@@ -82,6 +82,7 @@ import FinalCtaSection from "../components/FinalCtaSection.vue";
 import SiteFooter from "../components/SiteFooter.vue";
 import ThemeToggle from "../components/ThemeToggle.vue";
 import { useContent } from "../composables/useContent";
+import { api } from "../utils/api";
 
 const { content } = useContent();
 
@@ -90,7 +91,7 @@ const isDark = ref(true);
 
 const loadProjects = async (): Promise<void> => {
   try {
-    const response = await fetch("/api/projects");
+    const response = await api.fetch("/api/projects");
     if (!response.ok) return;
     const data = await response.json();
     if (Array.isArray(data)) {
