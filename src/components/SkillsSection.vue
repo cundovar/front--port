@@ -189,4 +189,29 @@ const open = ref(false);
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+@media (max-width: 768px) {
+  .modal-backdrop {
+    padding: 12px;
+    align-items: flex-start;
+    overflow-y: auto;
+  }
+
+  .modal {
+    max-height: none;
+    padding: 16px;
+    margin: 0;
+  }
+
+  .modal-header {
+    position: sticky;
+    top: -16px;
+    background: var(--bg-elev);
+    padding: 12px 0;
+    margin: -16px -16px 16px;
+    padding: 16px;
+    border-bottom: 1px solid var(--line);
+    z-index: 10;
+  }
+}
 </style>

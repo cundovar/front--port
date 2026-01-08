@@ -1,7 +1,7 @@
 <template>
-  <button class="theme-toggle" type="button" @click="toggle">
-    <span class="dot" :class="{ dark: isDark }"></span>
-    <span class="label">{{ isDark ? "Nuit" : "Jour" }}</span>
+  <button class="theme-toggle" type="button" @click="toggle" :title="isDark ? 'Mode jour' : 'Mode nuit'">
+    <span v-if="isDark" class="icon">🌙</span>
+    <span v-else class="icon">☀️</span>
   </button>
 </template>
 
@@ -10,7 +10,7 @@ interface Props {
   isDark: boolean;
 }
 
-const props = defineProps<Props>();
+defineProps<Props>();
 const emit = defineEmits<{ (e: "toggle"): void }>();
 
 const toggle = (): void => {
@@ -22,30 +22,34 @@ const toggle = (): void => {
 .theme-toggle {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  padding: 8px 14px;
-  border-radius: 999px;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
   border: 1px solid var(--line);
   background: var(--bg-elev);
-  color: var(--text);
   cursor: pointer;
+  transition: transform 0.2s, border-color 0.2s;
 }
 
-.dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: var(--orange);
-  box-shadow: 0 0 10px rgba(245, 158, 11, 0.6);
+.theme-toggle:hover {
+  border-color: var(--yellow);
+  transform: scale(1.05);
 }
 
-.dot.dark {
-  background: var(--blue);
-  box-shadow: 0 0 10px rgba(59, 130, 246, 0.6);
+.icon {
+  font-size: 18px;
+  line-height: 1;
 }
 
-.label {
-  font-size: 13px;
-  font-weight: 600;
+@media (max-width: 768px) {
+  .theme-toggle {
+    width: 36px;
+    height: 36px;
+  }
+
+  .icon {
+    font-size: 16px;
+  }
 }
 </style>
