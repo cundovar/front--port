@@ -5,6 +5,9 @@
         <h2 class="about-title">{{ title }}</h2>
         <p class="about-subtitle">{{ subtitle }}</p>
         <div class="about-bio" v-html="bio"></div>
+        <div v-if="trustItems && trustItems.length" class="trust-strip">
+          <span v-for="item in trustItems" :key="item" class="trust-pill">{{ item }}</span>
+        </div>
       </div>
     </div>
   </section>
@@ -15,6 +18,7 @@ interface Props {
   title: string;
   subtitle: string;
   bio: string;
+  trustItems?: string[];
 }
 
 defineProps<Props>();
@@ -108,6 +112,23 @@ defineProps<Props>();
   border: 1px solid var(--yellow);
   border-radius: 20px;
   color: var(--yellow);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.trust-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.trust-pill {
+  padding: 8px 16px;
+  background: rgba(250, 204, 21, 0.15);
+  border: 1px solid var(--yellow);
+  border-radius: 20px;
+  color: var(--text);
   font-size: 14px;
   font-weight: 500;
 }

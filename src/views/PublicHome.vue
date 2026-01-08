@@ -1,6 +1,6 @@
 <template>
   <main class="page">
-    <div class="section top-bar">
+    <div class="top-bar">
       <ThemeToggle :is-dark="isDark" @toggle="toggleTheme" />
     </div>
 
@@ -18,9 +18,8 @@
       :title="content.about.title"
       :subtitle="content.about.subtitle"
       :bio="content.about.bio"
+      :trust-items="content.trust.items"
     />
-
-    <TrustStrip :items="content.trust.items" />
 
     <StackLiteSection
       :title="content.stack.title"
@@ -28,13 +27,30 @@
       :items="content.stack.items"
     />
 
+    <!-- Teaching: Desktop vs Mobile -->
     <TeachingSection
+      v-if="!isMobile"
+      :title="content.teaching.title"
+      :subtitle="content.teaching.subtitle"
+      :items="content.teaching.items"
+    />
+    <TeachingSectionMobile
+      v-else
       :title="content.teaching.title"
       :subtitle="content.teaching.subtitle"
       :items="content.teaching.items"
     />
 
+    <!-- Projects: Desktop vs Mobile -->
     <ProjectsSection
+      v-if="!isMobile"
+      id="incubateur"
+      :title="content.projects.title"
+      :subtitle="content.projects.subtitle"
+      :projects="projects"
+    />
+    <ProjectsSectionMobile
+      v-else
       id="incubateur"
       :title="content.projects.title"
       :subtitle="content.projects.subtitle"
@@ -70,13 +86,14 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { onMounted, onUnmounted, ref } from "vue";
 import HeroSection from "../components/HeroSection.vue";
 import AboutSection from "../components/AboutSection.vue";
-import TrustStrip from "../components/TrustStrip.vue";
 import StackLiteSection from "../components/StackLiteSection.vue";
 import TeachingSection from "../components/TeachingSection.vue";
+import TeachingSectionMobile from "../components/TeachingSectionMobile.vue";
 import ProjectsSection from "../components/ProjectsSection.vue";
+import ProjectsSectionMobile from "../components/ProjectsSectionMobile.vue";
 import SkillsSection from "../components/SkillsSection.vue";
 import FinalCtaSection from "../components/FinalCtaSection.vue";
 import SiteFooter from "../components/SiteFooter.vue";
@@ -88,6 +105,11 @@ const { content } = useContent();
 
 const projects = ref(content.value.projects.items ?? []);
 const isDark = ref(true);
+const isMobile = ref(window.innerWidth <= 768);
+
+const handleResize = (): void => {
+  isMobile.value = window.innerWidth <= 768;
+};
 
 const loadProjects = async (): Promise<void> => {
   try {
@@ -104,6 +126,11 @@ const loadProjects = async (): Promise<void> => {
 
 onMounted(() => {
   void loadProjects();
+  window.addEventListener("resize", handleResize);
+});
+
+onUnmounted(() => {
+  window.removeEventListener("resize", handleResize);
 });
 
 const toggleTheme = (): void => {
@@ -116,6 +143,18 @@ const toggleTheme = (): void => {
 .top-bar {
   display: flex;
   justify-content: flex-end;
-  padding-top: 40px;
+  /* padding-top: 40px;/ */
+}
+
+@media (max-width: 768px) {
+  .top-bar {
+    position: fixed;
+    bottom: 8px;
+    right: 5%;
+    left: auto;
+    padding: 0;
+    z-index: 100;
+    width: auto;
+  }
 }
 </style>

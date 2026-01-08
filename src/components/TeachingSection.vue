@@ -33,7 +33,7 @@ defineProps<Props>();
 }
 
 .teaching-card {
-  background: var(--panel);
+  background: var(--bg-elev);
   border: 1px solid var(--line);
   border-radius: 16px;
   padding: 20px;

@@ -4,7 +4,7 @@ node_modules
 .env.production
 .env.development
 src
-index.html
+
 package.json
 package-lock.json
 vite.config.js

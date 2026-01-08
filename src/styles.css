@@ -26,16 +26,26 @@ body.theme-light {
   --shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
 }
 
-* {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
+}
+
+html, body {
+  overflow-x: hidden;
+  width: 100%;
 }
 
 body {
   margin: 0;
   font-family: "IBM Plex Sans", system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
   background: var(--bg);
   color: var(--text);
   position: relative;
+  -webkit-text-size-adjust: 100%;
 }
 
 
@@ -48,6 +58,15 @@ a {
   text-decoration: none;
 }
 
+p, li {
+  font-size: clamp(15px, 4vw, 17px);
+  line-height: 1.7;
+}
+
+ul, ol {
+  padding-left: 1.25em;
+}
+
 img {
   max-width: 100%;
   display: block;
@@ -57,8 +76,15 @@ img {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  gap: 56px;
-  padding: 20px 20px 72px;
+  gap: 32px;
+  padding: 48px 16px 60px;
+}
+
+@media (min-width: 768px) {
+  .page {
+    gap: 56px;
+    padding: 20px 20px 72px;
+  }
 }
 
 .section {
@@ -77,7 +103,7 @@ img {
 .section-subtitle {
   color: var(--muted);
   margin: 0 0 32px;
-  font-size: 16px;
+  font-size: clamp(15px, 3.5vw, 18px);
 }
 
 .card {
