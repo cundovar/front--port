@@ -1,0 +1,5 @@
+# Redirection vers dist/ pour OVH mutualisé
+# Ce fichier est déployé à la racine de new-portfolio/front/
+
+RewriteEngine On
+RewriteRule ^(.*)$ dist/$1 [L]

@@ -30,6 +30,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
 import type { CommentStatus, StudentComment } from "../types";
+import { api } from "../utils/api";
 
 interface Props {
   initialComments: StudentComment[];
@@ -49,7 +50,7 @@ const adminHeaders = (): HeadersInit => {
 
 const load = async (): Promise<void> => {
   try {
-    const response = await fetch("/api/admin/comments", { headers: adminHeaders() });
+    const response = await api.fetch("/api/admin/comments", { headers: adminHeaders() });
     if (!response.ok) {
       return;
     }

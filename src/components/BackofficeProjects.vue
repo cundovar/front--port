@@ -92,6 +92,7 @@
 import { onMounted, reactive, ref } from "vue";
 import type { ProjectCard } from "../types";
 import RichTextEditor from "./RichTextEditor.vue";
+import { api } from "../utils/api";
 
 const projects = ref<ProjectCard[]>([]);
 const editingId = ref<string | null>(null);
@@ -149,7 +150,7 @@ const isNumericId = (value: string): boolean => {
 
 const load = async (): Promise<void> => {
   try {
-    const response = await fetch("/api/projects");
+    const response = await api.fetch("/api/projects");
     if (!response.ok) {
       error.value = `Impossible de charger les projets (API ${response.status}).`;
       return;
@@ -259,7 +260,7 @@ const save = async (): Promise<void> => {
       payload.imageUrl = undefined;
     }
 
-    const response = await fetch("/api/admin/projects", {
+    const response = await api.fetch("/api/admin/projects", {
       method: "POST",
       headers: adminHeaders(),
       body: JSON.stringify(payload),
