@@ -69,7 +69,7 @@ const setStatus = async (id: string, status: CommentStatus): Promise<void> => {
     target.status = status;
   }
 
-  const response = await fetch(`/api/admin/comments/${id}`, {
+  const response = await api.fetch(`/api/admin/comments/${id}`, {
     method: "PATCH",
     headers: adminHeaders(),
     body: JSON.stringify({ status }),

@@ -6,7 +6,7 @@
         <form class="form" @submit.prevent="submit">
           <label>
             Email
-            <input v-model="email" type="email" required />
+            <input v-model="email" type="text" required />
           </label>
           <label>
             Mot de passe
