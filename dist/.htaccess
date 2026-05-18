@@ -1,0 +1,6 @@
+RewriteEngine On
+
+# Vue Router history mode fallback for files served from dist/.
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.html [L]

@@ -9,5 +9,6 @@ package.json
 package-lock.json
 vite.config.js
 tsconfig.json
-public
+public/*
+!public/.htaccess
 documentation

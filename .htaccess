@@ -1,5 +1,7 @@
-# Redirection vers dist/ pour OVH mutualisé
-# Ce fichier est déployé à la racine de new-portfolio/front/
-
 RewriteEngine On
-RewriteRule ^(.*)$ dist/$1 [L]
+
+# Serve the built Vite app from dist/ when this file is deployed at the
+# frontend project root. Do not rewrite requests that are already in dist/.
+RewriteRule ^dist/ - [L]
+RewriteRule ^$ dist/index.html [L]
+RewriteRule ^(.+)$ dist/$1 [L]
