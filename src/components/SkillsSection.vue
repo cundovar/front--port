@@ -89,6 +89,15 @@ const open = ref(false);
   color: var(--muted);
 }
 
+.card h3,
+.modal-header h3 {
+  font-family: var(--font-display);
+  font-size: clamp(34px, 5vw, 54px);
+  line-height: 0.86;
+  text-transform: uppercase;
+  margin: 0 0 16px;
+}
+
 .summary-content :deep(p) {
   margin: 0 0 8px;
 }
@@ -118,8 +127,13 @@ const open = ref(false);
 .evidence li {
   display: flex;
   justify-content: space-between;
-  border-bottom: 1px solid var(--line);
-  padding-bottom: 8px;
+  gap: 16px;
+  border-bottom: 2px solid var(--line);
+  padding-bottom: 10px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
 }
 
 .anchor {
@@ -130,7 +144,7 @@ const open = ref(false);
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(8, 12, 18, 0.72);
+  background: color-mix(in oklch, var(--bg) 76%, transparent);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -141,10 +155,10 @@ const open = ref(false);
 .modal {
   width: min(860px, 100%);
   background: var(--bg-elev);
-  border: 1px solid var(--line);
-  border-radius: 20px;
+  border: 3px solid var(--line);
+  border-radius: 0;
   padding: 24px;
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-lg);
 }
 
 .modal-header {
@@ -153,11 +167,6 @@ const open = ref(false);
   align-items: center;
   gap: 16px;
   margin-bottom: 16px;
-}
-
-.modal-header h3 {
-  margin: 0;
-  font-family: "Sora", system-ui, sans-serif;
 }
 
 .modal-header .btn {
@@ -172,7 +181,9 @@ const open = ref(false);
 
 .modal-grid h4 {
   margin: 0 0 10px;
-  font-size: 15px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  text-transform: uppercase;
 }
 
 .meta {
@@ -211,7 +222,7 @@ const open = ref(false);
     padding: 12px 0;
     margin: -16px -16px 16px;
     padding: 16px;
-    border-bottom: 1px solid var(--line);
+    border-bottom: 2px solid var(--line);
     z-index: 10;
   }
 }

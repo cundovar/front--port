@@ -29,48 +29,38 @@ defineProps<Props>();
   position: relative;
 }
 
-.about-section::before {
-  content: "";
-  position: absolute;
-  width: 350px;
-  height: 350px;
-  background: var(--orange);
-  border-radius: 50%;
-  filter: blur(100px);
-  opacity: 0.1;
-  top: -50px;
-  right: 50px;
-  pointer-events: none;
-  z-index: -1;
-}
-
 .about-card {
-
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .about-content {
-  max-width: 600px;
+  max-width: 820px;
 }
 
 .about-title {
-  font-family: "Sora", system-ui, sans-serif;
-  font-size: clamp(28px, 4vw, 40px);
-  margin: 0 0 8px;
+  font-family: var(--font-display);
+  font-size: clamp(48px, 9vw, 92px);
+  line-height: 0.82;
+  text-transform: uppercase;
+  margin: 0 0 18px;
   color: var(--text);
 }
 
 .about-subtitle {
-  color: var(--yellow);
-  font-size: 16px;
-  margin: 0 0 20px;
-  font-weight: 500;
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  margin: 0 0 24px;
+  font-weight: 600;
+  text-transform: uppercase;
 }
 
 .about-bio {
-  color: var(--muted);
-  font-size: 16px;
-  line-height: 1.7;
-  margin: 0 0 24px;
+  color: var(--text);
+  font-size: clamp(21px, 3vw, 30px);
+  line-height: 1.12;
+  margin: 0 0 28px;
 }
 
 .about-bio :deep(p) {
@@ -124,13 +114,15 @@ defineProps<Props>();
 }
 
 .trust-pill {
-  padding: 8px 16px;
-  background: rgba(250, 204, 21, 0.15);
-  border: 1px solid var(--yellow);
-  border-radius: 20px;
+  padding: 8px 12px;
+  background: var(--bg-elev);
+  border: 2px solid var(--line);
+  border-radius: 0;
   color: var(--text);
-  font-size: 14px;
-  font-weight: 500;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
 }
 
 @media (max-width: 768px) {

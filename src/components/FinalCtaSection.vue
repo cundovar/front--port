@@ -29,11 +29,17 @@ defineProps<Props>();
   flex-direction: column;
   gap: 20px;
   align-items: flex-start;
+  background:
+    repeating-linear-gradient(90deg, var(--soft) 0 12px, transparent 12px 24px),
+    var(--bg-elev);
 }
 
 .final-cta h2 {
   margin: 0 0 8px;
-  font-family: "Sora", system-ui, sans-serif;
+  font-family: var(--font-display);
+  font-size: clamp(42px, 8vw, 76px);
+  line-height: 0.86;
+  text-transform: uppercase;
 }
 
 .cta-actions {
@@ -44,6 +50,8 @@ defineProps<Props>();
 
 .muted {
   color: var(--muted);
+  max-width: 58ch;
+  font-size: clamp(17px, 3vw, 21px);
 }
 
 @media (min-width: 840px) {

@@ -29,25 +29,31 @@ defineProps<Props>();
 .teaching-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 16px;
+  gap: 0;
+  border-top: 2px solid var(--line);
+  border-left: 2px solid var(--line);
 }
 
 .teaching-card {
   background: var(--bg-elev);
-  border: 1px solid var(--line);
-  border-radius: 16px;
-  padding: 20px;
-  transition: border-color 0.2s;
+  border-right: 2px solid var(--line);
+  border-bottom: 2px solid var(--line);
+  border-radius: 0;
+  padding: 22px;
+  transition: background 160ms var(--ease);
 }
 
 .teaching-card:hover {
-  border-color: var(--yellow);
+  background: var(--soft);
 }
 
 .card-title {
-  margin: 0 0 12px;
-  font-size: 18px;
-  font-weight: 600;
+  margin: 0 0 18px;
+  font-family: var(--font-display);
+  font-size: 34px;
+  line-height: 0.9;
+  font-weight: 900;
+  text-transform: uppercase;
   color: var(--text);
 }
 
@@ -62,15 +68,18 @@ defineProps<Props>();
 
 .topics-list li {
   color: var(--muted);
-  font-size: 14px;
-  padding-left: 12px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  padding-left: 18px;
   position: relative;
+  text-transform: uppercase;
 }
 
 .topics-list li::before {
   content: "•";
   position: absolute;
   left: 0;
-  color: var(--yellow);
+  color: var(--accent);
 }
 </style>

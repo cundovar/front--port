@@ -25,16 +25,18 @@ const toggle = (): void => {
   justify-content: center;
   width: 40px;
   height: 40px;
-  border-radius: 50%;
-  border: 1px solid var(--line);
+  border-radius: 0;
+  border: 2px solid var(--line);
   background: var(--bg-elev);
+  color: var(--text);
   cursor: pointer;
-  transition: transform 0.2s, border-color 0.2s;
+  box-shadow: 4px 4px 0 var(--line);
+  transition: transform 160ms var(--ease), box-shadow 160ms var(--ease);
 }
 
 .theme-toggle:hover {
-  border-color: var(--yellow);
-  transform: scale(1.05);
+  transform: translate(-1px, -1px);
+  box-shadow: 5px 5px 0 var(--line);
 }
 
 .icon {

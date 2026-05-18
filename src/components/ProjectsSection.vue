@@ -2,13 +2,41 @@
   <section class="section">
     <h2 class="section-title">{{ title }}</h2>
     <p class="section-subtitle">{{ subtitle }}</p>
-    <div class="grid grid-2">
-      <article v-for="project in projects" :key="project.id" class="card">
-        <div class="project-header">
-          <div>
-            <h3>{{ project.name }}</h3>
-            <p class="muted">{{ project.stack }}</p>
-          </div>
+    <div class="project-filters" role="group" aria-label="Filtrer les projets par technologie">
+      <button
+        class="filter-btn"
+        :class="{ active: selectedTechnology === 'all' }"
+        type="button"
+        :aria-pressed="selectedTechnology === 'all'"
+        @click="$emit('selectTechnology', 'all')"
+      >
+        Tous
+      </button>
+      <button
+        v-for="technology in technologies"
+        :key="technology.value"
+        class="filter-btn"
+        :class="{ active: selectedTechnology === technology.value }"
+        type="button"
+        :aria-pressed="selectedTechnology === technology.value"
+        @click="$emit('selectTechnology', technology.value)"
+      >
+        {{ technology.label }}
+      </button>
+    </div>
+    <div class="projects-grid">
+      <article v-for="project in projects" :key="project.id" class="project-card">
+        <img v-if="project.imageUrl" class="project-image" :src="project.imageUrl" :alt="project.name" />
+        <div v-else class="project-image project-placeholder">{{ project.name }}</div>
+        <div class="project-body">
+          <p class="muted">{{ project.stack }}</p>
+          <h3>{{ project.name }}</h3>
+          <div
+            v-if="project.summary || project.bulletin"
+            class="project-summary"
+            v-html="project.summary || project.bulletin"
+          ></div>
+          <p v-if="project.duration" class="project-duration">Duree: {{ project.duration }}</p>
           <div class="project-links">
             <a class="btn btn-secondary" :href="project.siteUrl" target="_blank" rel="noreferrer">Site</a>
             <a
@@ -22,10 +50,6 @@
             </a>
           </div>
         </div>
-        <img v-if="project.imageUrl" class="project-image" :src="project.imageUrl" :alt="project.name" />
-        <div v-if="project.summary" class="project-summary" v-html="project.summary"></div>
-        <p v-if="project.duration" class="project-duration">Duree: {{ project.duration }}</p>
-        <div v-if="project.bulletin" class="bulletin" v-html="project.bulletin"></div>
       </article>
     </div>
   </section>
@@ -34,34 +58,97 @@
 <script setup lang="ts">
 import type { ProjectCard } from "../types";
 
+interface TechnologyFilter {
+  value: string;
+  label: string;
+}
+
 interface Props {
   title: string;
   subtitle: string;
   projects: ProjectCard[];
+  technologies: TechnologyFilter[];
+  selectedTechnology: string;
 }
 
 defineProps<Props>();
+defineEmits<{ (e: "selectTechnology", technology: string): void }>();
 </script>
 
 <style scoped>
-.project-header {
+.project-filters {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: -12px 0 34px;
 }
 
-.project-header h3 {
+.filter-btn {
+  min-height: 46px;
+  padding: 10px 18px;
+  border: 2px solid var(--line);
+  background: var(--bg-elev);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: transform 160ms var(--ease), box-shadow 160ms var(--ease), background 160ms var(--ease), color 160ms var(--ease);
+}
+
+.filter-btn:hover,
+.filter-btn.active {
+  background: var(--text);
+  color: var(--bg-elev);
+}
+
+.filter-btn:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 var(--line);
+}
+
+.project-body h3 {
   margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(36px, 4.5vw, 48px);
+  line-height: 0.82;
+  text-transform: uppercase;
 }
 
 .muted {
   color: var(--muted);
   margin: 4px 0 0;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 28px;
+}
+
+.project-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-elev);
+  border: 3px solid var(--line);
+  box-shadow: var(--shadow);
+  padding: 20px;
+}
+
+.project-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
 }
 
 .project-summary {
-  margin: 16px 0;
+  margin: 16px 0 0;
+  padding: 0;
   color: var(--text);
 }
 
@@ -83,59 +170,49 @@ defineProps<Props>();
 }
 
 .project-summary :deep(a) {
-  color: var(--yellow);
+  color: var(--accent);
   text-decoration: underline;
 }
 
 .project-duration {
-  margin: 6px 0 0;
+  margin: 12px 0 0;
   color: var(--muted);
-  font-size: 13px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
 }
 
 .project-image {
-  margin-top: 16px;
-  border-radius: 14px;
-  border: 1px solid var(--line);
-  max-height: 220px;
+  margin: 0;
+  border-radius: 0;
+  border: 2px solid var(--line);
+  aspect-ratio: 16 / 4.5;
+  max-height: none;
   object-fit: cover;
   width: 100%;
+  margin-bottom: 16px;
 }
 
-.bulletin {
-  margin: 12px 0 0;
+.project-placeholder {
+  display: grid;
+  place-items: center;
+  background:
+    linear-gradient(135deg, transparent 0 48%, var(--line) 49% 51%, transparent 52%),
+    linear-gradient(45deg, transparent 0 48%, var(--line) 49% 51%, transparent 52%),
+    var(--soft);
   color: var(--muted);
-  font-size: 14px;
-}
-
-.bulletin :deep(p) {
-  margin: 0 0 6px;
-}
-
-.bulletin :deep(p:last-child) {
-  margin-bottom: 0;
-}
-
-.bulletin :deep(strong) {
-  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 11px;
   font-weight: 600;
-}
-
-.bulletin :deep(ul) {
-  padding-left: 20px;
-  margin: 6px 0;
-}
-
-.bulletin :deep(h2),
-.bulletin :deep(h3) {
-  color: var(--text);
-  margin: 10px 0 6px;
-  font-size: 15px;
+  text-transform: uppercase;
 }
 
 .project-links {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+  padding: 0;
+  margin-top: 24px;
 }
 </style>

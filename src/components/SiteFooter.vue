@@ -37,8 +37,14 @@ defineProps<Props>();
   display: flex;
   flex-direction: column;
   gap: 16px;
-  border-top: 1px solid var(--line);
-  padding-top: 24px;
+  border-top: 0;
+  border-bottom: 0;
+  padding-top: 32px;
+  padding-bottom: 0;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
 }
 
 .footer-left {
@@ -56,10 +62,12 @@ defineProps<Props>();
 .footer-links a {
   color: var(--text);
   text-decoration: none;
+  border-bottom: 2px solid transparent;
 }
 
 .footer-links a:hover {
-  color: var(--yellow);
+  color: var(--text);
+  border-bottom-color: var(--line);
 }
 
 .muted {
