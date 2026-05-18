@@ -85,6 +85,34 @@
       <!-- SKILLS -->
       <div v-show="activeTab === 'skills'" class="form-section">
         <h3>Competences (IA Detective)</h3>
+
+        <div class="ai-generate-box">
+          <p class="muted">
+            Analyse automatique de ton profil GitHub via OpenAI.
+            <span v-if="skillsGeneratedAt">Derniere analyse: {{ skillsGeneratedAt }}</span>
+          </p>
+          <div class="ai-buttons">
+            <button
+              type="button"
+              class="btn btn-primary"
+              :disabled="generatingSkills"
+              @click="generateSkills(false)"
+            >
+              {{ generatingSkills ? "Generation..." : "Regenerer analyse IA" }}
+            </button>
+            <button
+              type="button"
+              class="btn btn-secondary"
+              :disabled="generatingSkills"
+              @click="generateSkills(true)"
+            >
+              Sans IA (fallback)
+            </button>
+          </div>
+          <p v-if="skillsSuccess" class="success">{{ skillsSuccess }}</p>
+          <p v-if="skillsError" class="error">{{ skillsError }}</p>
+        </div>
+
         <div class="field">
           <label>Titre</label>
           <input v-model="content.skills.title" type="text" />
@@ -186,6 +214,11 @@ const error = ref("");
 const success = ref("");
 const saving = ref(false);
 
+const generatingSkills = ref(false);
+const skillsError = ref("");
+const skillsSuccess = ref("");
+const skillsGeneratedAt = ref("");
+
 const updateRawJson = (): void => {
   rawJson.value = JSON.stringify(content, null, 2);
 };
@@ -231,6 +264,52 @@ const removeFooterLink = (index: number): void => {
   content.footer.links.splice(index, 1);
 };
 
+const generateSkills = async (skipAi: boolean): Promise<void> => {
+  skillsError.value = "";
+  skillsSuccess.value = "";
+  generatingSkills.value = true;
+
+  const token = localStorage.getItem("admin_token") ?? "";
+
+  try {
+    const response = await api.fetch("/api/admin/skills/generate", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: token ? `Bearer ${token}` : "",
+      },
+      body: JSON.stringify({ skipAi }),
+    });
+
+    if (!response.ok) {
+      const detail = await response.text();
+      skillsError.value = `Echec (${response.status}). ${detail}`;
+    } else {
+      const data = await response.json();
+      skillsGeneratedAt.value = data.snapshot?.generatedAt ?? "";
+      skillsSuccess.value = data.aiUsed
+        ? "Analyse IA generee avec succes."
+        : "Analyse fallback generee (sans IA).";
+    }
+  } catch {
+    skillsError.value = "Erreur reseau.";
+  }
+
+  generatingSkills.value = false;
+};
+
+const loadSkillsInfo = async (): Promise<void> => {
+  try {
+    const response = await api.fetch("/api/skills");
+    if (response.ok) {
+      const data = await response.json();
+      skillsGeneratedAt.value = data.generatedAt ?? "";
+    }
+  } catch {
+    // Ignore
+  }
+};
+
 const save = async (): Promise<void> => {
   error.value = "";
   success.value = "";
@@ -258,6 +337,7 @@ const save = async (): Promise<void> => {
 
 onMounted(() => {
   void load();
+  void loadSkillsInfo();
 });
 </script>
 
@@ -392,5 +472,29 @@ textarea {
 .success {
   color: #22c55e;
   margin-top: 12px;
+}
+
+.ai-generate-box {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 24px;
+}
+
+.ai-generate-box .muted {
+  margin: 0 0 12px;
+}
+
+.ai-buttons {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.ai-generate-box .success,
+.ai-generate-box .error {
+  margin-top: 12px;
+  margin-bottom: 0;
 }
 </style>

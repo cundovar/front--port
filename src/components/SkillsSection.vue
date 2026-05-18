@@ -1,7 +1,7 @@
 <template>
-  <section class="section">
-    <span id="skills" class="anchor" aria-hidden="true"></span>
-    <h2 class="section-title">{{ title }}</h2>
+  <div>
+    <section class="section">
+      <h2 class="section-title">{{ title }}</h2>
     <p class="section-subtitle">{{ subtitle }}</p>
     <div class="grid grid-2">
       <div class="card">
@@ -21,8 +21,8 @@
         </ul>
       </div>
     </div>
-  </section>
-  <div v-if="open" class="modal-backdrop" @click.self="open = false">
+    </section>
+    <div v-if="open" class="modal-backdrop" @click.self="open = false">
     <div class="modal">
       <div class="modal-header">
         <h3>Analyse complete</h3>
@@ -60,6 +60,7 @@
           </div>
         </div>
       </div>
+    </div>
     </div>
   </div>
 </template>
