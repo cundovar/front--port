@@ -104,6 +104,28 @@
         </div>
       </div>
 
+      <!-- TEACHING -->
+      <div v-show="activeTab === 'teaching'" class="form-section">
+        <h3>Enseignement</h3>
+        <div class="field">
+          <label>Titre</label>
+          <input v-model="content.teaching.title" type="text" />
+        </div>
+        <div class="field">
+          <label>Sous-titre</label>
+          <input v-model="content.teaching.subtitle" type="text" />
+        </div>
+        <div class="field">
+          <label>Technologies</label>
+          <textarea
+            v-model="teachingItemsText"
+            rows="12"
+            spellcheck="false"
+            placeholder="HTML | Semantique HTML5, Accessibilite, SEO basics, Formulaires"
+          ></textarea>
+        </div>
+      </div>
+
       <!-- SKILLS -->
       <div v-show="activeTab === 'skills'" class="form-section">
         <h3>Competences (IA Detective)</h3>
@@ -237,6 +259,7 @@ const tabs = [
   { key: "hero", label: "Hero" },
   { key: "about", label: "A propos" },
   { key: "stack", label: "Stack" },
+  { key: "teaching", label: "Enseignement" },
   { key: "skills", label: "Competences" },
   { key: "projects", label: "Projets" },
   { key: "cta", label: "CTA" },
@@ -257,6 +280,29 @@ const stackItemsText = computed({
       .split("\n")
       .map((item) => item.trim())
       .filter(Boolean);
+  },
+});
+const teachingItemsText = computed({
+  get: () =>
+    content.teaching.items
+      .map((item) => `${item.name} | ${item.topics.join(", ")}`)
+      .join("\n"),
+  set: (value: string) => {
+    content.teaching.items = value
+      .split("\n")
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .map((line) => {
+        const [namePart, topicsPart = ""] = line.split("|");
+        const name = namePart.trim();
+        const topics = topicsPart
+          .split(",")
+          .map((topic) => topic.trim())
+          .filter(Boolean);
+
+        return { name, topics };
+      })
+      .filter((item) => item.name.length > 0);
   },
 });
 
