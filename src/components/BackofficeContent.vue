@@ -82,6 +82,28 @@
         </div>
       </div>
 
+      <!-- STACK -->
+      <div v-show="activeTab === 'stack'" class="form-section">
+        <h3>Stack & techniques</h3>
+        <div class="field">
+          <label>Titre</label>
+          <input v-model="content.stack.title" type="text" />
+        </div>
+        <div class="field">
+          <label>Sous-titre</label>
+          <input v-model="content.stack.subtitle" type="text" />
+        </div>
+        <div class="field">
+          <label>Elements de stack</label>
+          <textarea
+            v-model="stackItemsText"
+            rows="8"
+            spellcheck="false"
+            placeholder="Une ligne par element"
+          ></textarea>
+        </div>
+      </div>
+
       <!-- SKILLS -->
       <div v-show="activeTab === 'skills'" class="form-section">
         <h3>Competences (IA Detective)</h3>
@@ -124,6 +146,19 @@
         <div class="field">
           <label>Resume (texte riche)</label>
           <RichTextEditor v-model="content.skills.summary" />
+        </div>
+      </div>
+
+      <!-- PROJECTS -->
+      <div v-show="activeTab === 'projects'" class="form-section">
+        <h3>Projets</h3>
+        <div class="field">
+          <label>Titre</label>
+          <input v-model="content.projects.title" type="text" />
+        </div>
+        <div class="field">
+          <label>Sous-titre</label>
+          <input v-model="content.projects.subtitle" type="text" />
         </div>
       </div>
 
@@ -191,7 +226,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, reactive, ref, watch } from "vue";
+import { computed, onMounted, reactive, ref, watch } from "vue";
 import type { ContentData } from "../types";
 import defaultContent from "../data/content.json";
 import RichTextEditor from "./RichTextEditor.vue";
@@ -201,7 +236,9 @@ const tabs = [
   { key: "header", label: "Header" },
   { key: "hero", label: "Hero" },
   { key: "about", label: "A propos" },
+  { key: "stack", label: "Stack" },
   { key: "skills", label: "Competences" },
+  { key: "projects", label: "Projets" },
   { key: "cta", label: "CTA" },
   { key: "footer", label: "Footer" },
   { key: "json", label: "JSON" },
@@ -213,6 +250,15 @@ const rawJson = ref(JSON.stringify(defaultContent, null, 2));
 const error = ref("");
 const success = ref("");
 const saving = ref(false);
+const stackItemsText = computed({
+  get: () => content.stack.items.join("\n"),
+  set: (value: string) => {
+    content.stack.items = value
+      .split("\n")
+      .map((item) => item.trim())
+      .filter(Boolean);
+  },
+});
 
 const generatingSkills = ref(false);
 const skillsError = ref("");
