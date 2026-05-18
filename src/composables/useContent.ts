@@ -25,6 +25,8 @@ export const useContent = () => {
   const content = ref<ContentData>(defaultContent as ContentData);
 
   const load = async (): Promise<void> => {
+    if (!api.isEnabled) return;
+
     try {
       const response = await api.fetch("/api/content");
       if (!response.ok) return;

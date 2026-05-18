@@ -120,11 +120,12 @@ import FinalCtaSection from "../components/FinalCtaSection.vue";
 import SiteFooter from "../components/SiteFooter.vue";
 import ThemeToggle from "../components/ThemeToggle.vue";
 import { useContent } from "../composables/useContent";
+import { projectsSeed } from "../data/projects";
 import { api } from "../utils/api";
 
 const { content } = useContent();
 
-const projects = ref(content.value.projects.items ?? []);
+const projects = ref(content.value.projects.items ?? projectsSeed);
 const selectedTechnology = ref("all");
 const isDark = ref(true);
 const isMobile = ref(window.innerWidth <= 768);
@@ -180,6 +181,8 @@ const handleResize = (): void => {
 };
 
 const loadProjects = async (): Promise<void> => {
+  if (!api.isEnabled) return;
+
   try {
     const response = await api.fetch("/api/projects");
     if (!response.ok) return;
