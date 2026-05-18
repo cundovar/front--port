@@ -26,7 +26,7 @@
     </div>
     <div class="projects-grid">
       <article v-for="project in projects" :key="project.id" class="project-card">
-        <img v-if="project.imageUrl" class="project-image" :src="project.imageUrl" :alt="project.name" />
+        <img v-if="project.imageUrl" class="project-image" :src="api.assetUrl(project.imageUrl)" :alt="project.name" />
         <div v-else class="project-image project-placeholder">{{ project.name }}</div>
         <div class="project-body">
           <p class="muted">{{ project.stack }}</p>
@@ -57,6 +57,7 @@
 
 <script setup lang="ts">
 import type { ProjectCard } from "../types";
+import { api } from "../utils/api";
 
 interface TechnologyFilter {
   value: string;
