@@ -93,7 +93,7 @@
             <img
               v-if="previewUrl || form.imageUrl"
               class="preview"
-              :src="previewUrl || form.imageUrl"
+              :src="api.assetUrl(previewUrl || form.imageUrl)"
               alt="Aperçu projet"
             />
           </div>
