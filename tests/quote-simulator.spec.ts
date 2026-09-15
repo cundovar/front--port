@@ -44,12 +44,20 @@ describe("validateStep", () => {
   });
 
   it("reports an invalid email without touching other fields", () => {
-    const contact = { ...emptyContact(), fullName: "Jane", email: "not-an-email" };
+    const contact = { ...emptyContact(), fullName: "Jane", email: "not-an-email", consentAccepted: true };
     const errors = validateStep("contact", emptyAnswers(), contact);
 
     expect(errors.email).toBeDefined();
     expect(errors.fullName).toBeUndefined();
     expect(errors.complexity).toBeUndefined();
+  });
+
+  it("requires contact consent before submission", () => {
+    const contact = { ...emptyContact(), fullName: "Jane", email: "jane@example.com" };
+
+    expect(validateStep("contact", emptyAnswers(), contact).consentAccepted).toBeDefined();
+    contact.consentAccepted = true;
+    expect(validateStep("contact", emptyAnswers(), contact)).toEqual({});
   });
 
   it("rejects an out-of-range integrations count", () => {
@@ -68,7 +76,12 @@ describe("buildSubmitPayload", () => {
       trainingNeed: "light" as const,
       projectDescription: "Relances clients",
     };
-    const contact = { ...emptyContact(), fullName: "  Jane Doe  ", email: " jane@example.com " };
+    const contact = {
+      ...emptyContact(),
+      fullName: "  Jane Doe  ",
+      email: " jane@example.com ",
+      consentAccepted: true,
+    };
 
     expect(buildSubmitPayload(answers, contact)).toEqual({
       serviceKey: "automation",
@@ -82,6 +95,7 @@ describe("buildSubmitPayload", () => {
       email: "jane@example.com",
       company: "",
       phone: "",
+      consentAccepted: true,
       honeypot: "",
     });
   });

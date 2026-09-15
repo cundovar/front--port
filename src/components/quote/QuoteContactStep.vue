@@ -16,6 +16,7 @@
         <input
           type="text"
           autocomplete="name"
+          maxlength="120"
           :value="contact.fullName"
           @input="emit('update', { fullName: ($event.target as HTMLInputElement).value })"
         />
@@ -27,6 +28,7 @@
         <input
           type="email"
           autocomplete="email"
+          maxlength="255"
           :value="contact.email"
           @input="emit('update', { email: ($event.target as HTMLInputElement).value })"
         />
@@ -38,9 +40,11 @@
         <input
           type="text"
           autocomplete="organization"
+          maxlength="120"
           :value="contact.company"
           @input="emit('update', { company: ($event.target as HTMLInputElement).value })"
         />
+        <span v-if="errors.company" class="quote-error" role="alert">{{ errors.company }}</span>
       </label>
 
       <label class="quote-field">
@@ -48,9 +52,11 @@
         <input
           type="tel"
           autocomplete="tel"
+          maxlength="40"
           :value="contact.phone"
           @input="emit('update', { phone: ($event.target as HTMLInputElement).value })"
         />
+        <span v-if="errors.phone" class="quote-error" role="alert">{{ errors.phone }}</span>
       </label>
     </div>
 
@@ -63,10 +69,18 @@
       @input="emit('update', { honeypot: ($event.target as HTMLInputElement).value })"
     />
 
-    <p class="quote-consent">
-      Vos coordonnées servent uniquement à vous recontacter au sujet de cette estimation.
-      Elles ne sont jamais transmises au modèle d’IA qui rédige la synthèse.
-    </p>
+    <label class="quote-consent">
+      <input
+        type="checkbox"
+        :checked="contact.consentAccepted"
+        @change="emit('update', { consentAccepted: ($event.target as HTMLInputElement).checked })"
+      />
+      <span>
+        J’accepte que mes coordonnées soient utilisées uniquement pour être recontacté au sujet de cette estimation.
+        Les champs de contact ne sont jamais transmis au modèle d’IA.
+      </span>
+    </label>
+    <p v-if="errors.consentAccepted" class="quote-error" role="alert">{{ errors.consentAccepted }}</p>
   </div>
 </template>
 
@@ -94,7 +108,8 @@ const emit = defineEmits<{ update: [Partial<QuoteContact>] }>();
 .quote-field { display: grid; gap: 7px; font-family: var(--font-mono); font-size: 11px; font-weight: 700; text-transform: uppercase; }
 .quote-field input { border: 2px solid var(--line); padding: 12px; color: var(--text); background: var(--bg); font: inherit; text-transform: none; }
 .quote-error { color: var(--accent); font-size: 14px; text-transform: none; font-weight: 400; }
-.quote-consent { margin: 0; font-size: 13px; opacity: 0.8; }
+.quote-consent { display: flex; align-items: flex-start; gap: 10px; margin: 0; font-size: 13px; opacity: 0.85; cursor: pointer; }
+.quote-consent input { margin-top: 3px; flex: 0 0 auto; }
 .quote-honeypot { position: absolute; left: -10000px; opacity: 0; }
 @media (max-width: 640px) { .quote-grid { grid-template-columns: 1fr; } }
 </style>

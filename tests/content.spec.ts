@@ -18,6 +18,20 @@ describe("normalizeContent", () => {
     expect(content.footer).toEqual(fallback.footer);
   });
 
+  it("keeps the quote CTA when the API still contains the legacy contact anchor", () => {
+    const content = normalizeContent(fallback, {
+      hero: {
+        primaryHref: "#contact",
+      },
+      services: fallback.services.map(({ serviceKey: _serviceKey, ...service }) => service),
+    });
+
+    expect(content.hero.primaryHref).toBe("/devis");
+    expect(content.services.map((service) => service.serviceKey)).toEqual(
+      fallback.services.map((service) => service.serviceKey),
+    );
+  });
+
   it("falls back section by section when the API sends invalid shapes", () => {
     const content = normalizeContent(fallback, {
       ai: null,

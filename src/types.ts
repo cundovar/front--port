@@ -238,6 +238,7 @@ export interface QuoteContact {
   email: string;
   company: string;
   phone: string;
+  consentAccepted: boolean;
   honeypot: string;
 }
 

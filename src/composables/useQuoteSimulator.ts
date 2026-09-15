@@ -75,6 +75,7 @@ export const emptyContact = (): QuoteContact => ({
   email: "",
   company: "",
   phone: "",
+  consentAccepted: false,
   honeypot: "",
 });
 
@@ -117,6 +118,21 @@ export const validateStep = (
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email.trim())) {
       errors.email = "Indiquez un email valide.";
     }
+    if (contact.fullName.trim().length > 120) {
+      errors.fullName = "Limitez votre nom à 120 caractères.";
+    }
+    if (contact.email.trim().length > 255) {
+      errors.email = "Limitez votre email à 255 caractères.";
+    }
+    if (contact.company.trim().length > 120) {
+      errors.company = "Limitez le nom de l’entreprise à 120 caractères.";
+    }
+    if (contact.phone.trim().length > 40) {
+      errors.phone = "Limitez le téléphone à 40 caractères.";
+    }
+    if (!contact.consentAccepted) {
+      errors.consentAccepted = "Confirmez que vos coordonnées peuvent être utilisées pour vous recontacter.";
+    }
   }
 
   return errors;
@@ -134,6 +150,7 @@ export const buildSubmitPayload = (answers: QuoteAnswers, contact: QuoteContact)
   email: contact.email.trim(),
   company: contact.company.trim(),
   phone: contact.phone.trim(),
+  consentAccepted: contact.consentAccepted,
   honeypot: contact.honeypot,
 });
 
