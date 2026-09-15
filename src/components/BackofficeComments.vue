@@ -41,16 +41,14 @@ const comments = ref<StudentComment[]>(props.initialComments.map((item) => ({ ..
 const error = ref("");
 
 const adminHeaders = (): HeadersInit => {
-  const token = localStorage.getItem("admin_token") ?? "";
   return {
     "Content-Type": "application/json",
-    Authorization: token ? `Bearer ${token}` : "",
   };
 };
 
 const load = async (): Promise<void> => {
   try {
-    const response = await api.fetch("/api/admin/comments", { headers: adminHeaders() });
+    const response = await api.fetch("/api/admin/comments", { headers: adminHeaders(), credentials: "include" });
     if (!response.ok) {
       return;
     }
@@ -72,6 +70,7 @@ const setStatus = async (id: string, status: CommentStatus): Promise<void> => {
   const response = await api.fetch(`/api/admin/comments/${id}`, {
     method: "PATCH",
     headers: adminHeaders(),
+    credentials: "include",
     body: JSON.stringify({ status }),
   });
   if (!response.ok) {

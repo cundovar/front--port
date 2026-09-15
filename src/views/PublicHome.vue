@@ -3,10 +3,11 @@
     <div class="top-bar">
       <a class="brand" href="#top">{{ content.header.logoText }}</a>
       <nav class="nav-links" aria-label="Navigation principale">
-        <a href="#apropos">A propos</a>
-        <a href="#stack">Stack</a>
-        <a href="#enseignement">Cours</a>
-        <a href="#incubateur">Projets</a>
+        <a href="#services">Services</a>
+        <a href="#faq">FAQ</a>
+        <a href="#cases">Réalisations</a>
+        <a href="#process">Méthode</a>
+        <a href="#profile">À propos</a>
         <a href="#contact">Contact</a>
       </nav>
       <ThemeToggle :is-dark="isDark" @toggle="toggleTheme" />
@@ -21,80 +22,36 @@
       :secondary-label="content.hero.secondaryLabel"
       :primary-href="content.hero.primaryHref"
       :secondary-href="content.hero.secondaryHref"
+      :stack-items="content.stack.items"
     />
-    <ProofStrip :items="content.skills.evidence" />
 
-    <AboutSection
-      id="apropos"
-      :title="content.about.title"
-      :subtitle="content.about.subtitle"
+    <ProofBar :items="proofItems" />
+
+    <ServicesSection :services="content.services" />
+
+    <ProblemsSection :problems="content.problems" />
+
+    <FeaturedCasesSection :cases="featuredProjects.slice(0, 3)" />
+
+    <ProcessSection :process="content.process" />
+
+    <ExpertiseSection :expertise="content.expertise" />
+
+    <ProfileSection
+      id="profile"
       :bio="content.about.bio"
-      :trust-items="content.trust.items"
+      :location="content.about.location"
+      :location-map-url="content.about.locationMapUrl"
+      :teaching-items="content.teaching.items"
     />
 
-    <StackLiteSection
-      id="stack"
-      :title="content.stack.title"
-      :subtitle="content.stack.subtitle"
-      :items="content.stack.items"
-    />
+    <FaqSection :services="content.services" />
 
-    <!-- Teaching: Desktop vs Mobile -->
-    <TeachingSection
-      v-if="!isMobile"
-      id="enseignement"
-      :title="content.teaching.title"
-      :subtitle="content.teaching.subtitle"
-      :items="content.teaching.items"
-    />
-    <TeachingSectionMobile
-      v-else
-      id="enseignement"
-      :title="content.teaching.title"
-      :subtitle="content.teaching.subtitle"
-      :items="content.teaching.items"
-    />
-
-    <!-- Projects: Desktop vs Mobile -->
-    <ProjectsSection
-      v-if="!isMobile"
-      id="incubateur"
-      :title="content.projects.title"
-      :subtitle="content.projects.subtitle"
-      :projects="filteredProjects"
-      :technologies="availableTechnologies"
-      :selected-technology="selectedTechnology"
-      @select-technology="selectedTechnology = $event"
-    />
-    <ProjectsSectionMobile
-      v-else
-      id="incubateur"
-      :title="content.projects.title"
-      :subtitle="content.projects.subtitle"
-      :projects="filteredProjects"
-      :technologies="availableTechnologies"
-      :selected-technology="selectedTechnology"
-      @select-technology="selectedTechnology = $event"
-    />
-
-    <SkillsSection
-      id="skills"
-      :title="content.skills.title"
-      :subtitle="content.skills.subtitle"
-      :summary="content.skills.summary"
-      :evidence="content.skills.evidence"
-      :top-skills="content.skills.topSkills"
-      :hidden-skills="content.skills.hiddenSkills"
-      :generated-at="content.skills.generatedAt"
-    />
-
-    <FinalCtaSection
-      id="contact"
-      :title="content.cta.title"
-      :subtitle="content.cta.subtitle"
-      :primary-label="content.cta.primaryLabel"
-      :primary-href="`mailto:${content.header.contactEmail}`"
-    />
+    <section id="contact" class="section contact-section" aria-labelledby="contact-form-title">
+      <h2 id="contact-form-title" class="section-title">Décrivez votre projet</h2>
+      <p class="section-subtitle">Votre message sera transmis à varas.cundo@gmail.com.</p>
+      <ContactForm />
+    </section>
 
     <SiteFooter
       :logo-text="content.header.logoText"
@@ -106,79 +63,43 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import HeroSection from "../components/HeroSection.vue";
-import AboutSection from "../components/AboutSection.vue";
-import StackLiteSection from "../components/StackLiteSection.vue";
-import TeachingSection from "../components/TeachingSection.vue";
-import TeachingSectionMobile from "../components/TeachingSectionMobile.vue";
-import ProjectsSection from "../components/ProjectsSection.vue";
-import ProjectsSectionMobile from "../components/ProjectsSectionMobile.vue";
-import SkillsSection from "../components/SkillsSection.vue";
-import ProofStrip from "../components/ProofStrip.vue";
-import FinalCtaSection from "../components/FinalCtaSection.vue";
+import ProofBar from "../components/ProofBar.vue";
+import ServicesSection from "../components/ServicesSection.vue";
+import FaqSection from "../components/FaqSection.vue";
+import ProblemsSection from "../components/ProblemsSection.vue";
+import FeaturedCasesSection from "../components/FeaturedCasesSection.vue";
+import ProcessSection from "../components/ProcessSection.vue";
+import ExpertiseSection from "../components/ExpertiseSection.vue";
+import ProfileSection from "../components/ProfileSection.vue";
+import ContactForm from "../components/ContactForm.vue";
 import SiteFooter from "../components/SiteFooter.vue";
 import ThemeToggle from "../components/ThemeToggle.vue";
 import { useContent } from "../composables/useContent";
 import { projectsSeed } from "../data/projects";
 import { api } from "../utils/api";
+import { normalizeProjects } from "../utils/content";
 
 const { content } = useContent();
 
 const projects = ref(content.value.projects.items ?? projectsSeed);
-const selectedTechnology = ref("all");
 const isDark = ref(true);
-const isMobile = ref(window.innerWidth <= 768);
 
-const normalizeTechnology = (value: string): string =>
-  value
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9]/g, "");
+const defaultProofItems = [
+  "Developpeur fullstack freelance France",
+  "Automatisation IA pour PME",
+  "Refonte Symfony Vue WordPress",
+  "Backoffice sur mesure local"
+];
 
-const technologyCatalog = computed(() => {
-  const labels = new Set([
-    "Next.js",
-    "Vue.js",
-    "React",
-    "Symfony",
-    "PHP",
-    "WordPress",
-    "Docker",
-    "MySQL",
-  ]);
-
-  content.value.teaching.items.forEach((item) => labels.add(item.name));
-
-  return Array.from(labels).map((label) => ({
-    value: normalizeTechnology(label),
-    label,
-  }));
+const proofItems = computed(() => {
+  return content.value.trust.items.length ? content.value.trust.items : defaultProofItems;
 });
 
-const stackIncludesTechnology = (stack: string, technology: string): boolean => {
-  const normalizedStack = normalizeTechnology(stack);
-
-  return normalizedStack.includes(technology);
-};
-
-const availableTechnologies = computed(() => {
-  return technologyCatalog.value.filter((technology) =>
-    projects.value.some((project) => stackIncludesTechnology(project.stack, technology.value)),
-  );
+const featuredProjects = computed(() => {
+  return projects.value.filter((p) => p.featured !== false) || projects.value;
 });
-
-const filteredProjects = computed(() => {
-  if (selectedTechnology.value === "all") {
-    return projects.value;
-  }
-
-  return projects.value.filter((project) => stackIncludesTechnology(project.stack, selectedTechnology.value));
-});
-
-const handleResize = (): void => {
-  isMobile.value = window.innerWidth <= 768;
-};
 
 const loadProjects = async (): Promise<void> => {
   if (!api.isEnabled) return;
@@ -187,9 +108,7 @@ const loadProjects = async (): Promise<void> => {
     const response = await api.fetch("/api/projects");
     if (!response.ok) return;
     const data = await response.json();
-    if (Array.isArray(data)) {
-      projects.value = data;
-    }
+    projects.value = normalizeProjects(data, projectsSeed);
   } catch {
     // Fallback sur les données par défaut
   }
@@ -197,11 +116,6 @@ const loadProjects = async (): Promise<void> => {
 
 onMounted(() => {
   void loadProjects();
-  window.addEventListener("resize", handleResize);
-});
-
-onUnmounted(() => {
-  window.removeEventListener("resize", handleResize);
 });
 
 const toggleTheme = (): void => {

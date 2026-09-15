@@ -80,6 +80,97 @@
           <label>Bio (texte riche)</label>
           <RichTextEditor v-model="content.about.bio" />
         </div>
+        <div class="field">
+          <label>Localisation</label>
+          <input v-model="content.about.location" type="text" placeholder="Paris 20e" />
+        </div>
+        <div class="field">
+          <label>URL d’intégration de la carte</label>
+          <input
+            v-model="content.about.locationMapUrl"
+            type="url"
+            placeholder="https://www.openstreetmap.org/export/embed.html?..."
+          />
+          <p class="muted">Colle une URL d’intégration Leaflet, OpenStreetMap ou Google Maps.</p>
+        </div>
+      </div>
+
+      <!-- FAQ -->
+      <div v-show="activeTab === 'faq'" class="form-section">
+        <h3>Questions fréquentes par service</h3>
+        <p class="muted">Les questions et réponses vides restent éditables mais ne sont pas affichées sur le site.</p>
+
+        <div v-for="(service, serviceIndex) in content.services" :key="service.title" class="faq-service-editor">
+          <h4>{{ service.title }}</h4>
+
+          <div v-for="(faq, faqIndex) in service.faqs" :key="faqIndex" class="faq-editor-item">
+            <div class="field">
+              <label :for="`faq-question-${serviceIndex}-${faqIndex}`">Question</label>
+              <input
+                :id="`faq-question-${serviceIndex}-${faqIndex}`"
+                v-model="faq.question"
+                type="text"
+                placeholder="Question fréquente"
+              />
+            </div>
+            <div class="field">
+              <label :for="`faq-answer-${serviceIndex}-${faqIndex}`">Réponse</label>
+              <textarea
+                :id="`faq-answer-${serviceIndex}-${faqIndex}`"
+                v-model="faq.answer"
+                rows="4"
+                placeholder="Réponse courte et utile"
+              ></textarea>
+            </div>
+            <div class="faq-editor-actions">
+              <button
+                type="button"
+                class="btn btn-secondary btn-sm"
+                :disabled="faqIndex === 0"
+                @click="moveFaq(serviceIndex, faqIndex, -1)"
+              >
+                ↑ Monter
+              </button>
+              <button
+                type="button"
+                class="btn btn-secondary btn-sm"
+                :disabled="faqIndex === service.faqs.length - 1"
+                @click="moveFaq(serviceIndex, faqIndex, 1)"
+              >
+                ↓ Descendre
+              </button>
+              <button type="button" class="btn btn-secondary btn-sm" @click="removeFaq(serviceIndex, faqIndex)">
+                Supprimer
+              </button>
+            </div>
+          </div>
+
+          <button type="button" class="btn btn-secondary" @click="addFaq(serviceIndex)">
+            + Ajouter une question
+          </button>
+        </div>
+      </div>
+
+      <!-- SERVICES & PRIX -->
+      <div v-show="activeTab === 'services'" class="form-section">
+        <h3>Services & tarifs</h3>
+        <p class="muted">Laisse un champ vide si une formule ne s'applique pas à ce service.</p>
+
+        <div v-for="service in content.services" :key="service.title" class="pricing-service-editor">
+          <h4>{{ service.title }}</h4>
+          <div class="pricing-editor-grid">
+            <div class="field">
+              <label>Formule essentielle</label>
+              <input v-model="service.pricing.essential" type="text" placeholder="À partir de ..." />
+            </div>
+            <div class="field">
+              <label>Formule standard</label>
+              <input v-model="service.pricing.standard" type="text" placeholder="À partir de ..." />
+            </div>
+            <div class="field">
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- STACK -->
@@ -253,11 +344,14 @@ import type { ContentData } from "../types";
 import defaultContent from "../data/content.json";
 import RichTextEditor from "./RichTextEditor.vue";
 import { api } from "../utils/api";
+import { normalizeContent } from "../utils/content";
 
 const tabs = [
   { key: "header", label: "Header" },
   { key: "hero", label: "Hero" },
   { key: "about", label: "A propos" },
+  { key: "faq", label: "FAQ" },
+  { key: "services", label: "Services & tarifs" },
   { key: "stack", label: "Stack" },
   { key: "teaching", label: "Enseignement" },
   { key: "skills", label: "Competences" },
@@ -320,7 +414,7 @@ watch(content, updateRawJson, { deep: true });
 const applyRawJson = (): void => {
   try {
     const parsed = JSON.parse(rawJson.value) as ContentData;
-    Object.assign(content, parsed);
+    Object.assign(content, normalizeContent(defaultContent as ContentData, parsed));
     error.value = "";
     success.value = "JSON applique.";
   } catch {
@@ -333,7 +427,7 @@ const load = async (): Promise<void> => {
     const response = await api.fetch("/api/content");
     if (!response.ok) return;
     const data = (await response.json()) as ContentData;
-    Object.assign(content, data);
+    Object.assign(content, normalizeContent(defaultContent as ContentData, data));
   } catch {
     // Keep default
   }
@@ -356,20 +450,34 @@ const removeFooterLink = (index: number): void => {
   content.footer.links.splice(index, 1);
 };
 
+const addFaq = (serviceIndex: number): void => {
+  content.services[serviceIndex].faqs.push({ question: "", answer: "" });
+};
+
+const removeFaq = (serviceIndex: number, faqIndex: number): void => {
+  content.services[serviceIndex].faqs.splice(faqIndex, 1);
+};
+
+const moveFaq = (serviceIndex: number, faqIndex: number, offset: -1 | 1): void => {
+  const faqs = content.services[serviceIndex].faqs;
+  const targetIndex = faqIndex + offset;
+  if (targetIndex < 0 || targetIndex >= faqs.length) return;
+
+  [faqs[faqIndex], faqs[targetIndex]] = [faqs[targetIndex], faqs[faqIndex]];
+};
+
 const generateSkills = async (skipAi: boolean): Promise<void> => {
   skillsError.value = "";
   skillsSuccess.value = "";
   generatingSkills.value = true;
-
-  const token = localStorage.getItem("admin_token") ?? "";
 
   try {
     const response = await api.fetch("/api/admin/skills/generate", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: token ? `Bearer ${token}` : "",
       },
+      credentials: "include",
       body: JSON.stringify({ skipAi }),
     });
 
@@ -407,13 +515,12 @@ const save = async (): Promise<void> => {
   success.value = "";
   saving.value = true;
 
-  const token = localStorage.getItem("admin_token") ?? "";
   const response = await api.fetch("/api/admin/content", {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
-      Authorization: token ? `Bearer ${token}` : "",
     },
+    credentials: "include",
     body: JSON.stringify(content),
   });
 
@@ -588,5 +695,57 @@ textarea {
 .ai-generate-box .error {
   margin-top: 12px;
   margin-bottom: 0;
+}
+
+.faq-service-editor {
+  padding: 18px;
+  margin-bottom: 20px;
+  border: 1px solid var(--line);
+  background: var(--bg);
+}
+
+.faq-editor-item {
+  padding: 16px 0;
+  border-top: 1px solid var(--line);
+}
+
+.faq-editor-item:first-of-type {
+  border-top: 0;
+}
+
+.faq-editor-item textarea {
+  min-height: 110px;
+  margin-bottom: 0;
+  resize: vertical;
+}
+
+.faq-editor-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.faq-editor-actions button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.pricing-service-editor {
+  padding: 18px;
+  margin-bottom: 20px;
+  border: 1px solid var(--line);
+  background: var(--bg);
+}
+
+.pricing-editor-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+@media (max-width: 760px) {
+  .pricing-editor-grid {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

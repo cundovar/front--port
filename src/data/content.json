@@ -2,33 +2,257 @@
   "header": {
     "logoText": "Portfolio IA",
     "logoUrl": null,
-    "contactEmail": "contact@example.com",
+    "contactEmail": "varas.cundo@gmail.com",
     "siteUrl": "https://example.com"
   },
 
   "hero": {
-    "title": "Formateur & Developpeur Web Fullstack",
-    "tagline": "J'enseigne le developpement web et je construis des applications modernes. Augmente par l'IA pour vous servir mieux.",
-    "subtitle": "Symfony + Vue.js, integration IA pragmatique, preuves concretes.",
-    "primaryLabel": "IA detective de competences",
-    "primaryHref": "#skills",
-    "secondaryLabel": "Me contacter",
-    "secondaryHref": "#contact"
+    "title": "Missionnaire Fullstack specialise IA & Automatisation",
+    "tagline": "Je construis des solutions sur mesure : automatisations fiables, agents IA pragmatiques, refontes scalables, sites WordPress ou applis web.",
+    "subtitle": "Depuis cadrages courts jusqu'a deployments en production, avec formation et transmission incluses.",
+    "primaryLabel": "Parler de votre mission",
+    "primaryHref": "#contact",
+    "secondaryLabel": "Voir les realisations",
+    "secondaryHref": "#cases"
   },
 
   "about": {
     "title": "A propos",
     "subtitle": "Qui suis-je ?",
-    "bio": "Developpeur web fullstack et formateur passionne, j'accompagne les apprenants dans leur montee en competences depuis plusieurs annees. Mon approche : des bases solides, des projets concrets, et une veille constante sur les meilleures pratiques."
+    "bio": "Developpeur web fullstack et formateur passionne, j'accompagne les apprenants dans leur montee en competences depuis plusieurs annees. Mon approche : des bases solides, des projets concrets, et une veille constante sur les meilleures pratiques.",
+    "location": "Paris 20e",
+    "locationMapUrl": "https://www.openstreetmap.org/export/embed.html?bbox=2.375%2C48.850%2C2.430%2C48.880&layer=mapnik&marker=48.865%2C2.400"
   },
 
   "trust": {
     "items": [
-      "Bootcamp 2020",
-      "1 an de formation",
-      "Symfony + Vue.js + React",
-      "Portfolio augmente IA",
-      "Projets en production"
+      "Developpeur fullstack freelance France",
+      "Automatisation IA pour PME",
+      "Refonte Symfony Vue WordPress",
+      "Backoffice sur mesure local"
+    ]
+  },
+
+  "services": [
+    {
+      "title": "Automatiser une tache repetitive",
+      "promise": "Gagner du temps sur les actions que vous refaites tous les jours : relances, copier-coller, tri ou suivi.",
+      "problems": [
+        "Copier-coller entre outils",
+        "Relances manuelles",
+        "Donnees eparpillees",
+        "Temps perdu sur des actions sans valeur"
+      ],
+      "deliverables": [
+        "Automatisation prete a utiliser",
+        "Tableau de suivi simple",
+        "Historique des actions",
+        "Notice courte pour rester autonome"
+      ],
+      "technologies": ["Symfony", "Vue.js", "n8n", "API", "Docker"],
+      "actionLabel": "Automatiser une tache",
+      "pricing": {
+        "essential": "",
+        "standard": ""
+      },
+      "faqs": [
+        {
+          "question": "Quels processus peut-on automatiser ?",
+          "answer": "Relances, synchronisation de donnees, creation de documents, notifications ou reporting, apres analyse du processus existant."
+        },
+        {
+          "question": "L'automatisation remplace-t-elle le controle humain ?",
+          "answer": "Non. Les etapes sensibles peuvent rester soumises a validation et les actions importantes restent tracables."
+        }
+      ]
+    },
+    {
+      "title": "Assistant IA pour votre activite",
+      "promise": "Utiliser l'IA pour aider a trier, resumer, rediger ou repondre, avec des controles clairs.",
+      "problems": [
+        "Tri manuel d'informations",
+        "Generation de contenus repetitifs",
+        "Besoin d'aide contextuelle dans un outil interne",
+        "Difficulte a industrialiser un prototype IA"
+      ],
+      "deliverables": [
+        "Premier assistant testable",
+        "Connexion a vos donnees utiles",
+        "Regles de validation humaines",
+        "Ecran pour surveiller les reponses"
+      ],
+      "technologies": ["OpenAI", "MCP", "Symfony", "Vue.js"],
+      "actionLabel": "Cadrer mon besoin IA",
+      "pricing": {
+        "essential": "",
+        "standard": ""
+      },
+      "faqs": [
+        {
+          "question": "A quoi sert un assistant IA dans une PME ?",
+          "answer": "Il peut trier, resumer, preparer des reponses ou assister une equipe a partir de regles et de donnees definies."
+        },
+        {
+          "question": "Comment eviter des reponses IA incoherentes ?",
+          "answer": "En limitant son perimetre, en ajoutant des controles humains et en prevoyant un ecran de suivi."
+        }
+      ]
+    },
+    {
+      "title": "Reprendre un site ou une application",
+      "promise": "Remettre au propre un outil devenu lent, difficile a modifier ou fragile pour les utilisateurs.",
+      "problems": [
+        "Site difficile a modifier",
+        "Backoffice incomplet",
+        "Dette technique bloquante",
+        "Experience mobile ou admin trop lente"
+      ],
+      "deliverables": [
+        "Diagnostic clair de l'existant",
+        "Plan de remise au propre",
+        "Interface plus simple a utiliser",
+        "Contenus faciles a modifier"
+      ],
+      "technologies": ["Vue.js", "React", "Symfony", "WordPress", "MySQL"],
+      "actionLabel": "Evaluer ma refonte",
+      "pricing": {
+        "essential": "",
+        "standard": ""
+      },
+      "faqs": [
+        {
+          "question": "Peut-on ameliorer l'existant sans tout refaire ?",
+          "answer": "Oui. Apres diagnostic, on peut corriger les priorites, moderniser progressivement et preserver ce qui fonctionne."
+        },
+        {
+          "question": "Que contient le diagnostic initial ?",
+          "answer": "L'etat technique, les blocages utilisateurs, les risques, les priorites et un plan de remise en ordre."
+        }
+      ]
+    },
+    {
+      "title": "Créer un outil web sur mesure",
+      "promise": "Construire un site, une application ou un backoffice adapte a votre facon de travailler.",
+      "problems": [
+        "Solution existante trop rigide ou limitee",
+        "Besoin specifique non couvert par les outils classiques",
+        "Projet requires integrations personnalisees",
+        "Croissance attendue, architecture de base requise"
+      ],
+      "deliverables": [
+        "Application ou espace client personnalise",
+        "Parcours simple pour vos utilisateurs",
+        "Connexion a vos outils existants",
+        "Base technique propre et documentee"
+      ],
+      "technologies": ["Vue.js", "React", "Symfony", "Node.js", "PostgreSQL", "Docker"],
+      "actionLabel": "Decrire mon projet",
+      "pricing": {
+        "essential": "",
+        "standard": ""
+      },
+      "faqs": [
+        {
+          "question": "Quand faut-il creer un outil sur mesure ?",
+          "answer": "Quand les outils existants imposent trop de contournements ou ne couvrent pas un processus metier important."
+        },
+        {
+          "question": "Comment se deroule le projet ?",
+          "answer": "Cadrage court, premiere version utilisable, retours utilisateurs, puis evolutions priorisees."
+        }
+      ]
+    },
+    {
+      "title": "Améliorer un site WordPress",
+      "promise": "Adapter WordPress a votre besoin reel : design, contenu, performance, formulaire ou fonctionnalite specifique.",
+      "problems": [
+        "Theme standard ne correspond pas au besoin",
+        "Plugin manquant ou incompatible",
+        "Performance ou securite degradee",
+        "Migration d'un site legacy vers WordPress"
+      ],
+      "deliverables": [
+        "Theme ou fonctionnalite sur mesure",
+        "Formulaires, espace client ou vente en ligne",
+        "Site plus rapide et plus clair",
+        "Formation pour gerer vos pages"
+      ],
+      "technologies": ["WordPress", "PHP", "MySQL", "WooCommerce", "Elementor"],
+      "actionLabel": "Ameliorer mon WordPress",
+      "pricing": {
+        "essential": "",
+        "standard": ""
+      },
+      "faqs": [
+        {
+          "question": "Peut-on ajouter une fonction specifique a WordPress ?",
+          "answer": "Oui : formulaire metier, espace client, connexion API, WooCommerce ou extension sur mesure selon le besoin."
+        },
+        {
+          "question": "Faut-il changer de theme pour ameliorer le site ?",
+          "answer": "Pas necessairement. Cela depend de la qualite du theme actuel, des plugins et des limites rencontrees."
+        }
+      ]
+    }
+  ],
+
+  "problems": [
+    {
+      "title": "Votre outil marche, mais vous perdez du temps partout autour",
+      "description": "Je cible les taches manuelles et les points de friction qui ralentissent le travail quotidien."
+    },
+    {
+      "title": "Vous avez une idee IA, mais pas de produit maintenable",
+      "description": "Je transforme le prototype en fonctionnalite cadree, testable et administrable."
+    },
+    {
+      "title": "Votre site ou application devient difficile a faire evoluer",
+      "description": "Je clarifie le code, les donnees et les ecrans utiles avant d'empiler de nouvelles fonctions."
+    }
+  ],
+
+  "process": [
+    {
+      "title": "Comprendre",
+      "description": "Analyser le besoin, les utilisateurs, les donnees disponibles et les contraintes budget-delai."
+    },
+    {
+      "title": "Cadrer",
+      "description": "Valider l'approche, l'architecture et les priorites avant d'investir dans le developpement."
+    },
+    {
+      "title": "Developper",
+      "description": "Livrer progressivement des parcours testables et integrer les retours rapidement."
+    },
+    {
+      "title": "Livrer",
+      "description": "Deployer en production, documenter, former et assurer une transition maitriste."
+    }
+  ],
+
+  "expertise": [
+    {
+      "title": "Fullstack utile",
+      "description": "Front, API, base de donnees, admin et deploiement dans une meme logique produit."
+    },
+    {
+      "title": "IA encadree",
+      "description": "Des agents et automatisations qui assistent le travail sans masquer les controles humains."
+    },
+    {
+      "title": "Transmission",
+      "description": "Une approche de formateur : livrer, expliquer et laisser une base que vous pouvez reprendre."
+    }
+  ],
+
+  "availability": {
+    "title": "Disponible pour missions courtes ou refontes progressives",
+    "subtitle": "Ideal pour un cadrage Codeur.com, une automatisation metier ou une reprise d'application existante.",
+    "items": [
+      "Audit et plan d'action",
+      "Prototype IA ou automatisation",
+      "Refonte front/back",
+      "Backoffice administrable"
     ]
   },
 
@@ -41,6 +265,12 @@
       "WordPress : plugins personnalises",
       "Qualite : Docker, migrations, Git propre"
     ]
+  },
+
+  "ai": {
+    "title": "Compatibilite IA",
+    "subtitle": "Ancien bloc conserve pour migration progressive des contenus.",
+    "items": []
   },
 
   "teaching": {
@@ -107,10 +337,10 @@
   },
 
   "cta": {
-    "title": "Disponible pour collaboration ou formation",
-    "subtitle": "Discutons de votre besoin et voyons comment je peux aider.",
-    "primaryLabel": "Me contacter",
-    "secondaryLabel": "Voir le site"
+    "title": "Decrivez votre mission",
+    "subtitle": "Partagez un apercu rapide de votre probleme et de ce que vous cherchez a accomplir.",
+    "primaryLabel": "Envoyer mon besoin",
+    "secondaryLabel": "Voir les services"
   },
 
   "footer": {
