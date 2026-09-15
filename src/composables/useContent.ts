@@ -2,35 +2,31 @@ import { onMounted, ref } from "vue";
 import type { ContentData } from "../types";
 import defaultContent from "../data/content.json";
 import { api } from "../utils/api";
+import { normalizeContent } from "../utils/content";
 
-const mergeContent = (base: ContentData, incoming: Partial<ContentData>): ContentData => {
-  const hasKey = <T extends object>(obj: T, key: keyof T): boolean =>
-    Object.prototype.hasOwnProperty.call(obj, key);
-
-  return {
-    header: hasKey(incoming, "header") ? { ...base.header, ...incoming.header } : base.header,
-    hero: hasKey(incoming, "hero") ? { ...base.hero, ...incoming.hero } : base.hero,
-    about: hasKey(incoming, "about") ? { ...base.about, ...incoming.about } : base.about,
-    trust: hasKey(incoming, "trust") ? { ...base.trust, ...incoming.trust } : base.trust,
-    stack: hasKey(incoming, "stack") ? { ...base.stack, ...incoming.stack } : base.stack,
-    teaching: hasKey(incoming, "teaching") ? { ...base.teaching, ...incoming.teaching } : base.teaching,
-    projects: hasKey(incoming, "projects") ? { ...base.projects, ...incoming.projects } : base.projects,
-    skills: hasKey(incoming, "skills") ? { ...base.skills, ...incoming.skills } : base.skills,
-    cta: hasKey(incoming, "cta") ? { ...base.cta, ...incoming.cta } : base.cta,
-    footer: hasKey(incoming, "footer") ? { ...base.footer, ...incoming.footer } : base.footer,
-  };
-};
+export type ContentLoadState = "idle" | "loading" | "ready" | "error";
 
 export const useContent = () => {
   const content = ref<ContentData>(defaultContent as ContentData);
+  const state = ref<ContentLoadState>("idle");
+  const error = ref<Error | null>(null);
 
   const load = async (): Promise<void> => {
+    if (!api.isEnabled) {
+      state.value = "ready";
+      return;
+    }
+
+    state.value = "loading";
     try {
       const response = await api.fetch("/api/content");
-      if (!response.ok) return;
+      if (!response.ok) {
+        state.value = "ready";
+        return;
+      }
 
-      const data = (await response.json()) as Partial<ContentData>;
-      content.value = mergeContent(defaultContent as ContentData, data);
+      const data = await response.json();
+      content.value = normalizeContent(defaultContent as ContentData, data);
 
       // Charger les skills depuis l'API dédiée si disponible
       const skillsResponse = await api.fetch("/api/skills");
@@ -48,7 +44,10 @@ export const useContent = () => {
           },
         };
       }
-    } catch {
+      state.value = "ready";
+    } catch (caught) {
+      error.value = caught instanceof Error ? caught : new Error("Content loading failed");
+      state.value = "error";
       // Fallback sur les données par défaut
     }
   };
@@ -57,5 +56,5 @@ export const useContent = () => {
     void load();
   });
 
-  return { content };
+  return { content, state, error };
 };

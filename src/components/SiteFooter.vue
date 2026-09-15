@@ -14,6 +14,7 @@
       >
         {{ link.label }}
       </a>
+      <a href="#faq">FAQ</a>
       <a :href="`mailto:${contactEmail}`">Email</a>
     </div>
   </footer>

@@ -4,7 +4,16 @@
       <div class="title-paper">
         <div class="hero-copy">
           <p class="eyebrow">Portfolio dev + formation</p>
-          <h1 id="portfolio-title" class="hero-title">{{ title }}</h1>
+          <h1 id="portfolio-title" class="hero-title" :aria-label="title">
+            <span
+              v-for="line in titleLines"
+              :key="line"
+              class="hero-title-line"
+              aria-hidden="true"
+            >
+              {{ line }}
+            </span>
+          </h1>
           <p class="hero-tagline">{{ tagline }}</p>
           <p class="hero-subtitle">{{ subtitle }}</p>
           <div class="hero-actions">
@@ -20,14 +29,16 @@
     </div>
     <div class="tech-ticker" aria-label="Technologies principales">
       <div class="tech-ticker-track" aria-hidden="true">
-        <span>Symfony + Vue.js + React + WordPress + Git + API + Formation + Fullstack +&nbsp;</span>
-        <span>Symfony + Vue.js + React + WordPress + Git + API + Formation + Fullstack +&nbsp;</span>
+        <span>{{ tickerText }}</span>
+        <span>{{ tickerText }}</span>
       </div>
     </div>
   </section>
 </template>
 
 <script setup lang="ts">
+import { computed } from "vue";
+
 interface Props {
   title: string;
   tagline: string;
@@ -36,9 +47,53 @@ interface Props {
   secondaryLabel: string;
   primaryHref: string;
   secondaryHref: string;
+  stackItems?: string[];
 }
 
-defineProps<Props>();
+const props = withDefaults(defineProps<Props>(), {
+  stackItems: () => []
+});
+
+const fallbackStack = [
+  "Symfony",
+  "Vue.js",
+  "React",
+  "WordPress",
+  "API",
+  "Backoffice",
+  "Automatisation",
+  "IA encadree"
+];
+
+const titleLines = computed(() => {
+  const normalizedTitle = props.title.replace(/\s+/g, " ").trim();
+
+  if (!normalizedTitle) return [];
+
+  if (normalizedTitle.includes("&")) {
+    return normalizedTitle
+      .split(/\s*&\s*/)
+      .filter(Boolean)
+      .map((part, index) => (index === 0 ? part : `& ${part}`));
+  }
+
+  return [normalizedTitle];
+});
+
+const tickerItems = computed(() => {
+  const items = props.stackItems.flatMap((item) => {
+    const normalized = item.replace(/^[^:]+:\s*/, "");
+    return normalized
+      .split(/[,/+]|\s+-\s+/)
+      .map((part) => part.trim())
+      .filter((part) => part.length > 1);
+  });
+
+  const uniqueItems = Array.from(new Set(items));
+  return uniqueItems.length ? uniqueItems : fallbackStack;
+});
+
+const tickerText = computed(() => `${tickerItems.value.join(" + ")} +\u00a0`);
 </script>
 
 <style scoped>
@@ -98,15 +153,21 @@ defineProps<Props>();
 
 .hero-title {
   font-family: var(--font-display);
-  font-size: clamp(58px, 10vw, 112px);
-  line-height: 0.82;
+  font-size: clamp(50px, 8vw, 96px);
+  line-height: 0.9;
   font-weight: 900;
   text-transform: uppercase;
   margin: 0;
   letter-spacing: 0;
-  max-width: 12ch;
-  overflow-wrap: anywhere;
-  word-break: break-word;
+  max-width: min(14ch, 100%);
+  overflow-wrap: normal;
+  word-break: normal;
+  text-wrap: balance;
+}
+
+.hero-title-line {
+  display: block;
+  max-width: 100%;
 }
 
 .hero-tagline {
@@ -191,7 +252,9 @@ defineProps<Props>();
   }
 
   .hero-title {
-    font-size: 48px;
+    font-size: clamp(34px, 10vw, 48px);
+    line-height: 0.98;
+    max-width: 100%;
   }
 
   .hero-tagline,

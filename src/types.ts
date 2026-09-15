@@ -22,11 +22,69 @@ export interface AboutContent {
   title: string;
   subtitle: string;
   bio: string;
+  location: string;
+  locationMapUrl: string;
 }
 
 // === TRUST ===
 export interface TrustContent {
   items: string[];
+}
+
+// === SERVICES ===
+export interface ServiceFaqItem {
+  question: string;
+  answer: string;
+}
+
+export interface ServicePricing {
+  essential: string;
+  standard: string;
+}
+
+export interface ServiceOffer {
+  title: string;
+  promise: string;
+  problems: string[];
+  deliverables: string[];
+  technologies?: string[];
+  actionLabel: string;
+  faqs: ServiceFaqItem[];
+  pricing: ServicePricing;
+}
+
+export interface ProblemContent {
+  title: string;
+  description: string;
+}
+
+export interface ProcessStep {
+  title: string;
+  description: string;
+}
+
+export interface ExpertiseItem {
+  title: string;
+  description: string;
+}
+
+export interface AvailabilityContent {
+  title: string;
+  subtitle: string;
+  items: string[];
+}
+
+// === AI ===
+export interface AiToolItem {
+  name: string;
+  role: string;
+  description: string;
+}
+
+export interface AiContent {
+  title: string;
+  subtitle: string;
+  items: AiToolItem[];
 }
 
 // === STACK ===
@@ -49,23 +107,45 @@ export interface TeachingContent {
 }
 
 // === PROJECTS ===
+export type ProjectStatus = "draft" | "published" | "in_progress" | "archived";
+
 export interface ProjectCard {
-  id: string;
+  id: number;
+  slug: string;
   name: string;
   stack: string;
   summary: string;
-  progress: number;
   bulletin: string;
   siteUrl: string;
-  repoUrl: string;
-  imageUrl?: string;
-  duration?: string;
+  repoUrl?: string | null;
+  imageUrl?: string | null;
+  duration?: string | null;
+  status: ProjectStatus;
+  clientProblem?: string | null;
+  mission?: string | null;
+  solution?: string | null;
+  outcomes: string[];
+  serviceTags: string[];
+  featured: boolean;
+  sortOrder: number;
 }
 
 export interface ProjectsContent {
   title: string;
   subtitle: string;
   items?: ProjectCard[];
+}
+
+// === COMMENTS ===
+export type CommentStatus = "pending" | "approved" | "rejected";
+
+export interface StudentComment {
+  id: string;
+  authorName: string;
+  authorRole: string;
+  content: string;
+  status: CommentStatus;
+  createdAt: string;
 }
 
 // === SKILLS ===
@@ -114,7 +194,13 @@ export interface ContentData {
   hero: HeroContent;
   about: AboutContent;
   trust: TrustContent;
+  services: ServiceOffer[];
+  problems: ProblemContent[];
+  process: ProcessStep[];
+  expertise: ExpertiseItem[];
+  availability: AvailabilityContent;
   stack: StackContent;
+  ai: AiContent;
   teaching: TeachingContent;
   projects: ProjectsContent;
   skills: SkillsContent;

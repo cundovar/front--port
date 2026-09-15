@@ -1,13 +1,18 @@
 import { createRouter, createWebHistory } from "vue-router";
 import PublicHome from "./views/PublicHome.vue";
+import ProjectDetail from "./views/ProjectDetail.vue";
+import RealisationsPage from "./views/RealisationsPage.vue";
 import AdminDashboard from "./views/AdminDashboard.vue";
 import AdminProjects from "./views/AdminProjects.vue";
 import AdminComments from "./views/AdminComments.vue";
 import AdminLogin from "./views/AdminLogin.vue";
 import AdminContent from "./views/AdminContent.vue";
+import { api } from "./utils/api";
 
 const routes = [
   { path: "/", component: PublicHome },
+  { path: "/realisations", component: RealisationsPage },
+  { path: "/realisations/:slug", component: ProjectDetail },
   { path: "/admin/login", component: AdminLogin },
   { path: "/admin", component: AdminDashboard },
   { path: "/admin/projects", component: AdminProjects },
@@ -20,10 +25,16 @@ export const router = createRouter({
   routes,
 });
 
-router.beforeEach((to) => {
+router.beforeEach(async (to) => {
   if (to.path.startsWith("/admin") && to.path !== "/admin/login") {
-    const token = localStorage.getItem("admin_token");
-    if (!token) {
+    try {
+      const response = await api.fetch("/api/admin/me", {
+        credentials: "include",
+      });
+      if (!response.ok) {
+        return "/admin/login";
+      }
+    } catch {
       return "/admin/login";
     }
   }

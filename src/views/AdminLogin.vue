@@ -28,20 +28,29 @@ const email = ref("");
 const password = ref("");
 
 const submit = async (): Promise<void> => {
-  const response = await api.fetch("/api/admin/login", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email: email.value, password: password.value }),
-  });
+  try {
+    const response = await api.fetch("/api/admin/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ email: email.value, password: password.value }),
+    });
 
-  if (!response.ok) {
-    return;
-  }
+    console.log("Response status:", response.status);
+    const data = await response.json();
+    console.log("Response data:", data);
 
-  const data = (await response.json()) as { token?: string };
-  if (data.token) {
-    localStorage.setItem("admin_token", data.token);
-    window.location.href = "/admin";
+    if (!response.ok) {
+      console.error("Login failed");
+      return;
+    }
+
+    console.log("Login successful, redirecting...");
+    setTimeout(() => {
+      window.location.href = "/admin";
+    }, 100);
+  } catch (error) {
+    console.error("Error:", error);
   }
 };
 </script>
