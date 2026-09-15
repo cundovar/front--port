@@ -9,6 +9,7 @@ import AdminLogin from "./views/AdminLogin.vue";
 import AdminContent from "./views/AdminContent.vue";
 import QuoteSimulator from "./views/QuoteSimulator.vue";
 import AdminQuoteEstimates from "./views/AdminQuoteEstimates.vue";
+import AdminQuotePricing from "./views/AdminQuotePricing.vue";
 import { api } from "./utils/api";
 
 const routes = [
@@ -22,6 +23,7 @@ const routes = [
   { path: "/admin/comments", component: AdminComments },
   { path: "/admin/content", component: AdminContent },
   { path: "/admin/quote-estimates", component: AdminQuoteEstimates },
+  { path: "/admin/quote-pricing", component: AdminQuotePricing },
 ];
 
 export const router = createRouter({

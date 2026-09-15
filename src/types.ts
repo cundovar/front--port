@@ -38,11 +38,6 @@ export interface ServiceFaqItem {
   answer: string;
 }
 
-export interface ServicePricing {
-  essential: string;
-  standard: string;
-}
-
 export interface ServiceOffer {
   serviceKey: QuoteServiceKey;
   title: string;
@@ -52,7 +47,6 @@ export interface ServiceOffer {
   technologies?: string[];
   actionLabel: string;
   faqs: ServiceFaqItem[];
-  pricing: ServicePricing;
 }
 
 export interface ProblemContent {
@@ -210,26 +204,66 @@ export interface ContentData {
   footer: FooterContent;
 }
 
+/** Offer families of the pricing catalog. Amounts stay server-side. */
 export type QuoteServiceKey =
-  | "automation"
-  | "ai-assistant"
+  | "site-vitrine"
+  | "automatisation"
+  | "assistant-ia"
   | "refonte"
-  | "custom-tool"
-  | "wordpress";
+  | "outil-metier";
 
-export type QuoteComplexity = "simple" | "standard" | "complexe";
+export type QuoteProjectStage = "nouveau" | "existant";
+export type QuoteContentReadiness = "pret" | "a-rediger" | "je-ne-sais-pas";
+export type QuoteDeadline = "flexible" | "normal" | "prioritaire";
+export type QuoteStep = "offer" | "scope" | "situation" | "result";
 
-export type QuoteTrainingNeed = "none" | "light" | "full";
+export interface QuotePricedItem {
+  key: string;
+  label: string;
+  minimumAmount: number;
+  maximumAmount: number;
+}
 
-export type QuoteStep = "need" | "details" | "contact" | "result";
+export interface QuoteVariant extends QuotePricedItem {
+  includes: string[];
+}
+
+export interface QuoteOffer {
+  key: string;
+  label: string;
+  summary?: string;
+  /** False for offers with no editorial content (automation, AI assistant, custom tool). */
+  contentQuestion?: boolean;
+  variants: QuoteVariant[];
+  options: QuotePricedItem[];
+}
+
+export interface QuoteCatalog {
+  offers: QuoteOffer[];
+  adjustments: {
+    priorityDelay: { label: string; multiplier: number };
+    contentWriting: { label: string; minimumAmount: number; maximumAmount: number };
+  };
+}
+
+export interface QuoteCatalogError {
+  path: string;
+  message: string;
+}
+
+export interface QuoteCatalogAdminPayload {
+  version: number;
+  updatedAt: string;
+  catalog: QuoteCatalog;
+}
 
 export interface QuoteAnswers {
-  serviceKey: QuoteServiceKey | "";
-  complexity: QuoteComplexity | "";
-  integrationsCount: number;
-  legacyTakeover: boolean;
-  urgency: boolean;
-  trainingNeed: QuoteTrainingNeed;
+  offerKey: string;
+  variantKey: string;
+  optionKeys: string[];
+  projectStage: QuoteProjectStage;
+  contentReadiness: QuoteContentReadiness;
+  deadline: QuoteDeadline;
   projectDescription: string;
 }
 
@@ -238,7 +272,7 @@ export interface QuoteContact {
   email: string;
   company: string;
   phone: string;
-  consentAccepted: boolean;
+  consent: boolean;
   honeypot: string;
 }
 
@@ -248,26 +282,55 @@ export interface QuoteCalculationFactor {
   impactMax: number;
 }
 
+export interface QuoteSelectedOption {
+  key: string;
+  label: string;
+}
+
 export interface QuoteEstimateResult {
-  id: number;
-  serviceKey: QuoteServiceKey;
+  offerKey: string;
+  offerLabel: string;
+  variantKey: string;
+  variantLabel: string;
   minimumAmount: number;
   maximumAmount: number;
+  includes: string[];
+  selectedOptions: QuoteSelectedOption[];
   calculationDetail: QuoteCalculationFactor[];
+  pricingVersion: number;
+  disclaimer: string;
+}
+
+export interface QuoteSubmissionResult extends QuoteEstimateResult {
+  id: number;
   summary: string;
   recommendedScope: string[];
   missingQuestions: string[];
   riskFlags: string[];
-  disclaimer: string;
+  aiSource: string;
 }
 
-export interface QuoteEstimateAdminRecord extends QuoteEstimateResult {
+/** Lightweight row of GET /api/admin/quote-estimates: mirrors mapListItem() exactly. */
+export interface QuoteEstimateAdminListItem {
+  id: number;
+  offerKey: string;
+  variantKey: string | null;
+  fullName: string;
+  email: string;
+  minimumAmount: number;
+  maximumAmount: number;
+  status: string;
+  pricingVersion: number;
+  createdAt: string;
+  qualifiedAt: string | null;
+}
+
+export interface QuoteEstimateAdminRecord extends QuoteSubmissionResult {
   fullName: string;
   email: string;
   company: string | null;
   phone: string | null;
   answers: Record<string, unknown>;
-  aiSource: string;
   status: string;
   notes: string | null;
   createdAt: string;

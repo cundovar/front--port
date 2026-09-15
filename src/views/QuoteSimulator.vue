@@ -4,42 +4,74 @@
       <a class="quote-back" href="/">← Retour au portfolio</a>
       <h1 class="quote-title">Estimer votre projet en 2 minutes</h1>
       <p class="quote-intro">
-        Répondez à quelques questions : vous obtenez une fourchette indicative, calculée à partir de vos réponses,
-        et une lecture de votre besoin. Sans engagement.
+        Quelques questions simples, et vous voyez une fourchette de prix avant même de laisser vos coordonnées.
+        Sans engagement.
       </p>
     </header>
 
-    <QuoteProgress :labels="stepLabels" :current-index="currentIndex" />
+    <QuoteProgress :labels="progressLabels" :current-index="currentIndex" />
 
-    <section class="quote-card" aria-live="polite">
-      <h2 ref="stepHeading" class="quote-step-title" tabindex="-1">{{ stepTitles[step] }}</h2>
+    <p v-if="catalogState === 'loading'" class="quote-state" role="status">Chargement des offres…</p>
+
+    <section v-else-if="catalogState === 'error'" class="quote-card">
+      <p class="quote-error" role="alert">Les offres n’ont pas pu être chargées.</p>
+      <button class="btn btn-primary" type="button" @click="loadCatalog">Réessayer</button>
+    </section>
+
+    <section v-else class="quote-card">
+      <h2 ref="stepHeading" class="quote-step-title" tabindex="-1">{{ stepLabels[step] }}</h2>
 
       <QuoteNeedStep
-        v-if="step === 'need'"
-        :model-value="answers.serviceKey"
-        :options="serviceOptions"
-        :error="errors.serviceKey"
-        @update:model-value="answers.serviceKey = $event"
+        v-if="step === 'offer'"
+        :model-value="answers.offerKey"
+        :offers="catalog?.offers ?? []"
+        :error="errors.offerKey"
+        @update:model-value="selectOffer"
       />
 
-      <QuoteDetailsStep
-        v-else-if="step === 'details'"
+      <QuoteScopeStep
+        v-else-if="step === 'scope' && currentOffer"
+        :offer="currentOffer"
         :answers="answers"
         :errors="errors"
-        :complexity-options="complexityOptions"
-        :training-options="trainingOptions"
+        @update="Object.assign(answers, $event)"
+        @toggle-option="toggleOption"
+      />
+
+      <QuoteSituationStep
+        v-else-if="step === 'situation'"
+        :answers="answers"
+        :errors="errors"
+        :offer="currentOffer"
         @update="Object.assign(answers, $event)"
       />
 
-      <QuoteContactStep
-        v-else-if="step === 'contact'"
-        :contact="contact"
-        :errors="errors"
-        :recap="recap"
-        @update="Object.assign(contact, $event)"
-      />
+      <template v-else-if="step === 'result' && result">
+        <QuoteResultStep :result="result" />
 
-      <QuoteResultStep v-else-if="result" :result="result" />
+        <template v-if="!submission">
+          <QuoteContactStep :contact="contact" :errors="errors" @update="Object.assign(contact, $event)" />
+          <div class="quote-actions">
+            <button class="btn btn-outline" type="button" @click="goBack">Modifier mes réponses</button>
+            <button class="btn btn-primary" type="button" :disabled="submitState === 'loading'" @click="sendQuote">
+              {{ submitState === "loading" ? "Envoi…" : "Recevoir l’estimation et en parler" }}
+            </button>
+          </div>
+        </template>
+
+        <section v-else class="quote-confirmation" aria-labelledby="quote-confirmation-title">
+          <h3 id="quote-confirmation-title" class="quote-subtitle">Demande transmise</h3>
+          <p>Merci, votre demande est enregistrée. Je reviens vers vous rapidement.</p>
+          <p v-if="submission.summary" class="quote-summary">{{ submission.summary }}</p>
+          <template v-if="submission.missingQuestions.length">
+            <h4 class="quote-subtitle">À préciser ensemble</h4>
+            <ul class="quote-list">
+              <li v-for="question in submission.missingQuestions" :key="question">{{ question }}</li>
+            </ul>
+          </template>
+          <a class="btn btn-outline" href="/">Retour au portfolio</a>
+        </section>
+      </template>
 
       <p class="quote-reassurance">
         Estimation indicative · Sans engagement · Vos coordonnées restent confidentielles
@@ -49,22 +81,8 @@
 
       <div v-if="step !== 'result'" class="quote-actions">
         <button v-if="currentIndex > 0" class="btn btn-outline" type="button" @click="goBack">Retour</button>
-        <button
-          v-if="step !== 'contact'"
-          class="btn btn-primary"
-          type="button"
-          @click="goNext"
-        >
-          Continuer
-        </button>
-        <button
-          v-else
-          class="btn btn-primary"
-          type="button"
-          :disabled="submitState === 'submitting'"
-          @click="sendQuote"
-        >
-          {{ submitState === "submitting" ? "Envoi…" : "Voir mon estimation" }}
+        <button class="btn btn-primary" type="button" :disabled="previewState === 'loading'" @click="goNext">
+          {{ previewState === "loading" ? "Calcul…" : nextLabel }}
         </button>
       </div>
     </section>
@@ -76,73 +94,45 @@ import { computed, nextTick, onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
 import QuoteProgress from "../components/quote/QuoteProgress.vue";
 import QuoteNeedStep from "../components/quote/QuoteNeedStep.vue";
-import QuoteDetailsStep from "../components/quote/QuoteDetailsStep.vue";
+import QuoteScopeStep from "../components/quote/QuoteScopeStep.vue";
+import QuoteSituationStep from "../components/quote/QuoteSituationStep.vue";
 import QuoteContactStep from "../components/quote/QuoteContactStep.vue";
 import QuoteResultStep from "../components/quote/QuoteResultStep.vue";
 import {
-  COMPLEXITY_LABELS,
-  KNOWN_SERVICE_KEYS,
   QUOTE_STEPS,
-  SERVICE_LABELS,
-  TRAINING_LABELS,
+  STEP_LABELS,
+  resolvePreselectedOffer,
   useQuoteSimulator,
 } from "../composables/useQuoteSimulator";
-import type { QuoteComplexity, QuoteStep, QuoteTrainingNeed } from "../types";
 
 const route = useRoute();
 const {
+  catalog,
+  catalogState,
+  loadCatalog,
   step,
   answers,
   contact,
   errors,
+  currentOffer,
+  previewState,
   submitState,
   feedback,
   result,
-  preselectService,
-  back,
+  submission,
+  selectOffer,
+  toggleOption,
   next,
+  back,
   submit,
 } = useQuoteSimulator();
 
 const stepHeading = ref<HTMLElement | null>(null);
-
-const stepLabels = ["Besoin", "Projet", "Contact", "Résultat"];
-
-const stepTitles: Record<QuoteStep, string> = {
-  need: "Votre besoin",
-  details: "Votre projet",
-  contact: "Vos coordonnées",
-  result: "Votre estimation",
-};
-
-const serviceOptions = KNOWN_SERVICE_KEYS.map((value) => ({ value, label: SERVICE_LABELS[value] }));
-
-const complexityOptions = (Object.keys(COMPLEXITY_LABELS) as QuoteComplexity[]).map((value) => ({
-  value,
-  label: COMPLEXITY_LABELS[value],
-}));
-
-const trainingOptions = (Object.keys(TRAINING_LABELS) as QuoteTrainingNeed[]).map((value) => ({
-  value,
-  label: TRAINING_LABELS[value],
-}));
+const stepLabels = STEP_LABELS;
+const progressLabels = QUOTE_STEPS.map((value) => STEP_LABELS[value]);
 
 const currentIndex = computed(() => QUOTE_STEPS.indexOf(step.value));
-
-const recap = computed(() => [
-  {
-    label: "Besoin",
-    value: answers.serviceKey ? SERVICE_LABELS[answers.serviceKey] : "—",
-  },
-  {
-    label: "Complexité",
-    value: answers.complexity ? COMPLEXITY_LABELS[answers.complexity] : "—",
-  },
-  { label: "Outils à relier", value: String(answers.integrationsCount) },
-  { label: "Existant à reprendre", value: answers.legacyTakeover ? "Oui" : "Non" },
-  { label: "Délai serré", value: answers.urgency ? "Oui" : "Non" },
-  { label: "Accompagnement", value: TRAINING_LABELS[answers.trainingNeed] },
-]);
+const nextLabel = computed(() => (step.value === "situation" ? "Voir mon estimation" : "Continuer"));
 
 const focusStepHeading = async (): Promise<void> => {
   await nextTick();
@@ -150,9 +140,7 @@ const focusStepHeading = async (): Promise<void> => {
 };
 
 const goNext = async (): Promise<void> => {
-  if (next()) {
-    await focusStepHeading();
-  }
+  if (await next()) await focusStepHeading();
 };
 
 const goBack = async (): Promise<void> => {
@@ -161,13 +149,13 @@ const goBack = async (): Promise<void> => {
 };
 
 const sendQuote = async (): Promise<void> => {
-  if (await submit()) {
-    await focusStepHeading();
-  }
+  if (await submit()) await focusStepHeading();
 };
 
-onMounted(() => {
-  preselectService(route.query.service);
+onMounted(async () => {
+  await loadCatalog();
+  const preselected = resolvePreselectedOffer(catalog.value, route.query.service);
+  if (preselected) selectOffer(preselected);
 });
 </script>
 
@@ -180,7 +168,12 @@ onMounted(() => {
 .quote-card { border: 3px solid var(--line); background: var(--bg-elev); box-shadow: var(--shadow); padding: clamp(20px, 4vw, 36px); display: grid; gap: 24px; }
 .quote-step-title { margin: 0; font-size: 20px; }
 .quote-step-title:focus-visible { outline: 2px solid var(--text); outline-offset: 4px; }
+.quote-state { font-family: var(--font-mono); font-size: 12px; text-transform: uppercase; }
 .quote-reassurance { margin: 0; font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; opacity: 0.7; }
-.quote-feedback { margin: 0; color: var(--accent); font-size: 14px; }
+.quote-feedback, .quote-error { margin: 0; color: var(--accent); font-size: 14px; }
 .quote-actions { display: flex; flex-wrap: wrap; gap: 14px; justify-content: space-between; }
+.quote-confirmation { display: grid; gap: 12px; border-top: 2px solid var(--line); padding-top: 24px; }
+.quote-subtitle { margin: 0; font-family: var(--font-mono); font-size: 12px; text-transform: uppercase; }
+.quote-summary { margin: 0; font-size: 15px; line-height: 1.6; }
+.quote-list { margin: 0; padding-left: 20px; display: grid; gap: 6px; font-size: 14px; }
 </style>

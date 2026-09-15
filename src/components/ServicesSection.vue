@@ -36,10 +36,6 @@ interface Service {
   deliverables: string[];
   technologies?: string[];
   actionLabel: string;
-  pricing?: {
-    essential: string;
-    standard: string;
-  };
 }
 
 const ctaHref = (serviceKey: unknown): string => buildQuoteCtaHref(serviceKey);

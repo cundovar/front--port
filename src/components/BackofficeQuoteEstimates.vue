@@ -30,7 +30,7 @@
           >
             <span class="list-status">{{ statusLabel(item.status) }}</span>
             <span class="list-name">{{ item.fullName }}</span>
-            <span class="list-service">{{ serviceLabel(item.serviceKey) }}</span>
+            <span class="list-service">{{ serviceLabel(item) }}</span>
             <span class="list-amount">{{ item.minimumAmount }} – {{ item.maximumAmount }} €</span>
             <span class="list-date">{{ formatDate(item.createdAt) }}</span>
           </button>
@@ -41,8 +41,12 @@
         <h2>{{ selected.fullName }}</h2>
         <p class="muted">{{ selected.email }}<template v-if="selected.company"> · {{ selected.company }}</template><template v-if="selected.phone"> · {{ selected.phone }}</template></p>
 
+        <h3>Offre retenue</h3>
+        <p>{{ selected.answers.offerLabel ?? selected.offerKey }} · {{ selected.answers.variantLabel ?? "—" }}</p>
+
         <h3>Fourchette</h3>
         <p class="amount">{{ selected.minimumAmount }} € – {{ selected.maximumAmount }} €</p>
+        <p class="muted">Calculée avec la grille tarifaire version {{ selected.pricingVersion }}.</p>
 
         <h3>Réponses</h3>
         <dl class="answers">
@@ -97,14 +101,11 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
-import type { QuoteEstimateAdminRecord } from "../types";
-import { quoteServiceLabel, quoteStatusLabel } from "../composables/useQuoteSimulator";
+import type { QuoteEstimateAdminListItem, QuoteEstimateAdminRecord } from "../types";
+import { quoteStatusLabel } from "../composables/useQuoteSimulator";
 import { api } from "../utils/api";
 
-type ListItem = Pick<
-  QuoteEstimateAdminRecord,
-  "id" | "serviceKey" | "fullName" | "email" | "minimumAmount" | "maximumAmount" | "status" | "createdAt" | "qualifiedAt"
->;
+type ListItem = QuoteEstimateAdminListItem;
 
 const statusOptions = [
   { value: "new", label: "Nouvelle" },
@@ -125,7 +126,9 @@ const error = ref("");
 const adminHeaders = () => ({ "Content-Type": "application/json" });
 
 const statusLabel = quoteStatusLabel;
-const serviceLabel = quoteServiceLabel;
+
+// Labels are stored with each estimate so history survives a catalog rename.
+const serviceLabel = (item: { offerKey: string }): string => item.offerKey;
 
 const formatDate = (value: string): string =>
   value ? new Date(value).toLocaleDateString("fr-FR", { dateStyle: "medium" }) : "—";

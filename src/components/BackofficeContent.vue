@@ -151,28 +151,6 @@
         </div>
       </div>
 
-      <!-- SERVICES & PRIX -->
-      <div v-show="activeTab === 'services'" class="form-section">
-        <h3>Services & tarifs</h3>
-        <p class="muted">Laisse un champ vide si une formule ne s'applique pas à ce service.</p>
-
-        <div v-for="service in content.services" :key="service.title" class="pricing-service-editor">
-          <h4>{{ service.title }}</h4>
-          <div class="pricing-editor-grid">
-            <div class="field">
-              <label>Formule essentielle</label>
-              <input v-model="service.pricing.essential" type="text" placeholder="À partir de ..." />
-            </div>
-            <div class="field">
-              <label>Formule standard</label>
-              <input v-model="service.pricing.standard" type="text" placeholder="À partir de ..." />
-            </div>
-            <div class="field">
-            </div>
-          </div>
-        </div>
-      </div>
-
       <!-- STACK -->
       <div v-show="activeTab === 'stack'" class="form-section">
         <h3>Stack & techniques</h3>
@@ -351,7 +329,6 @@ const tabs = [
   { key: "hero", label: "Hero" },
   { key: "about", label: "A propos" },
   { key: "faq", label: "FAQ" },
-  { key: "services", label: "Services & tarifs" },
   { key: "stack", label: "Stack" },
   { key: "teaching", label: "Enseignement" },
   { key: "skills", label: "Competences" },
@@ -730,22 +707,4 @@ textarea {
   cursor: not-allowed;
 }
 
-.pricing-service-editor {
-  padding: 18px;
-  margin-bottom: 20px;
-  border: 1px solid var(--line);
-  background: var(--bg);
-}
-
-.pricing-editor-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-}
-
-@media (max-width: 760px) {
-  .pricing-editor-grid {
-    grid-template-columns: 1fr;
-  }
-}
 </style>

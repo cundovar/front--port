@@ -74,23 +74,6 @@ describe("normalizeContent", () => {
     expect(content.services[0].faqs).toEqual([{ question: "Question API", answer: "Reponse API" }]);
     expect(content.services[1].faqs).toEqual(fallback.services[1].faqs);
   });
-
-  it("normalizes editable service pricing fields", () => {
-    const content = normalizeContent(fallback, {
-      services: fallback.services.map((service, index) => ({
-        ...service,
-        pricing: index === 0
-          ? { essential: "900 €", standard: "1 500 €" }
-          : { standard: 900 },
-      })),
-    });
-
-    expect(content.services[0].pricing).toEqual({
-      essential: "900 €",
-      standard: "1 500 €",
-    });
-    expect(content.services[1].pricing).toEqual(fallback.services[1].pricing);
-  });
 });
 
 describe("normalizeProjects", () => {

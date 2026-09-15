@@ -1,4 +1,5 @@
-import type { ContentData, ProjectCard, ProjectStatus } from "../types";
+import type { ContentData, ProjectCard, ProjectStatus, QuoteServiceKey } from "../types";
+import { KNOWN_OFFER_KEYS } from "../composables/useQuoteSimulator";
 
 const contentSections = [
   "header",
@@ -47,18 +48,28 @@ const normalizeFaqs = (
   }));
 };
 
-const normalizePricing = (
-  fallbackPricing: ContentData["services"][number]["pricing"],
-  incoming: unknown,
-): ContentData["services"][number]["pricing"] => {
-  if (!isRecord(incoming)) {
-    return fallbackPricing;
+/**
+ * Content already stored in production still carries the service keys used before
+ * the catalog refonte. Merging them as-is would overwrite the new fallback keys and
+ * break the "/devis?service=" preselection, so they are translated on read.
+ */
+const LEGACY_SERVICE_KEYS: Record<string, QuoteServiceKey> = {
+  automation: "automatisation",
+  "ai-assistant": "assistant-ia",
+  "custom-tool": "outil-metier",
+  wordpress: "site-vitrine",
+};
+
+export const normalizeServiceKey = (incoming: unknown, fallbackKey: QuoteServiceKey): QuoteServiceKey => {
+  if (typeof incoming !== "string" || incoming.trim() === "") {
+    return fallbackKey;
   }
 
-  return {
-    essential: typeof incoming.essential === "string" ? incoming.essential : fallbackPricing.essential,
-    standard: typeof incoming.standard === "string" ? incoming.standard : fallbackPricing.standard,
-  };
+  if (LEGACY_SERVICE_KEYS[incoming]) {
+    return LEGACY_SERVICE_KEYS[incoming];
+  }
+
+  return KNOWN_OFFER_KEYS.includes(incoming as QuoteServiceKey) ? (incoming as QuoteServiceKey) : fallbackKey;
 };
 
 const normalizeServices = (base: ContentData["services"], incoming: unknown): ContentData["services"] => {
@@ -81,9 +92,9 @@ const normalizeServices = (base: ContentData["services"], incoming: unknown): Co
 
     return {
       ...mergedService,
+      serviceKey: normalizeServiceKey(incomingService.serviceKey, fallbackService.serviceKey),
       actionLabel: actionLabel.trim() ? actionLabel : fallbackService.actionLabel,
       faqs: normalizeFaqs(fallbackService.faqs, incomingService.faqs),
-      pricing: normalizePricing(fallbackService.pricing, incomingService.pricing),
     };
   });
 };

@@ -1,23 +1,24 @@
 import { describe, expect, it } from "vitest";
 import content from "../src/data/content.json";
 import {
-  KNOWN_SERVICE_KEYS,
+  KNOWN_OFFER_KEYS,
   buildQuoteCtaHref,
-  quoteServiceLabel,
   quoteStatusLabel,
 } from "../src/composables/useQuoteSimulator";
+import type { ContentData } from "../src/types";
+import { normalizeContent, normalizeServiceKey } from "../src/utils/content";
 
-describe("content and catalog stay in sync", () => {
-  it("gives every service offer a key from the known catalog", () => {
+describe("homepage CTAs and catalog stay aligned", () => {
+  it("gives every service offer a key the simulator recognises", () => {
     const keys = content.services.map((service) => service.serviceKey);
 
     expect(keys).toHaveLength(5);
     keys.forEach((key) => {
-      expect(KNOWN_SERVICE_KEYS).toContain(key);
+      expect(KNOWN_OFFER_KEYS).toContain(key);
     });
   });
 
-  it("uses distinct keys per offer", () => {
+  it("uses a distinct key per offer", () => {
     const keys = content.services.map((service) => service.serviceKey);
     expect(new Set(keys).size).toBe(keys.length);
   });
@@ -28,26 +29,33 @@ describe("content and catalog stay in sync", () => {
 });
 
 describe("buildQuoteCtaHref", () => {
-  it("builds a preselected link for each offer", () => {
+  it("preselects the matching offer for each card", () => {
     content.services.forEach((service) => {
       expect(buildQuoteCtaHref(service.serviceKey)).toBe(`/devis?service=${service.serviceKey}`);
     });
   });
 
-  it("falls back to the bare simulator for an unknown key", () => {
+  it("falls back to the bare simulator for anything unknown", () => {
     expect(buildQuoteCtaHref("injected")).toBe("/devis");
     expect(buildQuoteCtaHref(undefined)).toBe("/devis");
+    expect(buildQuoteCtaHref(42)).toBe("/devis");
   });
 
-  it("never adds any query parameter other than service", () => {
-    const href = buildQuoteCtaHref("automation");
-    const query = href.split("?")[1] ?? "";
-
-    expect(query.split("&")).toEqual(["service=automation"]);
+  it("adds no query parameter other than service", () => {
+    const query = buildQuoteCtaHref("automatisation").split("?")[1] ?? "";
+    expect(query.split("&")).toEqual(["service=automatisation"]);
   });
 });
 
-describe("admin display helpers", () => {
+describe("no pricing is duplicated in the frontend", () => {
+  it("keeps content.json free of quote amounts", () => {
+    const serialized = JSON.stringify(content.services);
+
+    expect(serialized).not.toMatch(/minimumAmount|maximumAmount/);
+  });
+});
+
+describe("admin status labels", () => {
   it("labels every backend status", () => {
     expect(quoteStatusLabel("new")).toBe("Nouvelle");
     expect(quoteStatusLabel("reviewed")).toBe("Vue");
@@ -55,13 +63,49 @@ describe("admin display helpers", () => {
     expect(quoteStatusLabel("archived")).toBe("Archivée");
   });
 
-  it("falls back to the raw value for an unknown status", () => {
+  it("falls back to the raw value when unknown", () => {
     expect(quoteStatusLabel("unknown")).toBe("unknown");
   });
+});
 
-  it("labels every service key", () => {
-    KNOWN_SERVICE_KEYS.forEach((key) => {
-      expect(quoteServiceLabel(key)).not.toBe(key);
+describe("service keys already stored in production", () => {
+  // The API payload deployed before the refonte still carries the old keys.
+  const LEGACY_PAYLOAD_KEYS = ["automation", "ai-assistant", "refonte", "custom-tool", "wordpress"];
+
+  it("translates every legacy key to a key of the active catalog", () => {
+    const translated = LEGACY_PAYLOAD_KEYS.map((key) => normalizeServiceKey(key, "site-vitrine"));
+
+    translated.forEach((key) => {
+      expect(KNOWN_OFFER_KEYS).toContain(key);
+    });
+    expect(translated).toEqual([
+      "automatisation",
+      "assistant-ia",
+      "refonte",
+      "outil-metier",
+      "site-vitrine",
+    ]);
+  });
+
+  it("keeps the fallback key when the stored one is unknown or missing", () => {
+    expect(normalizeServiceKey("service-supprime", "refonte")).toBe("refonte");
+    expect(normalizeServiceKey(undefined, "refonte")).toBe("refonte");
+    expect(normalizeServiceKey(42, "refonte")).toBe("refonte");
+  });
+
+  it("never lets a stored legacy key break the CTA preselection", () => {
+    const fallback = content as unknown as ContentData;
+    const legacyApiResponse = {
+      services: fallback.services.map((service, index) => ({
+        ...service,
+        serviceKey: LEGACY_PAYLOAD_KEYS[index],
+      })),
+    };
+
+    const normalized = normalizeContent(fallback, legacyApiResponse);
+
+    normalized.services.forEach((service) => {
+      expect(buildQuoteCtaHref(service.serviceKey)).toBe(`/devis?service=${service.serviceKey}`);
     });
   });
 });

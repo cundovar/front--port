@@ -3,7 +3,6 @@ node_modules
 .env.local
 .env.production
 .env.development
-src
 
 package.json
 package-lock.json

@@ -1,44 +1,59 @@
-import { reactive, ref } from "vue";
+import { computed, reactive, ref } from "vue";
 import type {
   QuoteAnswers,
-  QuoteComplexity,
+  QuoteCatalog,
   QuoteContact,
   QuoteEstimateResult,
-  QuoteServiceKey,
+  QuoteOffer,
   QuoteStep,
-  QuoteTrainingNeed,
+  QuoteSubmissionResult,
 } from "../types";
 import { api } from "../utils/api";
 
-export const KNOWN_SERVICE_KEYS: QuoteServiceKey[] = [
-  "automation",
-  "ai-assistant",
+export const QUOTE_STEPS: QuoteStep[] = ["offer", "scope", "situation", "result"];
+
+export const STEP_LABELS: Record<QuoteStep, string> = {
+  offer: "Résultat recherché",
+  scope: "Votre besoin",
+  situation: "Votre situation",
+  result: "Estimation",
+};
+
+export const PROJECT_STAGE_OPTIONS = [
+  { value: "nouveau", label: "C’est un nouveau projet" },
+  { value: "existant", label: "Quelque chose existe déjà" },
+] as const;
+
+export const CONTENT_OPTIONS = [
+  { value: "pret", label: "Mes textes et images sont prêts" },
+  { value: "a-rediger", label: "J’ai besoin qu’on rédige les contenus" },
+  { value: "je-ne-sais-pas", label: "Je ne sais pas encore" },
+] as const;
+
+export const DEADLINE_OPTIONS = [
+  { value: "flexible", label: "Pas de date imposée" },
+  { value: "normal", label: "Dans les prochaines semaines" },
+  { value: "prioritaire", label: "C’est urgent" },
+] as const;
+
+const MAX_DESCRIPTION_LENGTH = 600;
+
+/**
+ * Offer keys only — never amounts, which live solely in the backend catalog.
+ * Used to build and validate the "/devis?service=" links from the homepage.
+ */
+export const KNOWN_OFFER_KEYS = [
+  "site-vitrine",
+  "automatisation",
+  "assistant-ia",
   "refonte",
-  "custom-tool",
-  "wordpress",
-];
+  "outil-metier",
+] as const;
 
-export const QUOTE_STEPS: QuoteStep[] = ["need", "details", "contact", "result"];
-
-export const SERVICE_LABELS: Record<QuoteServiceKey, string> = {
-  automation: "Automatiser une tâche répétitive",
-  "ai-assistant": "Assistant IA pour votre activité",
-  refonte: "Reprendre un site ou une application",
-  "custom-tool": "Créer un outil web sur mesure",
-  wordpress: "Améliorer un site WordPress",
-};
-
-export const COMPLEXITY_LABELS: Record<QuoteComplexity, string> = {
-  simple: "Simple — un besoin bien cadré",
-  standard: "Standard — quelques cas particuliers",
-  complexe: "Complexe — plusieurs systèmes à relier",
-};
-
-export const TRAINING_LABELS: Record<QuoteTrainingNeed, string> = {
-  none: "Aucun accompagnement",
-  light: "Prise en main légère",
-  full: "Formation et suivi complets",
-};
+export const buildQuoteCtaHref = (offerKey: unknown): string =>
+  typeof offerKey === "string" && (KNOWN_OFFER_KEYS as readonly string[]).includes(offerKey)
+    ? `/devis?service=${offerKey}`
+    : "/devis";
 
 export const QUOTE_STATUS_LABELS: Record<string, string> = {
   new: "Nouvelle",
@@ -49,24 +64,13 @@ export const QUOTE_STATUS_LABELS: Record<string, string> = {
 
 export const quoteStatusLabel = (value: string): string => QUOTE_STATUS_LABELS[value] ?? value;
 
-export const quoteServiceLabel = (value: string): string =>
-  SERVICE_LABELS[value as QuoteServiceKey] ?? value;
-
-/** Builds the CTA target for a service offer, refusing anything outside the catalog. */
-export const buildQuoteCtaHref = (serviceKey: unknown): string => {
-  const resolved = resolvePreselectedService(serviceKey);
-  return resolved ? `/devis?service=${resolved}` : "/devis";
-};
-
-const MAX_DESCRIPTION_LENGTH = 600;
-
 export const emptyAnswers = (): QuoteAnswers => ({
-  serviceKey: "",
-  complexity: "",
-  integrationsCount: 0,
-  legacyTakeover: false,
-  urgency: false,
-  trainingNeed: "none",
+  offerKey: "",
+  variantKey: "",
+  optionKeys: [],
+  projectStage: "nouveau",
+  contentReadiness: "pret",
+  deadline: "normal",
   projectDescription: "",
 });
 
@@ -75,19 +79,46 @@ export const emptyContact = (): QuoteContact => ({
   email: "",
   company: "",
   phone: "",
-  consentAccepted: false,
+  consent: false,
   honeypot: "",
 });
 
-/** Only ever trust a ?service= value that matches the known catalog. */
-export const resolvePreselectedService = (queryValue: unknown): QuoteServiceKey | "" => {
-  if (typeof queryValue !== "string") return "";
-  return KNOWN_SERVICE_KEYS.includes(queryValue as QuoteServiceKey)
-    ? (queryValue as QuoteServiceKey)
-    : "";
+export const findOffer = (catalog: QuoteCatalog | null, offerKey: string): QuoteOffer | null =>
+  catalog?.offers.find((offer) => offer.key === offerKey) ?? null;
+
+/** Only accept a ?service= value that the active catalog actually declares. */
+export const resolvePreselectedOffer = (catalog: QuoteCatalog | null, queryValue: unknown): string =>
+  typeof queryValue === "string" && findOffer(catalog, queryValue) ? queryValue : "";
+
+/**
+ * "Avez-vous vos textes et vos images ?" only makes sense for offers that ship
+ * editorial content. The backend prices it the same way, from the same flag.
+ */
+export const offerAsksAboutContent = (offer: QuoteOffer | null): boolean =>
+  offer !== null && offer.contentQuestion !== false;
+
+/** After an offer change, drop the variant and options that belong to another offer. */
+export const pruneIncompatibleAnswers = (catalog: QuoteCatalog | null, answers: QuoteAnswers): void => {
+  const offer = findOffer(catalog, answers.offerKey);
+  if (!offer) {
+    answers.variantKey = "";
+    answers.optionKeys = [];
+    return;
+  }
+
+  if (!offer.variants.some((variant) => variant.key === answers.variantKey)) {
+    answers.variantKey = "";
+  }
+
+  const allowed = offer.options.map((option) => option.key);
+  answers.optionKeys = answers.optionKeys.filter((key) => allowed.includes(key));
+
+  // The question is not asked for this offer: never carry a stale answer into the price.
+  if (!offerAsksAboutContent(offer)) {
+    answers.contentReadiness = "pret";
+  }
 };
 
-/** Validates only the active step, so other steps' answers are never touched. */
 export const validateStep = (
   step: QuoteStep,
   answers: QuoteAnswers,
@@ -95,148 +126,170 @@ export const validateStep = (
 ): Record<string, string> => {
   const errors: Record<string, string> = {};
 
-  if (step === "need" && !resolvePreselectedService(answers.serviceKey)) {
-    errors.serviceKey = "Choisissez le type de besoin.";
+  if (step === "offer" && !answers.offerKey) {
+    errors.offerKey = "Choisissez le résultat que vous recherchez.";
   }
 
-  if (step === "details") {
-    if (!answers.complexity) {
-      errors.complexity = "Indiquez la complexité estimée.";
-    }
-    if (answers.integrationsCount < 0 || answers.integrationsCount > 20) {
-      errors.integrationsCount = "Indiquez un nombre entre 0 et 20.";
-    }
-    if (answers.projectDescription.length > MAX_DESCRIPTION_LENGTH) {
-      errors.projectDescription = `Limitez la description à ${MAX_DESCRIPTION_LENGTH} caractères.`;
-    }
+  if (step === "scope" && !answers.variantKey) {
+    errors.variantKey = "Choisissez la formule qui correspond le mieux.";
   }
 
-  if (step === "contact") {
-    if (!contact.fullName.trim()) {
-      errors.fullName = "Indiquez votre nom.";
-    }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email.trim())) {
-      errors.email = "Indiquez un email valide.";
-    }
-    if (contact.fullName.trim().length > 120) {
-      errors.fullName = "Limitez votre nom à 120 caractères.";
-    }
-    if (contact.email.trim().length > 255) {
-      errors.email = "Limitez votre email à 255 caractères.";
-    }
-    if (contact.company.trim().length > 120) {
-      errors.company = "Limitez le nom de l’entreprise à 120 caractères.";
-    }
-    if (contact.phone.trim().length > 40) {
-      errors.phone = "Limitez le téléphone à 40 caractères.";
-    }
-    if (!contact.consentAccepted) {
-      errors.consentAccepted = "Confirmez que vos coordonnées peuvent être utilisées pour vous recontacter.";
-    }
+  if (step === "situation" && answers.projectDescription.length > MAX_DESCRIPTION_LENGTH) {
+    errors.projectDescription = `Limitez la description à ${MAX_DESCRIPTION_LENGTH} caractères.`;
   }
 
   return errors;
 };
 
-export const buildSubmitPayload = (answers: QuoteAnswers, contact: QuoteContact) => ({
-  serviceKey: answers.serviceKey,
-  complexity: answers.complexity,
-  integrationsCount: answers.integrationsCount,
-  legacyTakeover: answers.legacyTakeover,
-  urgency: answers.urgency,
-  trainingNeed: answers.trainingNeed,
+export const validateContact = (contact: QuoteContact): Record<string, string> => {
+  const errors: Record<string, string> = {};
+
+  if (!contact.fullName.trim()) {
+    errors.fullName = "Indiquez votre nom.";
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email.trim())) {
+    errors.email = "Indiquez un email valide.";
+  }
+  if (!contact.consent) {
+    errors.consent = "Votre accord est nécessaire pour vous recontacter.";
+  }
+
+  return errors;
+};
+
+export const buildPreviewPayload = (answers: QuoteAnswers) => ({
+  offerKey: answers.offerKey,
+  variantKey: answers.variantKey,
+  optionKeys: [...answers.optionKeys],
+  projectStage: answers.projectStage,
+  contentReadiness: answers.contentReadiness,
+  deadline: answers.deadline,
   projectDescription: answers.projectDescription,
+});
+
+export const buildSubmitPayload = (answers: QuoteAnswers, contact: QuoteContact) => ({
+  ...buildPreviewPayload(answers),
   fullName: contact.fullName.trim(),
   email: contact.email.trim(),
   company: contact.company.trim(),
   phone: contact.phone.trim(),
-  consentAccepted: contact.consentAccepted,
+  consent: contact.consent,
   honeypot: contact.honeypot,
 });
 
-export const mapApiResultToResult = (data: unknown): QuoteEstimateResult => {
-  const raw = (data ?? {}) as Record<string, unknown>;
-  const asStringList = (value: unknown): string[] =>
-    Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
-
-  return {
-    id: typeof raw.id === "number" ? raw.id : 0,
-    serviceKey: (raw.serviceKey as QuoteServiceKey) ?? "automation",
-    minimumAmount: typeof raw.minimumAmount === "number" ? raw.minimumAmount : 0,
-    maximumAmount: typeof raw.maximumAmount === "number" ? raw.maximumAmount : 0,
-    calculationDetail: Array.isArray(raw.calculationDetail)
-      ? (raw.calculationDetail as QuoteEstimateResult["calculationDetail"])
-      : [],
-    summary: typeof raw.summary === "string" ? raw.summary : "",
-    recommendedScope: asStringList(raw.recommendedScope),
-    missingQuestions: asStringList(raw.missingQuestions),
-    riskFlags: asStringList(raw.riskFlags),
-    disclaimer:
-      typeof raw.disclaimer === "string"
-        ? raw.disclaimer
-        : "Estimation indicative, non contractuelle.",
-  };
-};
-
-export type QuoteSubmitState = "idle" | "submitting" | "success" | "error";
+export type QuoteRequestState = "idle" | "loading" | "ready" | "error";
 
 export const useQuoteSimulator = () => {
-  const step = ref<QuoteStep>("need");
+  const catalog = ref<QuoteCatalog | null>(null);
+  const catalogState = ref<QuoteRequestState>("idle");
+
+  const step = ref<QuoteStep>("offer");
   const answers = reactive<QuoteAnswers>(emptyAnswers());
   const contact = reactive<QuoteContact>(emptyContact());
   const errors = reactive<Record<string, string>>({});
-  const submitState = ref<QuoteSubmitState>("idle");
+
+  const previewState = ref<QuoteRequestState>("idle");
+  const submitState = ref<QuoteRequestState>("idle");
   const feedback = ref("");
+
   const result = ref<QuoteEstimateResult | null>(null);
+  const submission = ref<QuoteSubmissionResult | null>(null);
+
+  const currentOffer = computed(() => findOffer(catalog.value, answers.offerKey));
 
   const replaceErrors = (next: Record<string, string>): void => {
     Object.keys(errors).forEach((key) => delete errors[key]);
     Object.assign(errors, next);
   };
 
-  const preselectService = (queryValue: unknown): void => {
-    const preselected = resolvePreselectedService(queryValue);
-    if (preselected) {
-      answers.serviceKey = preselected;
+  const loadCatalog = async (): Promise<void> => {
+    catalogState.value = "loading";
+    try {
+      const response = await api.fetch("/api/quote-pricing");
+      if (!response.ok) throw new Error();
+      const data = await response.json();
+      catalog.value = data.catalog as QuoteCatalog;
+      catalogState.value = "ready";
+    } catch {
+      catalogState.value = "error";
     }
   };
 
-  const goTo = (next: QuoteStep): void => {
-    step.value = next;
+  const selectOffer = (offerKey: string): void => {
+    answers.offerKey = offerKey;
+    pruneIncompatibleAnswers(catalog.value, answers);
+  };
+
+  const toggleOption = (optionKey: string): void => {
+    const index = answers.optionKeys.indexOf(optionKey);
+    if (index === -1) {
+      answers.optionKeys.push(optionKey);
+    } else {
+      answers.optionKeys.splice(index, 1);
+    }
+  };
+
+  const requestPreview = async (): Promise<boolean> => {
+    previewState.value = "loading";
+    feedback.value = "";
+    try {
+      const response = await api.fetch("/api/quote-estimates/preview", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(buildPreviewPayload(answers)),
+      });
+
+      if (!response.ok) {
+        previewState.value = "error";
+        feedback.value =
+          response.status === 429
+            ? "Trop de simulations depuis cette connexion. Réessayez dans quelques minutes."
+            : "Le calcul a échoué. Vos réponses sont conservées, vous pouvez réessayer.";
+        return false;
+      }
+
+      result.value = (await response.json()) as QuoteEstimateResult;
+      previewState.value = "ready";
+      return true;
+    } catch {
+      previewState.value = "error";
+      feedback.value = "Le calcul a échoué. Vos réponses sont conservées, vous pouvez réessayer.";
+      return false;
+    }
+  };
+
+  const next = async (): Promise<boolean> => {
+    const stepErrors = validateStep(step.value, answers, contact);
+    replaceErrors(stepErrors);
+    if (Object.keys(stepErrors).length > 0) return false;
+
+    const index = QUOTE_STEPS.indexOf(step.value);
+    const upcoming = QUOTE_STEPS[index + 1];
+    if (!upcoming) return true;
+
+    if (upcoming === "result" && !(await requestPreview())) {
+      return false;
+    }
+
+    step.value = upcoming;
+    return true;
   };
 
   const back = (): void => {
     const index = QUOTE_STEPS.indexOf(step.value);
     if (index > 0) {
       replaceErrors({});
-      goTo(QUOTE_STEPS[index - 1]);
+      step.value = QUOTE_STEPS[index - 1];
     }
-  };
-
-  const next = (): boolean => {
-    const stepErrors = validateStep(step.value, answers, contact);
-    replaceErrors(stepErrors);
-    if (Object.keys(stepErrors).length > 0) {
-      return false;
-    }
-
-    const index = QUOTE_STEPS.indexOf(step.value);
-    if (index < QUOTE_STEPS.length - 1) {
-      goTo(QUOTE_STEPS[index + 1]);
-    }
-    return true;
   };
 
   const submit = async (): Promise<boolean> => {
-    const stepErrors = validateStep("contact", answers, contact);
-    replaceErrors(stepErrors);
-    if (Object.keys(stepErrors).length > 0) {
-      return false;
-    }
+    const contactErrors = validateContact(contact);
+    replaceErrors(contactErrors);
+    if (Object.keys(contactErrors).length > 0) return false;
 
-    submitState.value = "submitting";
+    submitState.value = "loading";
     feedback.value = "";
-
     try {
       const response = await api.fetch("/api/quote-estimates", {
         method: "POST",
@@ -248,14 +301,13 @@ export const useQuoteSimulator = () => {
         submitState.value = "error";
         feedback.value =
           response.status === 429
-            ? "Trop de simulations depuis cette connexion. Réessayez dans quelques minutes."
+            ? "Trop d’envois depuis cette connexion. Réessayez dans quelques minutes."
             : "L’envoi a échoué. Vos réponses sont conservées, vous pouvez réessayer.";
         return false;
       }
 
-      result.value = mapApiResultToResult(await response.json());
-      submitState.value = "success";
-      goTo("result");
+      submission.value = (await response.json()) as QuoteSubmissionResult;
+      submitState.value = "ready";
       return true;
     } catch {
       submitState.value = "error";
@@ -265,16 +317,24 @@ export const useQuoteSimulator = () => {
   };
 
   return {
+    catalog,
+    catalogState,
+    loadCatalog,
     step,
     answers,
     contact,
     errors,
+    currentOffer,
+    previewState,
     submitState,
     feedback,
     result,
-    preselectService,
-    back,
+    submission,
+    selectOffer,
+    toggleOption,
+    requestPreview,
     next,
+    back,
     submit,
   };
 };

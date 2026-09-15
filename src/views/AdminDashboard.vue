@@ -7,6 +7,7 @@
         <RouterLink to="/admin/comments">Commentaires</RouterLink>
         <RouterLink to="/admin/content">Contenu</RouterLink>
         <RouterLink to="/admin/quote-estimates">Estimations</RouterLink>
+        <RouterLink to="/admin/quote-pricing">Tarifs</RouterLink>
       </nav>
     </div>
 
@@ -31,6 +32,11 @@
           <h2>Estimations</h2>
           <p class="muted">Demandes issues du simulateur de devis.</p>
           <RouterLink class="btn btn-secondary" to="/admin/quote-estimates">Ouvrir</RouterLink>
+        </div>
+        <div class="card">
+          <h2>Tarifs</h2>
+          <p class="muted">Grille utilisee par le simulateur, sans redeploiement.</p>
+          <RouterLink class="btn btn-secondary" to="/admin/quote-pricing">Ouvrir</RouterLink>
         </div>
       </div>
     </section>

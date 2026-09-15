@@ -40,7 +40,7 @@
 
   "services": [
     {
-      "serviceKey": "automation",
+      "serviceKey": "automatisation",
       "title": "Gagnez du temps chaque semaine",
       "promise": "Automatisez les relances, copier-coller, tris et suivis qui ralentissent votre activité.",
       "problems": [
@@ -57,10 +57,6 @@
       ],
       "technologies": ["Symfony", "Vue.js", "n8n", "API", "Docker"],
       "actionLabel": "Estimer mon automatisation",
-      "pricing": {
-        "essential": "",
-        "standard": ""
-      },
       "faqs": [
         {
           "question": "Quels processus peut-on automatiser ?",
@@ -73,7 +69,7 @@
       ]
     },
     {
-      "serviceKey": "ai-assistant",
+      "serviceKey": "assistant-ia",
       "title": "Ajoutez un assistant IA utile à votre activité",
       "promise": "Triez, résumez, rédigez ou préparez des réponses plus rapidement, avec des contrôles humains clairs.",
       "problems": [
@@ -90,10 +86,6 @@
       ],
       "technologies": ["OpenAI", "MCP", "Symfony", "Vue.js"],
       "actionLabel": "Estimer mon assistant IA",
-      "pricing": {
-        "essential": "",
-        "standard": ""
-      },
       "faqs": [
         {
           "question": "A quoi sert un assistant IA dans une PME ?",
@@ -123,10 +115,6 @@
       ],
       "technologies": ["Vue.js", "React", "Symfony", "WordPress", "MySQL"],
       "actionLabel": "Estimer ma refonte",
-      "pricing": {
-        "essential": "",
-        "standard": ""
-      },
       "faqs": [
         {
           "question": "Peut-on ameliorer l'existant sans tout refaire ?",
@@ -139,7 +127,7 @@
       ]
     },
     {
-      "serviceKey": "custom-tool",
+      "serviceKey": "outil-metier",
       "title": "Créez un outil adapté à votre activité",
       "promise": "Transformez votre façon de travailler avec une application, un espace client ou un backoffice conçu pour vos besoins.",
       "problems": [
@@ -156,10 +144,6 @@
       ],
       "technologies": ["Vue.js", "React", "Symfony", "Node.js", "PostgreSQL", "Docker"],
       "actionLabel": "Estimer mon outil",
-      "pricing": {
-        "essential": "",
-        "standard": ""
-      },
       "faqs": [
         {
           "question": "Quand faut-il creer un outil sur mesure ?",
@@ -172,7 +156,7 @@
       ]
     },
     {
-      "serviceKey": "wordpress",
+      "serviceKey": "site-vitrine",
       "title": "Transformez votre WordPress en outil professionnel",
       "promise": "Améliorez votre design, vos performances et vos fonctionnalités pour obtenir un site plus utile à votre activité.",
       "problems": [
@@ -189,10 +173,6 @@
       ],
       "technologies": ["WordPress", "PHP", "MySQL", "WooCommerce", "Elementor"],
       "actionLabel": "Estimer mon WordPress",
-      "pricing": {
-        "essential": "",
-        "standard": ""
-      },
       "faqs": [
         {
           "question": "Peut-on ajouter une fonction specifique a WordPress ?",
