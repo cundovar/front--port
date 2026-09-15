@@ -7,13 +7,18 @@
   },
 
   "hero": {
-    "title": "Missionnaire Fullstack specialise IA & Automatisation",
-    "tagline": "Je construis des solutions sur mesure : automatisations fiables, agents IA pragmatiques, refontes scalables, sites WordPress ou applis web.",
-    "subtitle": "Depuis cadrages courts jusqu'a deployments en production, avec formation et transmission incluses.",
-    "primaryLabel": "Parler de votre mission",
+    "title": "Gagnez du temps avec une automatisation ou un outil web adapté à votre activité.",
+    "tagline": "Je conçois des solutions IA, des automatisations, des sites WordPress et des applications sur mesure, de l’idée à la mise en production.",
+    "subtitle": "Automatisation · IA pragmatique · Refonte · WordPress · Application métier",
+    "primaryLabel": "Obtenir une estimation",
     "primaryHref": "#contact",
     "secondaryLabel": "Voir les realisations",
-    "secondaryHref": "#cases"
+    "secondaryHref": "#cases",
+    "proofItems": [
+      "De l’idée à la mise en ligne",
+      "Solutions administrables et documentées",
+      "Paris 20e · À distance partout en France"
+    ]
   },
 
   "about": {
@@ -35,8 +40,8 @@
 
   "services": [
     {
-      "title": "Automatiser une tache repetitive",
-      "promise": "Gagner du temps sur les actions que vous refaites tous les jours : relances, copier-coller, tri ou suivi.",
+      "title": "Gagnez du temps chaque semaine",
+      "promise": "Automatisez les relances, copier-coller, tris et suivis qui ralentissent votre activité.",
       "problems": [
         "Copier-coller entre outils",
         "Relances manuelles",
@@ -44,13 +49,13 @@
         "Temps perdu sur des actions sans valeur"
       ],
       "deliverables": [
-        "Automatisation prete a utiliser",
-        "Tableau de suivi simple",
-        "Historique des actions",
-        "Notice courte pour rester autonome"
+        "Une automatisation prête à utiliser",
+        "Un tableau de suivi simple",
+        "Un historique des actions",
+        "Une formation courte pour rester autonome"
       ],
       "technologies": ["Symfony", "Vue.js", "n8n", "API", "Docker"],
-      "actionLabel": "Automatiser une tache",
+      "actionLabel": "Estimer mon automatisation",
       "pricing": {
         "essential": "",
         "standard": ""
@@ -67,8 +72,8 @@
       ]
     },
     {
-      "title": "Assistant IA pour votre activite",
-      "promise": "Utiliser l'IA pour aider a trier, resumer, rediger ou repondre, avec des controles clairs.",
+      "title": "Ajoutez un assistant IA utile à votre activité",
+      "promise": "Triez, résumez, rédigez ou préparez des réponses plus rapidement, avec des contrôles humains clairs.",
       "problems": [
         "Tri manuel d'informations",
         "Generation de contenus repetitifs",
@@ -76,13 +81,13 @@
         "Difficulte a industrialiser un prototype IA"
       ],
       "deliverables": [
-        "Premier assistant testable",
-        "Connexion a vos donnees utiles",
-        "Regles de validation humaines",
-        "Ecran pour surveiller les reponses"
+        "Un premier assistant testable",
+        "Une connexion à vos données utiles",
+        "Des règles de validation humaines",
+        "Un écran pour surveiller les réponses"
       ],
       "technologies": ["OpenAI", "MCP", "Symfony", "Vue.js"],
-      "actionLabel": "Cadrer mon besoin IA",
+      "actionLabel": "Estimer mon assistant IA",
       "pricing": {
         "essential": "",
         "standard": ""
@@ -99,8 +104,8 @@
       ]
     },
     {
-      "title": "Reprendre un site ou une application",
-      "promise": "Remettre au propre un outil devenu lent, difficile a modifier ou fragile pour les utilisateurs.",
+      "title": "Remettez votre site ou application au propre",
+      "promise": "Retrouvez un outil plus rapide, plus fiable et plus facile à faire évoluer sans repartir systématiquement de zéro.",
       "problems": [
         "Site difficile a modifier",
         "Backoffice incomplet",
@@ -108,13 +113,13 @@
         "Experience mobile ou admin trop lente"
       ],
       "deliverables": [
-        "Diagnostic clair de l'existant",
-        "Plan de remise au propre",
-        "Interface plus simple a utiliser",
-        "Contenus faciles a modifier"
+        "Un diagnostic clair de l'existant",
+        "Un plan de remise au propre priorisé",
+        "Une interface plus simple à utiliser",
+        "Des contenus faciles à modifier"
       ],
       "technologies": ["Vue.js", "React", "Symfony", "WordPress", "MySQL"],
-      "actionLabel": "Evaluer ma refonte",
+      "actionLabel": "Estimer ma refonte",
       "pricing": {
         "essential": "",
         "standard": ""
@@ -131,8 +136,8 @@
       ]
     },
     {
-      "title": "Créer un outil web sur mesure",
-      "promise": "Construire un site, une application ou un backoffice adapte a votre facon de travailler.",
+      "title": "Créez un outil adapté à votre activité",
+      "promise": "Transformez votre façon de travailler avec une application, un espace client ou un backoffice conçu pour vos besoins.",
       "problems": [
         "Solution existante trop rigide ou limitee",
         "Besoin specifique non couvert par les outils classiques",
@@ -140,13 +145,13 @@
         "Croissance attendue, architecture de base requise"
       ],
       "deliverables": [
-        "Application ou espace client personnalise",
-        "Parcours simple pour vos utilisateurs",
-        "Connexion a vos outils existants",
-        "Base technique propre et documentee"
+        "Une application ou un espace client personnalisé",
+        "Un parcours simple pour vos utilisateurs",
+        "Une connexion à vos outils existants",
+        "Une base technique propre et documentée"
       ],
       "technologies": ["Vue.js", "React", "Symfony", "Node.js", "PostgreSQL", "Docker"],
-      "actionLabel": "Decrire mon projet",
+      "actionLabel": "Estimer mon outil",
       "pricing": {
         "essential": "",
         "standard": ""
@@ -163,8 +168,8 @@
       ]
     },
     {
-      "title": "Améliorer un site WordPress",
-      "promise": "Adapter WordPress a votre besoin reel : design, contenu, performance, formulaire ou fonctionnalite specifique.",
+      "title": "Transformez votre WordPress en outil professionnel",
+      "promise": "Améliorez votre design, vos performances et vos fonctionnalités pour obtenir un site plus utile à votre activité.",
       "problems": [
         "Theme standard ne correspond pas au besoin",
         "Plugin manquant ou incompatible",
@@ -172,13 +177,13 @@
         "Migration d'un site legacy vers WordPress"
       ],
       "deliverables": [
-        "Theme ou fonctionnalite sur mesure",
-        "Formulaires, espace client ou vente en ligne",
-        "Site plus rapide et plus clair",
-        "Formation pour gerer vos pages"
+        "Un thème ou une fonctionnalité sur mesure",
+        "Des formulaires, un espace client ou la vente en ligne",
+        "Un site plus rapide et plus clair",
+        "Une formation pour gérer vos pages"
       ],
       "technologies": ["WordPress", "PHP", "MySQL", "WooCommerce", "Elementor"],
-      "actionLabel": "Ameliorer mon WordPress",
+      "actionLabel": "Estimer mon WordPress",
       "pricing": {
         "essential": "",
         "standard": ""
@@ -198,35 +203,39 @@
 
   "problems": [
     {
-      "title": "Votre outil marche, mais vous perdez du temps partout autour",
-      "description": "Je cible les taches manuelles et les points de friction qui ralentissent le travail quotidien."
+      "title": "Vous perdez du temps dans les copier-coller et les relances",
+      "description": "Les mêmes actions reviennent chaque jour et mobilisent du temps sans apporter de valeur à votre activité."
     },
     {
-      "title": "Vous avez une idee IA, mais pas de produit maintenable",
-      "description": "Je transforme le prototype en fonctionnalite cadree, testable et administrable."
+      "title": "Vos informations sont dispersées entre plusieurs outils",
+      "description": "Vos données sont difficiles à retrouver, à suivre ou à transmettre sans manipulations manuelles."
     },
     {
-      "title": "Votre site ou application devient difficile a faire evoluer",
-      "description": "Je clarifie le code, les donnees et les ecrans utiles avant d'empiler de nouvelles fonctions."
+      "title": "Votre site ou application devient difficile à modifier",
+      "description": "Chaque évolution prend trop de temps ou risque de fragiliser ce qui fonctionne déjà."
+    },
+    {
+      "title": "Vous souhaitez utiliser l'IA, mais ne savez pas par où commencer",
+      "description": "Vous avez identifié un potentiel, mais pas encore le bon usage, les données nécessaires ou les contrôles à prévoir."
     }
   ],
 
   "process": [
     {
-      "title": "Comprendre",
-      "description": "Analyser le besoin, les utilisateurs, les donnees disponibles et les contraintes budget-delai."
+      "title": "Clarifier votre besoin",
+      "description": "Nous échangeons sur votre situation, vos priorités et le résultat attendu."
     },
     {
-      "title": "Cadrer",
-      "description": "Valider l'approche, l'architecture et les priorites avant d'investir dans le developpement."
+      "title": "Valider le périmètre et le budget",
+      "description": "Vous recevez une proposition claire avec les fonctionnalités, le délai et le coût."
     },
     {
-      "title": "Developper",
-      "description": "Livrer progressivement des parcours testables et integrer les retours rapidement."
+      "title": "Suivre l'avancement",
+      "description": "Vous découvrez régulièrement des versions testables et pouvez donner votre avis."
     },
     {
-      "title": "Livrer",
-      "description": "Deployer en production, documenter, former et assurer une transition maitriste."
+      "title": "Prendre en main votre solution",
+      "description": "Je mets le projet en ligne, documente son fonctionnement et vous forme à son utilisation."
     }
   ],
 

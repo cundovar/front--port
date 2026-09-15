@@ -27,11 +27,8 @@
         </div>
       </div>
     </div>
-    <div class="tech-ticker" aria-label="Technologies principales">
-      <div class="tech-ticker-track" aria-hidden="true">
-        <span>{{ tickerText }}</span>
-        <span>{{ tickerText }}</span>
-      </div>
+    <div class="hero-proofs" aria-label="Mes engagements">
+      <p v-for="proof in proofs" :key="proof" class="hero-proof">{{ proof }}</p>
     </div>
   </section>
 </template>
@@ -47,22 +44,17 @@ interface Props {
   secondaryLabel: string;
   primaryHref: string;
   secondaryHref: string;
-  stackItems?: string[];
+  proofItems?: string[];
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  stackItems: () => []
+  proofItems: () => []
 });
 
-const fallbackStack = [
-  "Symfony",
-  "Vue.js",
-  "React",
-  "WordPress",
-  "API",
-  "Backoffice",
-  "Automatisation",
-  "IA encadree"
+const fallbackProofs = [
+  "De l'idée à la mise en ligne",
+  "Solutions administrables et documentées",
+  "Paris 20e · À distance partout en France"
 ];
 
 const titleLines = computed(() => {
@@ -80,20 +72,10 @@ const titleLines = computed(() => {
   return [normalizedTitle];
 });
 
-const tickerItems = computed(() => {
-  const items = props.stackItems.flatMap((item) => {
-    const normalized = item.replace(/^[^:]+:\s*/, "");
-    return normalized
-      .split(/[,/+]|\s+-\s+/)
-      .map((part) => part.trim())
-      .filter((part) => part.length > 1);
-  });
-
-  const uniqueItems = Array.from(new Set(items));
-  return uniqueItems.length ? uniqueItems : fallbackStack;
+const proofs = computed(() => {
+  const items = props.proofItems.map((item) => item.trim()).filter(Boolean);
+  return items.length ? items : fallbackProofs;
 });
-
-const tickerText = computed(() => `${tickerItems.value.join(" + ")} +\u00a0`);
 </script>
 
 <style scoped>
@@ -194,44 +176,31 @@ const tickerText = computed(() => `${tickerItems.value.join(" + ")} +\u00a0`);
   flex-wrap: wrap;
 }
 
-.tech-ticker {
+.hero-proofs {
   position: relative;
   z-index: 2;
   margin: clamp(24px, 4vw, 44px) auto clamp(30px, 5vw, 58px);
-  width: min(100%, 1280px);
+  width: min(calc(var(--max-width) + (var(--gutter) * 2)), 100%);
+  padding: 0 var(--gutter);
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.hero-proof {
+  display: flex;
+  align-items: center;
+  min-height: 68px;
+  margin: 0;
+  padding: 14px 16px;
   border: 3px solid var(--line);
   background: var(--text);
   color: var(--bg-elev);
-  overflow: hidden;
-  transform: translateX(12px);
-  box-shadow: 10px 10px 0 var(--accent);
-}
-
-.tech-ticker-track {
-  display: flex;
-  width: max-content;
-  animation: ticker 22s linear infinite;
-}
-
-.tech-ticker span {
-  display: inline-flex;
-  padding: 12px 0;
   font-family: var(--font-mono);
-  font-size: 16px;
-  line-height: 1;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.35;
   text-transform: uppercase;
-  white-space: nowrap;
-}
-
-@keyframes ticker {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .tech-ticker-track {
-    animation: none;
-  }
 }
 
 @media (max-width: 720px) {
@@ -268,13 +237,8 @@ const tickerText = computed(() => `${tickerItems.value.join(" + ")} +\u00a0`);
     width: min(100%, calc(100vw - 128px));
   }
 
-  .tech-ticker {
-    transform: none;
-    box-shadow: 6px 6px 0 var(--accent);
-  }
-
-  .tech-ticker span {
-    font-size: 13px;
+  .hero-proofs {
+    grid-template-columns: 1fr;
   }
 
   .hero-actions {

@@ -8,7 +8,7 @@
         <a href="#cases">Réalisations</a>
         <a href="#process">Méthode</a>
         <a href="#profile">À propos</a>
-        <a href="#contact">Contact</a>
+        <a class="nav-cta" href="#contact">Parlons de votre projet</a>
       </nav>
       <ThemeToggle :is-dark="isDark" @toggle="toggleTheme" />
     </div>
@@ -22,14 +22,14 @@
       :secondary-label="content.hero.secondaryLabel"
       :primary-href="content.hero.primaryHref"
       :secondary-href="content.hero.secondaryHref"
-      :stack-items="content.stack.items"
+      :proof-items="content.hero.proofItems"
     />
 
     <ProofBar :items="proofItems" />
 
-    <ServicesSection :services="content.services" />
-
     <ProblemsSection :problems="content.problems" />
+
+    <ServicesSection :services="content.services" />
 
     <FeaturedCasesSection :cases="featuredProjects.slice(0, 3)" />
 
@@ -48,8 +48,8 @@
     <FaqSection :services="content.services" />
 
     <section id="contact" class="section contact-section" aria-labelledby="contact-form-title">
-      <h2 id="contact-form-title" class="section-title">Décrivez votre projet</h2>
-      <p class="section-subtitle">Votre message sera transmis à varas.cundo@gmail.com.</p>
+      <h2 id="contact-form-title" class="section-title">Parlons de votre projet</h2>
+      <p class="section-subtitle">Décrivez votre besoin pour recevoir une première estimation sans engagement.</p>
       <ContactForm />
     </section>
 
@@ -59,6 +59,8 @@
       :tagline="content.footer.tagline"
       :links="content.footer.links"
     />
+
+    <a class="mobile-estimate-cta" href="#contact">Obtenir une estimation</a>
   </main>
 </template>
 
@@ -170,6 +172,24 @@ const toggleTheme = (): void => {
   border-bottom-color: var(--line);
 }
 
+.nav-links .nav-cta {
+  padding: 9px 12px;
+  border: 2px solid var(--line);
+  background: var(--accent);
+  color: var(--text);
+  box-shadow: 4px 4px 0 var(--line);
+}
+
+.nav-links .nav-cta:hover {
+  border-bottom-color: var(--line);
+  transform: translate(-1px, -1px);
+  box-shadow: 5px 5px 0 var(--line);
+}
+
+.mobile-estimate-cta {
+  display: none;
+}
+
 @media (max-width: 768px) {
   .top-bar {
     align-items: center;
@@ -204,6 +224,35 @@ const toggleTheme = (): void => {
     border: 2px solid var(--line);
     background: var(--bg-elev);
     font-size: 11px;
+  }
+
+  .nav-links .nav-cta {
+    display: none;
+  }
+
+  .page {
+    padding-bottom: calc(76px + env(safe-area-inset-bottom));
+  }
+
+  .mobile-estimate-cta {
+    position: fixed;
+    z-index: 100;
+    right: 14px;
+    bottom: calc(14px + env(safe-area-inset-bottom));
+    left: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 50px;
+    padding: 12px 18px;
+    border: 3px solid var(--line);
+    background: var(--accent);
+    color: var(--text);
+    box-shadow: 6px 6px 0 var(--line);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 900;
+    text-transform: uppercase;
   }
 }
 </style>

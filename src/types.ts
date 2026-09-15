@@ -15,6 +15,7 @@ export interface HeroContent {
   primaryHref: string;
   secondaryLabel: string;
   secondaryHref: string;
+  proofItems: string[];
 }
 
 // === ABOUT ===
