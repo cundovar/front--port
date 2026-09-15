@@ -11,7 +11,7 @@
     "tagline": "Je conçois des solutions IA, des automatisations, des sites WordPress et des applications sur mesure, de l’idée à la mise en production.",
     "subtitle": "Automatisation · IA pragmatique · Refonte · WordPress · Application métier",
     "primaryLabel": "Obtenir une estimation",
-    "primaryHref": "#contact",
+    "primaryHref": "/devis",
     "secondaryLabel": "Voir les realisations",
     "secondaryHref": "#cases",
     "proofItems": [
@@ -40,6 +40,7 @@
 
   "services": [
     {
+      "serviceKey": "automation",
       "title": "Gagnez du temps chaque semaine",
       "promise": "Automatisez les relances, copier-coller, tris et suivis qui ralentissent votre activité.",
       "problems": [
@@ -72,6 +73,7 @@
       ]
     },
     {
+      "serviceKey": "ai-assistant",
       "title": "Ajoutez un assistant IA utile à votre activité",
       "promise": "Triez, résumez, rédigez ou préparez des réponses plus rapidement, avec des contrôles humains clairs.",
       "problems": [
@@ -104,6 +106,7 @@
       ]
     },
     {
+      "serviceKey": "refonte",
       "title": "Remettez votre site ou application au propre",
       "promise": "Retrouvez un outil plus rapide, plus fiable et plus facile à faire évoluer sans repartir systématiquement de zéro.",
       "problems": [
@@ -136,6 +139,7 @@
       ]
     },
     {
+      "serviceKey": "custom-tool",
       "title": "Créez un outil adapté à votre activité",
       "promise": "Transformez votre façon de travailler avec une application, un espace client ou un backoffice conçu pour vos besoins.",
       "problems": [
@@ -168,6 +172,7 @@
       ]
     },
     {
+      "serviceKey": "wordpress",
       "title": "Transformez votre WordPress en outil professionnel",
       "promise": "Améliorez votre design, vos performances et vos fonctionnalités pour obtenir un site plus utile à votre activité.",
       "problems": [

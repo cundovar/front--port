@@ -44,6 +44,7 @@ export interface ServicePricing {
 }
 
 export interface ServiceOffer {
+  serviceKey: QuoteServiceKey;
   title: string;
   promise: string;
   problems: string[];
@@ -207,4 +208,67 @@ export interface ContentData {
   skills: SkillsContent;
   cta: CtaContent;
   footer: FooterContent;
+}
+
+export type QuoteServiceKey =
+  | "automation"
+  | "ai-assistant"
+  | "refonte"
+  | "custom-tool"
+  | "wordpress";
+
+export type QuoteComplexity = "simple" | "standard" | "complexe";
+
+export type QuoteTrainingNeed = "none" | "light" | "full";
+
+export type QuoteStep = "need" | "details" | "contact" | "result";
+
+export interface QuoteAnswers {
+  serviceKey: QuoteServiceKey | "";
+  complexity: QuoteComplexity | "";
+  integrationsCount: number;
+  legacyTakeover: boolean;
+  urgency: boolean;
+  trainingNeed: QuoteTrainingNeed;
+  projectDescription: string;
+}
+
+export interface QuoteContact {
+  fullName: string;
+  email: string;
+  company: string;
+  phone: string;
+  honeypot: string;
+}
+
+export interface QuoteCalculationFactor {
+  label: string;
+  impactMin: number;
+  impactMax: number;
+}
+
+export interface QuoteEstimateResult {
+  id: number;
+  serviceKey: QuoteServiceKey;
+  minimumAmount: number;
+  maximumAmount: number;
+  calculationDetail: QuoteCalculationFactor[];
+  summary: string;
+  recommendedScope: string[];
+  missingQuestions: string[];
+  riskFlags: string[];
+  disclaimer: string;
+}
+
+export interface QuoteEstimateAdminRecord extends QuoteEstimateResult {
+  fullName: string;
+  email: string;
+  company: string | null;
+  phone: string | null;
+  answers: Record<string, unknown>;
+  aiSource: string;
+  status: string;
+  notes: string | null;
+  createdAt: string;
+  qualifiedAt: string | null;
 }

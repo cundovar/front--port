@@ -8,7 +8,7 @@
         <a href="#cases">Réalisations</a>
         <a href="#process">Méthode</a>
         <a href="#profile">À propos</a>
-        <a class="nav-cta" href="#contact">Parlons de votre projet</a>
+        <a class="nav-cta" href="/devis">Parlons de votre projet</a>
       </nav>
       <ThemeToggle :is-dark="isDark" @toggle="toggleTheme" />
     </div>
@@ -60,7 +60,7 @@
       :links="content.footer.links"
     />
 
-    <a class="mobile-estimate-cta" href="#contact">Obtenir une estimation</a>
+    <a class="mobile-estimate-cta" href="/devis">Obtenir une estimation</a>
   </main>
 </template>
 

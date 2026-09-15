@@ -6,6 +6,7 @@
         <RouterLink to="/admin/projects">Projets</RouterLink>
         <RouterLink to="/admin/comments">Commentaires</RouterLink>
         <RouterLink to="/admin/content">Contenu</RouterLink>
+        <RouterLink to="/admin/quote-estimates">Estimations</RouterLink>
       </nav>
     </div>
 
@@ -25,6 +26,11 @@
           <h2>Contenu</h2>
           <p class="muted">Edition du JSON global (textes/sections).</p>
           <RouterLink class="btn btn-secondary" to="/admin/content">Ouvrir</RouterLink>
+        </div>
+        <div class="card">
+          <h2>Estimations</h2>
+          <p class="muted">Demandes issues du simulateur de devis.</p>
+          <RouterLink class="btn btn-secondary" to="/admin/quote-estimates">Ouvrir</RouterLink>
         </div>
       </div>
     </section>

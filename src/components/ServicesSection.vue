@@ -14,7 +14,7 @@
             <li v-for="item in service.deliverables" :key="item">{{ item }}</li>
           </ul>
         </div>
-        <a href="#contact" class="btn btn-outline">
+        <a :href="ctaHref(service.serviceKey)" class="btn btn-outline">
           {{ service.actionLabel }}
         </a>
         <span class="estimate-note">Estimation sans engagement</span>
@@ -25,7 +25,11 @@
 </template>
 
 <script setup lang="ts">
+import { buildQuoteCtaHref } from "../composables/useQuoteSimulator";
+import type { QuoteServiceKey } from "../types";
+
 interface Service {
+  serviceKey: QuoteServiceKey;
   title: string;
   promise: string;
   problems?: string[];
@@ -37,6 +41,8 @@ interface Service {
     standard: string;
   };
 }
+
+const ctaHref = (serviceKey: unknown): string => buildQuoteCtaHref(serviceKey);
 
 interface Props {
   services: Service[];
