@@ -171,14 +171,46 @@ export const submitErrorMessage = (status: number): string => {
   return `L’envoi a échoué (erreur ${status}). Vos réponses sont conservées, vous pouvez réessayer.`;
 };
 
+/**
+ * Mirrors PHP’s FILTER_VALIDATE_EMAIL, which the server applies before saving.
+ * The previous `[^\s@]+@[^\s@]+\.[^\s@]+` accepted addresses Symfony then
+ * refused — an accent, a double dot, a leading dot — and the client only saw
+ * "l’envoi a échoué" at the very last step. ASCII only, no empty dot-separated
+ * part on either side, and a domain that ends on a real alphabetic label.
+ */
+const EMAIL_PATTERN =
+  /^[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?\.)+[A-Za-z]{2,}$/;
+
+export const isValidEmail = (email: string): boolean => EMAIL_PATTERN.test(email.trim());
+
+/**
+ * A 400 from the API names the field it refused. Map it to the input the client
+ * can actually fix; anything not shown on this screen falls back to null so the
+ * caller keeps the generic banner rather than flagging an invisible field.
+ */
+export const CONTACT_FIELD_ERRORS: Record<string, string> = {
+  fullName: "Indiquez votre nom.",
+  email: "Cet email n’est pas valide : ni accent, ni espace, ni point en double.",
+  company: "Nom d’entreprise trop long.",
+  phone: "Numéro de téléphone trop long.",
+  consent: "Votre accord est nécessaire pour vous recontacter.",
+};
+
+export const contactFieldError = (field: unknown): { field: string; message: string } | null => {
+  if (typeof field !== "string") return null;
+  const message = CONTACT_FIELD_ERRORS[field];
+
+  return message ? { field, message } : null;
+};
+
 export const validateContact = (contact: QuoteContact): Record<string, string> => {
   const errors: Record<string, string> = {};
 
   if (!contact.fullName.trim()) {
     errors.fullName = "Indiquez votre nom.";
   }
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email.trim())) {
-    errors.email = "Indiquez un email valide.";
+  if (!isValidEmail(contact.email)) {
+    errors.email = "Cet email n’est pas valide : ni accent, ni espace, ni point en double.";
   }
   if (!contact.consent) {
     errors.consent = "Votre accord est nécessaire pour vous recontacter.";
@@ -488,6 +520,19 @@ export const useQuoteSimulator = () => {
 
       if (!response.ok) {
         submitState.value = "error";
+
+        // A refused field is fixable right here: point at the input instead of
+        // leaving the client with a banner that names nothing.
+        if (response.status === 400) {
+          const body = await response.json().catch(() => null);
+          const refused = contactFieldError(body?.field);
+          if (refused) {
+            replaceErrors({ [refused.field]: refused.message });
+            feedback.value = "Une information est \u00e0 corriger avant l\u2019envoi.";
+            return false;
+          }
+        }
+
         feedback.value = submitErrorMessage(response.status);
         return false;
       }

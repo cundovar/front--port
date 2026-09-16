@@ -8,11 +8,13 @@ import {
   applyProposalToAnswers,
   buildRecommendationPayload,
   canBeAnalysed,
+  contactFieldError,
   formatQuotePrice,
   offerAsksAboutContent,
   pruneIncompatibleAnswers,
   reasonForKey,
   suggestedKeys,
+  isValidEmail,
   resolvePreselectedOffer,
   submitErrorMessage,
   validateContact,
@@ -357,5 +359,35 @@ describe("formatQuotePrice", () => {
 
   it("never prints a useless range when both bounds are equal", () => {
     expect(price(750, 750, "range")).toBe("750 €");
+  });
+});
+
+describe("isValidEmail", () => {
+  it("accepts the addresses Symfony accepts", () => {
+    ["jean@gmail.com", "jean.dupont@gmail.com", "jean+devis@gmail.com", "jean_d@mon-site.fr", "jean@sous.domaine.co.uk", "JEAN@GMAIL.COM"].forEach(
+      (email) => expect(isValidEmail(email), email).toBe(true),
+    );
+  });
+
+  it("refuses what the server refused with a 400, before the request leaves", () => {
+    ["andr\u00e9@gmail.com", "jean..dupont@gmail.com", ".jean@gmail.com", "jean.@gmail.com", "jean@gmail", "jean@-gmail.com", "jean@gmail..com"].forEach(
+      (email) => expect(isValidEmail(email), email).toBe(false),
+    );
+  });
+
+  it("ignores surrounding spaces the payload trims anyway", () => {
+    expect(isValidEmail("  jean@gmail.com  ")).toBe(true);
+  });
+});
+
+describe("contactFieldError", () => {
+  it("maps a field the API refused to the input holding it", () => {
+    expect(contactFieldError("email")?.message).toContain("accent");
+    expect(contactFieldError("fullName")?.field).toBe("fullName");
+  });
+
+  it("keeps the generic banner for anything not on the contact screen", () => {
+    expect(contactFieldError("offerKey")).toBeNull();
+    expect(contactFieldError(undefined)).toBeNull();
   });
 });
