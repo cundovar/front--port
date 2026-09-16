@@ -8,10 +8,11 @@ import AdminComments from "./views/AdminComments.vue";
 import AdminLogin from "./views/AdminLogin.vue";
 import AdminContent from "./views/AdminContent.vue";
 import QuoteSimulator from "./views/QuoteSimulator.vue";
+import NotFound from "./views/NotFound.vue";
 import AdminQuoteEstimates from "./views/AdminQuoteEstimates.vue";
 import AdminQuotePricing from "./views/AdminQuotePricing.vue";
 import { api } from "./utils/api";
-import { pageTitle } from "./utils/pageTitle";
+import { pageTitle, setRobotsNoindex } from "./utils/pageTitle";
 
 // `title` is undefined on "/" so the home page keeps the full wording written
 // in index.html. ProjectDetail sets its own once the project is loaded.
@@ -27,6 +28,10 @@ const routes = [
   { path: "/admin/content", component: AdminContent, meta: { title: "Contenu" } },
   { path: "/admin/quote-estimates", component: AdminQuoteEstimates, meta: { title: "Demandes de devis" } },
   { path: "/admin/quote-pricing", component: AdminQuotePricing, meta: { title: "Tarifs" } },
+  // Catch-all: the server answers 200 for any extension-less path, so without
+  // this the home page was served under every mistyped URL — duplicate content
+  // Google reports as a soft 404. `noindex` keeps those out of the index.
+  { path: "/:pathMatch(.*)*", component: NotFound, meta: { title: "Page introuvable", noindex: true } },
 ];
 
 export const router = createRouter({
@@ -52,4 +57,5 @@ router.beforeEach(async (to) => {
 
 router.afterEach((to) => {
   document.title = pageTitle(to.meta.title as string | undefined);
+  setRobotsNoindex(to.meta.noindex === true || to.path.startsWith("/admin"));
 });
