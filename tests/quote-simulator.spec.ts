@@ -5,26 +5,36 @@ import {
   emptyAnswers,
   emptyContact,
   findOffer,
+  applyProposalToAnswers,
+  buildRecommendationPayload,
+  canBeAnalysed,
+  formatQuotePrice,
   offerAsksAboutContent,
   pruneIncompatibleAnswers,
+  reasonForKey,
+  suggestedKeys,
   resolvePreselectedOffer,
   validateContact,
   validateStep,
 } from "../src/composables/useQuoteSimulator";
-import type { QuoteCatalog } from "../src/types";
+import type { QuoteCatalog, QuotePricingMode, QuoteProposal } from "../src/types";
 
 const catalog: QuoteCatalog = {
+  tools: [
+    { key: "tableur", label: "Excel ou Google Sheets" },
+    { key: "email", label: "Gmail ou Outlook" },
+  ],
   offers: [
     {
       key: "site-vitrine",
       label: "Présenter mon activité en ligne",
       variants: [
-        { key: "landing-page", label: "Une page unique", minimumAmount: 350, maximumAmount: 650, includes: ["Une page"] },
-        { key: "wordpress-vitrine", label: "Plusieurs pages", minimumAmount: 600, maximumAmount: 1100, includes: [] },
+        { key: "landing-page", label: "Une page unique", pricingMode: "fixed", minimumAmount: 550, maximumAmount: 550, priorityAmount: 150, includes: ["Une page"] },
+        { key: "wordpress-vitrine", label: "Plusieurs pages", pricingMode: "fixed", minimumAmount: 900, maximumAmount: 900, priorityAmount: 200, includes: [] },
       ],
       options: [
-        { key: "prise-rdv", label: "Prise de rendez-vous", minimumAmount: 150, maximumAmount: 350 },
-        { key: "blog", label: "Blog", minimumAmount: 120, maximumAmount: 300 },
+        { key: "prise-rdv", label: "Prise de rendez-vous", minimumAmount: 250, maximumAmount: 250 },
+        { key: "blog", label: "Blog", minimumAmount: 200, maximumAmount: 200 },
       ],
     },
     {
@@ -32,14 +42,13 @@ const catalog: QuoteCatalog = {
       label: "Arrêter de refaire la même tâche",
       contentQuestion: false,
       variants: [
-        { key: "automatisation-ciblee", label: "Une tâche", minimumAmount: 300, maximumAmount: 600, includes: [] },
+        { key: "automatisation-ciblee", label: "Une tâche", pricingMode: "fixed", minimumAmount: 500, maximumAmount: 500, priorityAmount: 150, includes: [] },
       ],
-      options: [{ key: "relances-auto", label: "Relances", minimumAmount: 120, maximumAmount: 300 }],
+      options: [{ key: "relances-auto", label: "Relances", minimumAmount: 200, maximumAmount: 200 }],
     },
   ],
   adjustments: {
-    priorityDelay: { label: "Délai prioritaire", multiplier: 1.25 },
-    contentWriting: { label: "Rédaction", minimumAmount: 150, maximumAmount: 400 },
+    contentWriting: { label: "Rédaction", minimumAmount: 300, maximumAmount: 300 },
   },
 };
 
@@ -89,7 +98,7 @@ describe("validateStep", () => {
 
   it("never asks for a technical complexity", () => {
     const answers = { ...emptyAnswers(), offerKey: "site-vitrine", variantKey: "landing-page" };
-    const errors = validateStep("situation", answers, emptyContact());
+    const errors = validateStep("need", answers, emptyContact());
 
     expect(errors).toEqual({});
     expect(Object.keys(errors)).not.toContain("complexity");
@@ -97,7 +106,7 @@ describe("validateStep", () => {
 
   it("rejects an over-long description", () => {
     const answers = { ...emptyAnswers(), projectDescription: "a".repeat(601) };
-    expect(validateStep("situation", answers, emptyContact()).projectDescription).toBeDefined();
+    expect(validateStep("need", answers, emptyContact()).projectDescription).toBeDefined();
   });
 });
 
@@ -196,5 +205,132 @@ describe("offerAsksAboutContent", () => {
     pruneIncompatibleAnswers(catalog, answers);
 
     expect(answers.contentReadiness).toBe("a-rediger");
+  });
+});
+
+const proposal = (over: Partial<QuoteProposal> = {}): QuoteProposal => ({
+  tier: "essential",
+  title: "Solution essentielle",
+  variantKey: "automatisation-ciblee",
+  variantLabel: "Une tâche",
+  includes: ["Une automatisation"],
+  selectedOptions: [{ key: "relances-auto", label: "Relances" }],
+  optionKeys: ["relances-auto"],
+  minimumAmount: 700,
+  maximumAmount: 700,
+  pricingMode: "fixed",
+  disclaimer: "Prix ferme pour le périmètre décrit ci-dessus.",
+  calculationDetail: [],
+  reasons: { "relances-auto": "Vous parlez de relances oubliées." },
+  pricingVersion: 3,
+  ...over,
+});
+
+describe("canBeAnalysed", () => {
+  it("refuses a description too short to say anything useful", () => {
+    expect(canBeAnalysed("trop court")).toBe(false);
+    expect(canBeAnalysed("   ".repeat(20))).toBe(false);
+  });
+
+  it("accepts a description of at least 30 characters", () => {
+    expect(canBeAnalysed("Je recopie mes demandes a la main chaque lundi.")).toBe(true);
+  });
+});
+
+describe("buildRecommendationPayload", () => {
+  it("sends the project context and never any contact detail", () => {
+    const answers = emptyAnswers();
+    answers.offerKey = "automatisation";
+    answers.projectDescription = "  Je recopie mes demandes a la main chaque lundi.  ";
+    answers.toolKeys = ["tableur"];
+
+    const payload = buildRecommendationPayload(answers);
+
+    expect(payload).toEqual({
+      offerKey: "automatisation",
+      projectDescription: "Je recopie mes demandes a la main chaque lundi.",
+      toolKeys: ["tableur"],
+      projectStage: "nouveau",
+      contentReadiness: "pret",
+      deadline: "normal",
+    });
+    expect(JSON.stringify(payload)).not.toMatch(/fullName|email|phone|consent/);
+  });
+
+  it("detaches the tool list from the reactive answers", () => {
+    const answers = emptyAnswers();
+    answers.toolKeys = ["tableur"];
+
+    buildRecommendationPayload(answers).toolKeys.push("email");
+
+    expect(answers.toolKeys).toEqual(["tableur"]);
+  });
+});
+
+describe("suggestedKeys and reasonForKey", () => {
+  it("merges the keys of every proposal without duplicates", () => {
+    const keys = suggestedKeys([
+      proposal(),
+      proposal({ tier: "complete", variantKey: "automatisation-multi-outils", optionKeys: ["relances-auto", "rapport-hebdo"] }),
+    ]);
+
+    expect(keys).toEqual([
+      "automatisation-ciblee",
+      "relances-auto",
+      "automatisation-multi-outils",
+      "rapport-hebdo",
+    ]);
+  });
+
+  it("returns the justification of a key, and an empty string otherwise", () => {
+    expect(reasonForKey([proposal()], "relances-auto")).toBe("Vous parlez de relances oubliées.");
+    expect(reasonForKey([proposal()], "rapport-hebdo")).toBe("");
+    expect(reasonForKey([], "relances-auto")).toBe("");
+  });
+});
+
+describe("applyProposalToAnswers", () => {
+  it("copies the proposal into answers the client can still edit", () => {
+    const answers = emptyAnswers();
+    answers.variantKey = "autre";
+    answers.optionKeys = ["obsolete"];
+
+    applyProposalToAnswers(proposal(), answers);
+
+    expect(answers.variantKey).toBe("automatisation-ciblee");
+    expect(answers.optionKeys).toEqual(["relances-auto"]);
+  });
+
+  it("detaches the option list so unticking one never edits the proposal", () => {
+    const answers = emptyAnswers();
+    const source = proposal();
+
+    applyProposalToAnswers(source, answers);
+    answers.optionKeys.pop();
+
+    expect(source.optionKeys).toEqual(["relances-auto"]);
+  });
+});
+
+describe("formatQuotePrice", () => {
+  // Intl separates thousands with a narrow no-break space; normalise it away
+  // rather than encoding an ICU detail in every expectation.
+  const price = (min: number, max: number, mode: QuotePricingMode): string =>
+    formatQuotePrice(min, max, mode).replace(/\s/g, " ");
+
+  it("shows one amount for a committed pack", () => {
+    expect(price(900, 900, "fixed")).toBe("900 €");
+  });
+
+  it("prefixes a starting price", () => {
+    expect(price(1400, 1400, "from")).toBe("à partir de 1 400 €");
+  });
+
+  it("shows both bounds for a range", () => {
+    expect(price(400, 900, "range")).toBe("400 € – 900 €");
+  });
+
+  it("never prints a useless range when both bounds are equal", () => {
+    expect(price(750, 750, "range")).toBe("750 €");
   });
 });

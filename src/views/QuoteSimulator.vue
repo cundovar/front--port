@@ -29,21 +29,27 @@
         @update:model-value="selectOffer"
       />
 
+      <QuoteSituationStep
+        v-else-if="step === 'need'"
+        :answers="answers"
+        :errors="errors"
+        :offer="currentOffer"
+        :tools="catalog?.tools ?? []"
+        @update="Object.assign(answers, $event)"
+        @toggle-tool="toggleTool"
+      />
+
       <QuoteScopeStep
         v-else-if="step === 'scope' && currentOffer"
         :offer="currentOffer"
         :answers="answers"
         :errors="errors"
+        :proposals="proposals"
+        :recommendation-state="recommendationState"
+        :summary="recommendationSummary"
         @update="Object.assign(answers, $event)"
         @toggle-option="toggleOption"
-      />
-
-      <QuoteSituationStep
-        v-else-if="step === 'situation'"
-        :answers="answers"
-        :errors="errors"
-        :offer="currentOffer"
-        @update="Object.assign(answers, $event)"
+        @choose-proposal="chooseProposal"
       />
 
       <template v-else-if="step === 'result' && result">
@@ -122,6 +128,11 @@ const {
   submission,
   selectOffer,
   toggleOption,
+  toggleTool,
+  recommendationState,
+  proposals,
+  recommendationSummary,
+  chooseProposal,
   next,
   back,
   submit,
@@ -132,7 +143,7 @@ const stepLabels = STEP_LABELS;
 const progressLabels = QUOTE_STEPS.map((value) => STEP_LABELS[value]);
 
 const currentIndex = computed(() => QUOTE_STEPS.indexOf(step.value));
-const nextLabel = computed(() => (step.value === "situation" ? "Voir mon estimation" : "Continuer"));
+const nextLabel = computed(() => (step.value === "scope" ? "Voir mon estimation" : "Continuer"));
 
 const focusStepHeading = async (): Promise<void> => {
   await nextTick();

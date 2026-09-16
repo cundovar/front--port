@@ -215,7 +215,7 @@ export type QuoteServiceKey =
 export type QuoteProjectStage = "nouveau" | "existant";
 export type QuoteContentReadiness = "pret" | "a-rediger" | "je-ne-sais-pas";
 export type QuoteDeadline = "flexible" | "normal" | "prioritaire";
-export type QuoteStep = "offer" | "scope" | "situation" | "result";
+export type QuoteStep = "offer" | "need" | "scope" | "result";
 
 export interface QuotePricedItem {
   key: string;
@@ -224,8 +224,23 @@ export interface QuotePricedItem {
   maximumAmount: number;
 }
 
+/**
+ * fixed : one committed amount · from : a starting amount · range : two bounds.
+ * fixed and from always carry minimumAmount === maximumAmount.
+ */
+export type QuotePricingMode = "fixed" | "from" | "range";
+
 export interface QuoteVariant extends QuotePricedItem {
   includes: string[];
+  pricingMode: QuotePricingMode;
+  /** Flat supplement for a priority deadline, never a multiplier. */
+  priorityAmount: number;
+}
+
+/** Tool the visitor can tick. Context for the AI only: it never carries an amount. */
+export interface QuoteTool {
+  key: string;
+  label: string;
 }
 
 export interface QuoteOffer {
@@ -240,8 +255,8 @@ export interface QuoteOffer {
 
 export interface QuoteCatalog {
   offers: QuoteOffer[];
+  tools: QuoteTool[];
   adjustments: {
-    priorityDelay: { label: string; multiplier: number };
     contentWriting: { label: string; minimumAmount: number; maximumAmount: number };
   };
 }
@@ -261,6 +276,8 @@ export interface QuoteAnswers {
   offerKey: string;
   variantKey: string;
   optionKeys: string[];
+  /** Context for the recommendation only: a tool never changes an amount. */
+  toolKeys: string[];
   projectStage: QuoteProjectStage;
   contentReadiness: QuoteContentReadiness;
   deadline: QuoteDeadline;
@@ -287,6 +304,35 @@ export interface QuoteSelectedOption {
   label: string;
 }
 
+/**
+ * A scope proposed by the AI, priced by the server from the active catalog.
+ * Every label here comes from the catalog; only `reasons` is written by the model,
+ * and only against a key the catalog declares.
+ */
+export interface QuoteProposal {
+  tier: string;
+  title: string;
+  variantKey: string;
+  variantLabel: string;
+  includes: string[];
+  selectedOptions: QuoteSelectedOption[];
+  optionKeys: string[];
+  minimumAmount: number;
+  maximumAmount: number;
+  pricingMode: QuotePricingMode;
+  disclaimer: string;
+  calculationDetail: QuoteCalculationFactor[];
+  reasons: Record<string, string>;
+  pricingVersion: number;
+}
+
+export interface QuoteRecommendation {
+  summary: string;
+  proposals: QuoteProposal[];
+  source: string;
+  pricingVersion: number;
+}
+
 export interface QuoteEstimateResult {
   offerKey: string;
   offerLabel: string;
@@ -298,6 +344,7 @@ export interface QuoteEstimateResult {
   selectedOptions: QuoteSelectedOption[];
   calculationDetail: QuoteCalculationFactor[];
   pricingVersion: number;
+  pricingMode: QuotePricingMode;
   disclaimer: string;
 }
 

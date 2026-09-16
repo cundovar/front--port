@@ -5,19 +5,28 @@ import type {
   QuoteContact,
   QuoteEstimateResult,
   QuoteOffer,
+  QuotePricingMode,
+  QuoteProposal,
+  QuoteRecommendation,
   QuoteStep,
   QuoteSubmissionResult,
 } from "../types";
 import { api } from "../utils/api";
 
-export const QUOTE_STEPS: QuoteStep[] = ["offer", "scope", "situation", "result"];
+export const QUOTE_STEPS: QuoteStep[] = ["offer", "need", "scope", "result"];
 
 export const STEP_LABELS: Record<QuoteStep, string> = {
   offer: "Résultat recherché",
-  scope: "Votre besoin",
-  situation: "Votre situation",
+  need: "Votre besoin",
+  scope: "Votre solution",
   result: "Estimation",
 };
+
+/**
+ * Below this, a description says nothing the structured answers do not already
+ * say, so no paid call is made. Mirrors the server rule.
+ */
+export const MIN_RECOMMENDATION_LENGTH = 30;
 
 export const PROJECT_STAGE_OPTIONS = [
   { value: "nouveau", label: "C’est un nouveau projet" },
@@ -37,6 +46,9 @@ export const DEADLINE_OPTIONS = [
 ] as const;
 
 const MAX_DESCRIPTION_LENGTH = 600;
+
+export const canBeAnalysed = (description: string): boolean =>
+  description.trim().length >= MIN_RECOMMENDATION_LENGTH;
 
 /**
  * Offer keys only — never amounts, which live solely in the backend catalog.
@@ -68,6 +80,7 @@ export const emptyAnswers = (): QuoteAnswers => ({
   offerKey: "",
   variantKey: "",
   optionKeys: [],
+  toolKeys: [],
   projectStage: "nouveau",
   contentReadiness: "pret",
   deadline: "normal",
@@ -130,12 +143,12 @@ export const validateStep = (
     errors.offerKey = "Choisissez le résultat que vous recherchez.";
   }
 
-  if (step === "scope" && !answers.variantKey) {
-    errors.variantKey = "Choisissez la formule qui correspond le mieux.";
+  if (step === "need" && answers.projectDescription.length > MAX_DESCRIPTION_LENGTH) {
+    errors.projectDescription = `Limitez la description à ${MAX_DESCRIPTION_LENGTH} caractères.`;
   }
 
-  if (step === "situation" && answers.projectDescription.length > MAX_DESCRIPTION_LENGTH) {
-    errors.projectDescription = `Limitez la description à ${MAX_DESCRIPTION_LENGTH} caractères.`;
+  if (step === "scope" && !answers.variantKey) {
+    errors.variantKey = "Choisissez la formule qui correspond le mieux.";
   }
 
   return errors;
@@ -156,6 +169,15 @@ export const validateContact = (contact: QuoteContact): Record<string, string> =
 
   return errors;
 };
+
+export const buildRecommendationPayload = (answers: QuoteAnswers) => ({
+  offerKey: answers.offerKey,
+  projectDescription: answers.projectDescription.trim(),
+  toolKeys: [...answers.toolKeys],
+  projectStage: answers.projectStage,
+  contentReadiness: answers.contentReadiness,
+  deadline: answers.deadline,
+});
 
 export const buildPreviewPayload = (answers: QuoteAnswers) => ({
   offerKey: answers.offerKey,
@@ -179,6 +201,78 @@ export const buildSubmitPayload = (answers: QuoteAnswers, contact: QuoteContact)
 
 export type QuoteRequestState = "idle" | "loading" | "ready" | "error";
 
+/** Recommendation is optional: "skipped" and "unavailable" are normal outcomes. */
+export type QuoteRecommendationState = "idle" | "loading" | "ready" | "skipped" | "unavailable";
+
+/**
+ * Keys the AI put forward, all tiers merged. Used to badge the manual list;
+ * the client still ticks whatever they want.
+ */
+export const suggestedKeys = (proposals: QuoteProposal[]): string[] => {
+  const keys: string[] = [];
+
+  proposals.forEach((proposal) => {
+    [proposal.variantKey, ...proposal.optionKeys].forEach((key) => {
+      if (key && !keys.includes(key)) keys.push(key);
+    });
+  });
+
+  return keys;
+};
+
+/** First justification found for a key, or "" when the model gave none. */
+export const reasonForKey = (proposals: QuoteProposal[], key: string): string => {
+  for (const proposal of proposals) {
+    const reason = proposal.reasons?.[key];
+    if (typeof reason === "string" && reason.trim() !== "") return reason;
+  }
+
+  return "";
+};
+
+/** Copies a proposal into the editable answers: the client keeps the last word. */
+export const applyProposalToAnswers = (proposal: QuoteProposal, answers: QuoteAnswers): void => {
+  answers.variantKey = proposal.variantKey;
+  answers.optionKeys = [...proposal.optionKeys];
+};
+
+export const formatQuoteAmount = (amount: number): string =>
+  `${new Intl.NumberFormat("fr-FR").format(amount)} €`;
+
+/**
+ * Price split in two, so a long prefix never pushes the currency onto its own
+ * line: the prefix is rendered small, the amount large.
+ */
+export const quotePriceParts = (
+  minimumAmount: number,
+  maximumAmount: number,
+  mode: QuotePricingMode,
+): { prefix: string; amount: string } => {
+  if (mode === "range" && minimumAmount !== maximumAmount) {
+    return { prefix: "", amount: `${formatQuoteAmount(minimumAmount)} – ${formatQuoteAmount(maximumAmount)}` };
+  }
+
+  return {
+    prefix: mode === "from" ? "À partir de" : "",
+    amount: formatQuoteAmount(minimumAmount),
+  };
+};
+
+/** Single-string form, for contexts with no room for two lines. */
+export const formatQuotePrice = (
+  minimumAmount: number,
+  maximumAmount: number,
+  mode: QuotePricingMode,
+): string => {
+  if (mode === "range" && minimumAmount !== maximumAmount) {
+    return `${formatQuoteAmount(minimumAmount)} – ${formatQuoteAmount(maximumAmount)}`;
+  }
+
+  return mode === "from"
+    ? `à partir de ${formatQuoteAmount(minimumAmount)}`
+    : formatQuoteAmount(minimumAmount);
+};
+
 export const useQuoteSimulator = () => {
   const catalog = ref<QuoteCatalog | null>(null);
   const catalogState = ref<QuoteRequestState>("idle");
@@ -191,6 +285,12 @@ export const useQuoteSimulator = () => {
   const previewState = ref<QuoteRequestState>("idle");
   const submitState = ref<QuoteRequestState>("idle");
   const feedback = ref("");
+
+  const recommendationState = ref<QuoteRecommendationState>("idle");
+  const proposals = ref<QuoteProposal[]>([]);
+  const recommendationSummary = ref("");
+  /** Guards against a slow answer landing after the client changed offer. */
+  let recommendationToken = 0;
 
   const result = ref<QuoteEstimateResult | null>(null);
   const submission = ref<QuoteSubmissionResult | null>(null);
@@ -216,8 +316,71 @@ export const useQuoteSimulator = () => {
   };
 
   const selectOffer = (offerKey: string): void => {
+    if (answers.offerKey !== offerKey) {
+      resetRecommendation();
+    }
     answers.offerKey = offerKey;
     pruneIncompatibleAnswers(catalog.value, answers);
+  };
+
+  const toggleTool = (toolKey: string): void => {
+    const index = answers.toolKeys.indexOf(toolKey);
+    if (index === -1) {
+      answers.toolKeys.push(toolKey);
+    } else {
+      answers.toolKeys.splice(index, 1);
+    }
+  };
+
+  const resetRecommendation = (): void => {
+    recommendationToken += 1;
+    proposals.value = [];
+    recommendationSummary.value = "";
+    recommendationState.value = "idle";
+  };
+
+  /**
+   * Fire and forget: the scope screen is already usable, so a slow, failing or
+   * rate-limited answer must never hold the journey.
+   */
+  const requestRecommendation = async (): Promise<void> => {
+    if (!canBeAnalysed(answers.projectDescription)) {
+      resetRecommendation();
+      recommendationState.value = "skipped";
+      return;
+    }
+
+    recommendationToken += 1;
+    const token = recommendationToken;
+    recommendationState.value = "loading";
+
+    try {
+      const response = await api.fetch("/api/quote-recommendations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(buildRecommendationPayload(answers)),
+      });
+
+      if (token !== recommendationToken) return;
+
+      if (!response.ok) {
+        recommendationState.value = "unavailable";
+        return;
+      }
+
+      const data = (await response.json()) as QuoteRecommendation;
+      if (token !== recommendationToken) return;
+
+      proposals.value = data.proposals ?? [];
+      recommendationSummary.value = data.summary ?? "";
+      recommendationState.value = proposals.value.length > 0 ? "ready" : "unavailable";
+    } catch {
+      if (token === recommendationToken) recommendationState.value = "unavailable";
+    }
+  };
+
+  const chooseProposal = (proposal: QuoteProposal): void => {
+    applyProposalToAnswers(proposal, answers);
   };
 
   const toggleOption = (optionKey: string): void => {
@@ -272,6 +435,12 @@ export const useQuoteSimulator = () => {
     }
 
     step.value = upcoming;
+
+    // Not awaited on purpose: the scope screen is rendered and usable right away.
+    if (upcoming === "scope") {
+      void requestRecommendation();
+    }
+
     return true;
   };
 
@@ -332,6 +501,12 @@ export const useQuoteSimulator = () => {
     submission,
     selectOffer,
     toggleOption,
+    toggleTool,
+    recommendationState,
+    proposals,
+    recommendationSummary,
+    requestRecommendation,
+    chooseProposal,
     requestPreview,
     next,
     back,

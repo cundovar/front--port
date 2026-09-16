@@ -1,10 +1,10 @@
 <template>
   <div class="quote-step-body">
     <p class="quote-range-label">{{ result.offerLabel }} · {{ result.variantLabel }}</p>
-    <p class="quote-range">{{ formatAmount(result.minimumAmount) }} – {{ formatAmount(result.maximumAmount) }}</p>
-    <p class="quote-disclaimer">
-      {{ result.disclaimer }} Ce montant situe l’ordre de grandeur de votre projet ; il ne remplace pas un devis.
-    </p>
+    <p v-if="price.prefix" class="quote-range-prefix">{{ price.prefix }}</p>
+    <p class="quote-range">{{ price.amount }}</p>
+    <!-- The wording is the server's, and follows the commercial mode of the variant. -->
+    <p class="quote-disclaimer">{{ result.disclaimer }}</p>
 
     <div class="quote-columns">
       <section v-if="result.includes.length" aria-labelledby="quote-includes-title">
@@ -38,18 +38,24 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from "vue";
 import type { QuoteEstimateResult } from "../../types";
+import { formatQuoteAmount, quotePriceParts } from "../../composables/useQuoteSimulator";
 
-defineProps<{ result: QuoteEstimateResult }>();
+const props = defineProps<{ result: QuoteEstimateResult }>();
 
-const formatAmount = (amount: number): string =>
-  new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(amount);
+const price = computed(() =>
+  quotePriceParts(props.result.minimumAmount, props.result.maximumAmount, props.result.pricingMode),
+);
+
+const formatAmount = formatQuoteAmount;
 </script>
 
 <style scoped>
 .quote-step-body { display: grid; gap: 20px; }
 .quote-range-label { margin: 0; font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; opacity: 0.75; }
 .quote-range { margin: 0; font-size: clamp(28px, 6vw, 44px); font-weight: 800; }
+.quote-range-prefix { margin: 0; font-family: var(--font-mono); font-size: 11px; font-weight: 700; text-transform: uppercase; opacity: 0.75; }
 .quote-disclaimer { margin: 0; font-size: 14px; opacity: 0.8; }
 .quote-columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
 .quote-subtitle { margin: 0 0 10px; font-family: var(--font-mono); font-size: 12px; text-transform: uppercase; }

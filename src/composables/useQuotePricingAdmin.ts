@@ -1,11 +1,20 @@
 import { computed, ref } from "vue";
-import type { QuoteCatalog, QuoteCatalogError, QuoteOffer } from "../types";
+import type { QuoteCatalog, QuoteCatalogError, QuoteOffer, QuotePricingMode, QuoteVariant } from "../types";
 import { api } from "../utils/api";
 
 export type QuotePricingAdminState = "idle" | "loading" | "ready" | "error";
 
-const MULTIPLIER_MIN = 1;
-const MULTIPLIER_MAX = 3;
+export const PRICING_MODES: { value: QuotePricingMode; label: string; help: string }[] = [
+  { value: "fixed", label: "Prix ferme", help: "Un montant unique, engagé pour le contenu listé." },
+  { value: "from", label: "À partir de", help: "Un montant de départ ; la suite est chiffrée à part." },
+  { value: "range", label: "Fourchette", help: "Deux bornes, quand le périmètre ne peut pas être engagé." },
+];
+
+/** Modes that commit to one amount, and therefore forbid any range downstream. */
+const SINGLE_AMOUNT_MODES: QuotePricingMode[] = ["fixed", "from"];
+
+export const commitsToASingleAmount = (offer: QuoteOffer | null | undefined): boolean =>
+  (offer?.variants ?? []).some((variant) => SINGLE_AMOUNT_MODES.includes(variant.pricingMode));
 
 /** Deep copy so an abandoned draft never mutates the catalog last confirmed by the server. */
 export const cloneCatalog = (catalog: QuoteCatalog): QuoteCatalog =>
@@ -37,6 +46,38 @@ const rangeErrors = (item: { minimumAmount: unknown; maximumAmount: unknown }, p
   }
   if (errors.length === 0 && min > max) {
     errors.push({ path: `${path}.maximumAmount`, message: "Le maximum doit être supérieur ou égal au minimum." });
+  }
+
+  return errors;
+};
+
+const singleAmountErrors = (
+  item: { minimumAmount: unknown; maximumAmount: unknown },
+  path: string,
+): QuoteCatalogError[] => {
+  const min = parseAmount(item.minimumAmount);
+  const max = parseAmount(item.maximumAmount);
+
+  if (!Number.isInteger(min) || !Number.isInteger(max) || min === max) return [];
+
+  return [{
+    path: `${path}.maximumAmount`,
+    message: "Un prix ferme ou « à partir de » attend un montant unique : minimum et maximum doivent être égaux.",
+  }];
+};
+
+const variantContractErrors = (variant: QuoteVariant, path: string): QuoteCatalogError[] => {
+  const errors: QuoteCatalogError[] = [];
+
+  if (!SINGLE_AMOUNT_MODES.includes(variant.pricingMode) && variant.pricingMode !== "range") {
+    errors.push({ path: `${path}.pricingMode`, message: "Mode attendu : fixe, à partir de, ou fourchette." });
+  } else if (SINGLE_AMOUNT_MODES.includes(variant.pricingMode)) {
+    errors.push(...singleAmountErrors(variant, path));
+  }
+
+  const priority = parseAmount(variant.priorityAmount);
+  if (!Number.isInteger(priority) || priority < 0) {
+    errors.push({ path: `${path}.priorityAmount`, message: "Supplément entier positif attendu (0 si aucun)." });
   }
 
   return errors;
@@ -94,29 +135,56 @@ export const validateCatalogDraft = (catalog: QuoteCatalog): QuoteCatalogError[]
     } else {
       const variantKeys: string[] = [];
       offer.variants.forEach((variant, variantIndex) => {
-        errors.push(...pricedItemErrors(variant, `${path}.variants.${variantIndex}`, variantKeys));
+        const variantPath = `${path}.variants.${variantIndex}`;
+        errors.push(...pricedItemErrors(variant, variantPath, variantKeys));
+        errors.push(...variantContractErrors(variant, variantPath));
       });
     }
 
     const optionKeys: string[] = [];
+    const commits = commitsToASingleAmount(offer);
+
     (offer.options ?? []).forEach((option, optionIndex) => {
-      errors.push(...pricedItemErrors(option, `${path}.options.${optionIndex}`, optionKeys));
+      const optionPath = `${path}.options.${optionIndex}`;
+      errors.push(...pricedItemErrors(option, optionPath, optionKeys));
+
+      // A committed pack plus a ranged option would silently become a range again.
+      if (commits) errors.push(...singleAmountErrors(option, optionPath));
     });
   });
 
-  const multiplier = Number(catalog.adjustments?.priorityDelay?.multiplier);
-  if (!Number.isFinite(multiplier) || multiplier < MULTIPLIER_MIN || multiplier > MULTIPLIER_MAX) {
-    errors.push({
-      path: "adjustments.priorityDelay.multiplier",
-      message: "Multiplicateur attendu entre 1 et 3.",
-    });
-  }
+  errors.push(...toolErrors(catalog.tools ?? []));
 
   if (catalog.adjustments?.contentWriting) {
     errors.push(...rangeErrors(catalog.adjustments.contentWriting, "adjustments.contentWriting"));
+
+    if ((catalog.offers ?? []).some(commitsToASingleAmount)) {
+      errors.push(...singleAmountErrors(catalog.adjustments.contentWriting, "adjustments.contentWriting"));
+    }
   } else {
     errors.push({ path: "adjustments.contentWriting", message: "Ajustement requis." });
   }
+
+  return errors;
+};
+
+const toolErrors = (tools: { key: unknown; label: unknown }[]): QuoteCatalogError[] => {
+  const errors: QuoteCatalogError[] = [];
+  const seen: string[] = [];
+
+  tools.forEach((tool, index) => {
+    const path = `tools.${index}`;
+
+    if (isBlank(tool.label)) errors.push({ path: `${path}.label`, message: "Champ texte requis." });
+
+    if (isBlank(tool.key)) {
+      errors.push({ path: `${path}.key`, message: "Champ texte requis." });
+    } else if (seen.includes(tool.key as string)) {
+      errors.push({ path: `${path}.key`, message: "Clé d’outil en double." });
+    } else {
+      seen.push(tool.key as string);
+    }
+  });
 
   return errors;
 };
@@ -158,9 +226,16 @@ export const buildCatalogPayload = (catalog: QuoteCatalog): { catalog: QuoteCata
       item.minimumAmount = parseAmount(item.minimumAmount);
       item.maximumAmount = parseAmount(item.maximumAmount);
     });
+
+    offer.variants.forEach((variant) => {
+      variant.priorityAmount = parseAmount(variant.priorityAmount);
+      // A committed mode must leave with one amount, whichever field was edited last.
+      if (SINGLE_AMOUNT_MODES.includes(variant.pricingMode)) {
+        variant.maximumAmount = variant.minimumAmount;
+      }
+    });
   });
 
-  copy.adjustments.priorityDelay.multiplier = Number(copy.adjustments.priorityDelay.multiplier);
   copy.adjustments.contentWriting.minimumAmount = parseAmount(copy.adjustments.contentWriting.minimumAmount);
   copy.adjustments.contentWriting.maximumAmount = parseAmount(copy.adjustments.contentWriting.maximumAmount);
 

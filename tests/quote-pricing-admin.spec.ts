@@ -10,6 +10,10 @@ import {
 import type { QuoteCatalog } from "../src/types";
 
 const baseCatalog = (): QuoteCatalog => ({
+  tools: [
+    { key: "tableur", label: "Excel ou Google Sheets" },
+    { key: "email", label: "Gmail ou Outlook" },
+  ],
   offers: [
     {
       key: "site-vitrine",
@@ -18,19 +22,38 @@ const baseCatalog = (): QuoteCatalog => ({
         {
           key: "landing-page",
           label: "Une page unique",
-          minimumAmount: 350,
-          maximumAmount: 650,
+          pricingMode: "fixed",
+          minimumAmount: 550,
+          maximumAmount: 550,
+          priorityAmount: 150,
           includes: ["Une page"],
         },
       ],
       options: [
-        { key: "blog", label: "Espace actualités ou blog", minimumAmount: 120, maximumAmount: 300 },
+        { key: "blog", label: "Espace actualités ou blog", minimumAmount: 200, maximumAmount: 200 },
+      ],
+    },
+    {
+      key: "refonte",
+      label: "Remettre au propre un site existant",
+      variants: [
+        {
+          key: "refonte-ciblee",
+          label: "Reprendre l’existant",
+          pricingMode: "range",
+          minimumAmount: 400,
+          maximumAmount: 900,
+          priorityAmount: 200,
+          includes: ["Un état des lieux"],
+        },
+      ],
+      options: [
+        { key: "performance", label: "Site plus rapide", minimumAmount: 150, maximumAmount: 400 },
       ],
     },
   ],
   adjustments: {
-    priorityDelay: { label: "Délai prioritaire", multiplier: 1.25 },
-    contentWriting: { label: "Rédaction des contenus", minimumAmount: 150, maximumAmount: 400 },
+    contentWriting: { label: "Rédaction des contenus", minimumAmount: 300, maximumAmount: 300 },
   },
 });
 
@@ -54,11 +77,11 @@ describe("validateCatalogDraft", () => {
 
   it("reports a maximum below the minimum on the exact field", () => {
     const catalog = baseCatalog();
-    catalog.offers[0].variants[0].maximumAmount = 100;
+    catalog.offers[1].variants[0].maximumAmount = 100;
 
     expect(validateCatalogDraft(catalog)).toEqual([
       {
-        path: "offers.0.variants.0.maximumAmount",
+        path: "offers.1.variants.0.maximumAmount",
         message: "Le maximum doit être supérieur ou égal au minimum.",
       },
     ]);
@@ -72,6 +95,7 @@ describe("validateCatalogDraft", () => {
     expect(validateCatalogDraft(catalog).map((error) => error.path)).toEqual([
       "offers.0.options.0.minimumAmount",
     ]);
+    expect(validateCatalogDraft(baseCatalog())).toEqual([]);
   });
 
   it("rejects a blank label", () => {
@@ -104,14 +128,70 @@ describe("validateCatalogDraft", () => {
     });
   });
 
-  it("keeps the priority multiplier inside the server bounds", () => {
+  it("rejects a negative or missing priority supplement", () => {
     const catalog = baseCatalog();
-    catalog.adjustments.priorityDelay.multiplier = 5;
+    catalog.offers[0].variants[0].priorityAmount = -50;
 
     expect(validateCatalogDraft(catalog)).toContainEqual({
-      path: "adjustments.priorityDelay.multiplier",
-      message: "Multiplicateur attendu entre 1 et 3.",
+      path: "offers.0.variants.0.priorityAmount",
+      message: "Supplément entier positif attendu (0 si aucun).",
     });
+  });
+
+  it("refuses a committed variant carrying two different bounds", () => {
+    const catalog = baseCatalog();
+    catalog.offers[0].variants[0].maximumAmount = 1800;
+
+    expect(validateCatalogDraft(catalog).map((e) => e.path)).toEqual([
+      "offers.0.variants.0.maximumAmount",
+    ]);
+  });
+
+  it("refuses a ranged option inside an offer that commits to a price", () => {
+    const catalog = baseCatalog();
+    catalog.offers[0].options[0].maximumAmount = 900;
+
+    expect(validateCatalogDraft(catalog).map((e) => e.path)).toEqual([
+      "offers.0.options.0.maximumAmount",
+    ]);
+  });
+
+  it("still accepts ranged options in an offer priced as a range", () => {
+    const catalog = baseCatalog();
+    catalog.offers[1].options[0].maximumAmount = 700;
+
+    expect(validateCatalogDraft(catalog)).toEqual([]);
+  });
+
+  it("rejects an unknown pricing mode", () => {
+    const catalog = baseCatalog();
+    // @ts-expect-error the value could come from a hand-edited draft
+    catalog.offers[0].variants[0].pricingMode = "negociable";
+
+    expect(validateCatalogDraft(catalog)).toContainEqual({
+      path: "offers.0.variants.0.pricingMode",
+      message: "Mode attendu : fixe, à partir de, ou fourchette.",
+    });
+  });
+
+  it("refuses a ranged writing supplement once a pack is committed", () => {
+    const catalog = baseCatalog();
+    catalog.adjustments.contentWriting.maximumAmount = 700;
+
+    expect(validateCatalogDraft(catalog).map((e) => e.path)).toEqual([
+      "adjustments.contentWriting.maximumAmount",
+    ]);
+  });
+
+  it("rejects a tool without a label and a duplicate tool key", () => {
+    const catalog = baseCatalog();
+    catalog.tools[0].label = "  ";
+    catalog.tools[1].key = "tableur";
+
+    const paths = validateCatalogDraft(catalog).map((e) => e.path);
+
+    expect(paths).toContain("tools.0.label");
+    expect(paths).toContain("tools.1.key");
   });
 
   it("refuses an empty grid", () => {
@@ -167,11 +247,22 @@ describe("buildCatalogPayload", () => {
     expect(payload.catalog.offers[0].variants[0].minimumAmount).toBe(400);
   });
 
+  it("collapses a committed variant onto a single amount before sending", () => {
+    const catalog = baseCatalog();
+    catalog.offers[0].variants[0].maximumAmount = 9999;
+
+    const payload = buildCatalogPayload(catalog);
+
+    expect(payload.catalog.offers[0].variants[0].maximumAmount).toBe(550);
+    // A range variant keeps both bounds untouched.
+    expect(payload.catalog.offers[1].variants[0].maximumAmount).toBe(900);
+  });
+
   it("never mutates the draft on screen", () => {
     const catalog = baseCatalog();
     buildCatalogPayload(catalog).catalog.offers[0].variants[0].minimumAmount = 1;
 
-    expect(catalog.offers[0].variants[0].minimumAmount).toBe(350);
+    expect(catalog.offers[0].variants[0].minimumAmount).toBe(550);
   });
 });
 

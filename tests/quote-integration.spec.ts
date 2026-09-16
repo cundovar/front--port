@@ -3,6 +3,7 @@ import content from "../src/data/content.json";
 import {
   KNOWN_OFFER_KEYS,
   buildQuoteCtaHref,
+  formatQuotePrice,
   quoteStatusLabel,
 } from "../src/composables/useQuoteSimulator";
 import type { ContentData } from "../src/types";
@@ -107,5 +108,58 @@ describe("service keys already stored in production", () => {
     normalized.services.forEach((service) => {
       expect(buildQuoteCtaHref(service.serviceKey)).toBe(`/devis?service=${service.serviceKey}`);
     });
+  });
+});
+
+describe("the AI never authors a deliverable or a price", () => {
+  // Mirrors the server contract: only these keys may carry model-written text.
+  const AI_AUTHORED_FIELDS = ["summary", "reasons"];
+
+  const proposal = {
+    tier: "essential",
+    title: "Solution essentielle",
+    variantKey: "automatisation-ciblee",
+    variantLabel: "Une tâche précise à automatiser",
+    includes: ["Une automatisation prête à l’emploi"],
+    selectedOptions: [{ key: "relances-auto", label: "Relances automatiques par email" }],
+    optionKeys: ["relances-auto"],
+    minimumAmount: 700,
+    maximumAmount: 700,
+    pricingMode: "fixed" as const,
+    disclaimer: "Prix ferme pour le périmètre décrit ci-dessus.",
+    calculationDetail: [],
+    reasons: { "relances-auto": "Vous parlez de relances oubliées." },
+    pricingVersion: 3,
+  };
+
+  it("attaches every justification to a key the proposal actually carries", () => {
+    const priced = [proposal.variantKey, ...proposal.optionKeys];
+
+    Object.keys(proposal.reasons).forEach((key) => {
+      expect(priced).toContain(key);
+    });
+  });
+
+  it("keeps the displayed scope out of the AI-authored fields", () => {
+    const displayed = [...proposal.includes, ...proposal.selectedOptions.map((o) => o.label)];
+
+    AI_AUTHORED_FIELDS.forEach((field) => {
+      expect(displayed).not.toContain(field);
+    });
+    // Labels and amounts come from the catalog payload, not from reasons/summary.
+    expect(displayed).toContain("Relances automatiques par email");
+    expect(proposal.minimumAmount).toBe(700);
+  });
+});
+
+describe("pricing modes stay consistent with their wording", () => {
+  it("never shows a range for a committed amount", () => {
+    expect(formatQuotePrice(900, 900, "fixed")).not.toContain("–");
+    expect(formatQuotePrice(1400, 1400, "from")).not.toContain("–");
+  });
+
+  it("keeps both bounds only when they differ", () => {
+    expect(formatQuotePrice(400, 900, "range")).toContain("–");
+    expect(formatQuotePrice(400, 400, "range")).not.toContain("–");
   });
 });

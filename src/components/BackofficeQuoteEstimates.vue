@@ -41,16 +41,27 @@
         <h2>{{ selected.fullName }}</h2>
         <p class="muted">{{ selected.email }}<template v-if="selected.company"> · {{ selected.company }}</template><template v-if="selected.phone"> · {{ selected.phone }}</template></p>
 
-        <h3>Offre retenue</h3>
+        <h3>Solution retenue par le client</h3>
         <p>{{ selected.answers.offerLabel ?? selected.offerKey }} · {{ selected.answers.variantLabel ?? "—" }}</p>
 
-        <h3>Fourchette</h3>
-        <p class="amount">{{ selected.minimumAmount }} € – {{ selected.maximumAmount }} €</p>
-        <p class="muted">Calculée avec la grille tarifaire version {{ selected.pricingVersion }}.</p>
+        <ul v-if="frozenOptions.length" class="factors">
+          <li v-for="option in frozenOptions" :key="option.key">{{ option.label }}</li>
+        </ul>
+
+        <h3>Montant</h3>
+        <p class="amount">{{ frozenPrice.prefix }} {{ frozenPrice.amount }}</p>
+        <p class="muted">
+          {{ selected.answers.disclaimer ?? "—" }}
+          Calculé avec la grille tarifaire version {{ selected.pricingVersion }} ; une modification
+          des tarifs ne change pas ce montant.
+        </p>
+
+        <h3>Outils déjà utilisés</h3>
+        <p>{{ toolLabels.length ? toolLabels.join(" · ") : "Non précisés" }}</p>
 
         <h3>Réponses</h3>
         <dl class="answers">
-          <div v-for="(value, key) in selected.answers" :key="key">
+          <div v-for="(value, key) in readableAnswers" :key="key">
             <dt>{{ key }}</dt>
             <dd>{{ formatAnswer(value) }}</dd>
           </div>
@@ -63,8 +74,14 @@
           </li>
         </ul>
 
-        <h3>Synthèse ({{ selected.aiSource }})</h3>
+        <h3>Qualification IA ({{ selected.aiSource }})</h3>
+        <p class="muted">Lecture du besoin, jamais un engagement : rien ici n’a été facturé au client.</p>
         <p>{{ selected.summary || "—" }}</p>
+
+        <template v-if="selected.recommendedScope.length">
+          <h4>Périmètre suggéré</h4>
+          <ul><li v-for="item in selected.recommendedScope" :key="item">{{ item }}</li></ul>
+        </template>
 
         <template v-if="selected.missingQuestions.length">
           <h3>Questions manquantes</h3>
@@ -100,9 +117,14 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
-import type { QuoteEstimateAdminListItem, QuoteEstimateAdminRecord } from "../types";
-import { quoteStatusLabel } from "../composables/useQuoteSimulator";
+import { computed, onMounted, ref } from "vue";
+import type {
+  QuoteEstimateAdminListItem,
+  QuoteEstimateAdminRecord,
+  QuotePricingMode,
+  QuoteSelectedOption,
+} from "../types";
+import { quotePriceParts, quoteStatusLabel } from "../composables/useQuoteSimulator";
 import { api } from "../utils/api";
 
 type ListItem = QuoteEstimateAdminListItem;
@@ -129,6 +151,44 @@ const statusLabel = quoteStatusLabel;
 
 // Labels are stored with each estimate so history survives a catalog rename.
 const serviceLabel = (item: { offerKey: string }): string => item.offerKey;
+
+/** Rendered from the catalog frozen in the estimate, never from any AI text. */
+const frozenOptions = computed<QuoteSelectedOption[]>(() => {
+  const options = selected.value?.answers.selectedOptions;
+  return Array.isArray(options) ? (options as QuoteSelectedOption[]) : [];
+});
+
+const toolLabels = computed<string[]>(() => {
+  const labels = selected.value?.answers.toolLabels;
+  return Array.isArray(labels) ? (labels as string[]) : [];
+});
+
+const frozenPrice = computed(() =>
+  selected.value
+    ? quotePriceParts(
+        selected.value.minimumAmount,
+        selected.value.maximumAmount,
+        (selected.value.answers.pricingMode as QuotePricingMode) ?? "range",
+      )
+    : { prefix: "", amount: "—" },
+);
+
+/** Structured keys are already rendered above; this list keeps the rest readable. */
+const RENDERED_ELSEWHERE = [
+  "offerLabel",
+  "variantLabel",
+  "selectedOptions",
+  "includes",
+  "pricingMode",
+  "disclaimer",
+  "toolKeys",
+  "toolLabels",
+];
+
+const readableAnswers = computed<Record<string, unknown>>(() => {
+  const entries = Object.entries(selected.value?.answers ?? {});
+  return Object.fromEntries(entries.filter(([key]) => !RENDERED_ELSEWHERE.includes(key)));
+});
 
 const formatDate = (value: string): string =>
   value ? new Date(value).toLocaleDateString("fr-FR", { dateStyle: "medium" }) : "—";

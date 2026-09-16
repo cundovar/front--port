@@ -114,7 +114,9 @@ img {
 
 .section-title {
   font-family: var(--font-display);
-  font-size: clamp(62px, 9vw, 112px);
+  /* The floor must stay under what a long word ("reconnaissez", "Réalisations")
+     can occupy on a 390px screen, otherwise the title overflows its section. */
+  font-size: clamp(40px, 9vw, 112px);
   line-height: 0.78;
   letter-spacing: 0;
   text-transform: uppercase;

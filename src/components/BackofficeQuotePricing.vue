@@ -58,18 +58,37 @@
               {{ errorFor(offerIndex, "variants", index, "label") }}
             </span>
 
+            <fieldset class="modes">
+              <legend>Mode de prix</legend>
+              <label v-for="mode in pricingModes" :key="mode.value" class="mode-choice">
+                <input
+                  type="radio"
+                  :name="`mode-${offerIndex}-${index}`"
+                  :value="mode.value"
+                  :checked="variant.pricingMode === mode.value"
+                  @change="selectMode(variant, mode.value)"
+                />
+                <span>
+                  <strong>{{ mode.label }}</strong>
+                  <em>{{ mode.help }}</em>
+                </span>
+              </label>
+            </fieldset>
+            <span class="field-error">{{ errorFor(offerIndex, "variants", index, "pricingMode") }}</span>
+
             <div class="amounts">
               <label>
-                Minimum (€)
+                {{ variant.pricingMode === "range" ? "Minimum (€)" : "Prix (€)" }}
                 <input
                   v-model.number="variant.minimumAmount"
                   type="number"
                   min="0"
                   step="50"
                   :aria-invalid="!!errorFor(offerIndex, 'variants', index, 'minimumAmount')"
+                  @input="mirrorCommittedAmount(variant)"
                 />
               </label>
-              <label>
+              <label v-if="variant.pricingMode === 'range'">
                 Maximum (€)
                 <input
                   v-model.number="variant.maximumAmount"
@@ -79,9 +98,13 @@
                   :aria-invalid="!!errorFor(offerIndex, 'variants', index, 'maximumAmount')"
                 />
               </label>
+              <label>
+                Supplément délai prioritaire (€)
+                <input v-model.number="variant.priorityAmount" type="number" min="0" step="50" />
+              </label>
             </div>
             <span
-              v-for="field in ['minimumAmount', 'maximumAmount']"
+              v-for="field in ['minimumAmount', 'maximumAmount', 'priorityAmount']"
               :key="field"
               class="field-error"
             >
@@ -110,10 +133,16 @@
             </label>
             <div class="amounts">
               <label>
-                Minimum (€)
-                <input v-model.number="option.minimumAmount" type="number" min="0" step="10" />
+                {{ offerCommits ? "Prix (€)" : "Minimum (€)" }}
+                <input
+                  v-model.number="option.minimumAmount"
+                  type="number"
+                  min="0"
+                  step="10"
+                  @input="offerCommits && mirrorCommittedAmount(option)"
+                />
               </label>
-              <label>
+              <label v-if="!offerCommits">
                 Maximum (€)
                 <input v-model.number="option.maximumAmount" type="number" min="0" step="10" />
               </label>
@@ -129,23 +158,38 @@
 
           <h3>Ajustements communs</h3>
           <div class="priced-item">
-            <label class="label-field">
-              Délai prioritaire · multiplicateur
-              <input v-model.number="draft.adjustments.priorityDelay.multiplier" type="number" min="1" max="3" step="0.05" />
-            </label>
-            <span class="field-error">{{ errors["adjustments.priorityDelay.multiplier"] }}</span>
-
             <div class="amounts">
               <label>
-                Rédaction des contenus · minimum (€)
-                <input v-model.number="draft.adjustments.contentWriting.minimumAmount" type="number" min="0" step="10" />
+                {{ anyOfferCommits ? "Rédaction des contenus (€)" : "Rédaction des contenus · minimum (€)" }}
+                <input
+                  v-model.number="draft.adjustments.contentWriting.minimumAmount"
+                  type="number"
+                  min="0"
+                  step="10"
+                  @input="anyOfferCommits && mirrorCommittedAmount(draft.adjustments.contentWriting)"
+                />
               </label>
-              <label>
+              <label v-if="!anyOfferCommits">
                 Rédaction des contenus · maximum (€)
                 <input v-model.number="draft.adjustments.contentWriting.maximumAmount" type="number" min="0" step="10" />
               </label>
             </div>
             <span class="field-error">{{ errors["adjustments.contentWriting.maximumAmount"] }}</span>
+            <p class="muted">
+              Le délai prioritaire est désormais un supplément fixe, réglé formule par formule.
+            </p>
+          </div>
+
+          <h3>Outils proposés dans le formulaire</h3>
+          <p class="muted">
+            Ils servent de contexte à l’analyse. Un outil ne porte aucun montant et ne change jamais un prix.
+          </p>
+          <div class="tools">
+            <label v-for="(tool, index) in draft.tools" :key="index" class="label-field">
+              <span class="sr-only">Outil {{ index + 1 }}</span>
+              <input v-model="tool.label" type="text" :aria-invalid="!!errors[`tools.${index}.label`]" />
+              <span class="field-error">{{ errors[`tools.${index}.label`] || errors[`tools.${index}.key`] }}</span>
+            </label>
           </div>
 
           <div class="actions">
@@ -164,7 +208,13 @@
 
 <script setup lang="ts">
 import { computed, onMounted } from "vue";
-import { describeErrorPath, useQuotePricingAdmin } from "../composables/useQuotePricingAdmin";
+import type { QuotePricingMode } from "../types";
+import {
+  PRICING_MODES,
+  commitsToASingleAmount,
+  describeErrorPath,
+  useQuotePricingAdmin,
+} from "../composables/useQuotePricingAdmin";
 
 const {
   state,
@@ -184,6 +234,25 @@ const {
 const offerIndex = computed(() =>
   draft.value?.offers.findIndex((offer) => offer.key === selectedOfferKey.value) ?? -1,
 );
+
+const pricingModes = PRICING_MODES;
+
+const offerCommits = computed(() => commitsToASingleAmount(currentOffer.value));
+const anyOfferCommits = computed(() => (draft.value?.offers ?? []).some(commitsToASingleAmount));
+
+/** A committed mode has one amount: keep both fields equal while typing. */
+const mirrorCommittedAmount = (item: { minimumAmount: number; maximumAmount: number }): void => {
+  item.maximumAmount = item.minimumAmount;
+};
+
+const selectMode = (
+  variant: { pricingMode: QuotePricingMode; minimumAmount: number; maximumAmount: number },
+  mode: QuotePricingMode,
+): void => {
+  variant.pricingMode = mode;
+  // Switching to a committed mode collapses the range onto its lower bound.
+  if (mode !== "range") mirrorCommittedAmount(variant);
+};
 
 const errorFor = (
   offer: number,
@@ -325,6 +394,38 @@ onMounted(() => {
 .field-error:not(:empty) {
   color: #b00020;
   font-size: 0.9rem;
+}
+
+.modes {
+  border: 1px solid var(--border, #d9d4c7);
+  padding: 10px 12px;
+  margin: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.modes legend {
+  font-size: 0.85rem;
+  padding: 0 4px;
+}
+
+.mode-choice {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.mode-choice em {
+  display: block;
+  font-size: 0.85rem;
+  opacity: 0.75;
+  font-style: normal;
+}
+
+.tools {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
 }
 
 .actions {
