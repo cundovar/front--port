@@ -14,6 +14,7 @@ import {
   reasonForKey,
   suggestedKeys,
   resolvePreselectedOffer,
+  submitErrorMessage,
   validateContact,
   validateStep,
 } from "../src/composables/useQuoteSimulator";
@@ -163,6 +164,30 @@ describe("payload builders", () => {
     expect(Object.keys(payload)).not.toContain("maximumAmount");
     expect(payload.fullName).toBe("Claire");
     expect(payload.consent).toBe(true);
+  });
+
+  it("carries the ticked tools so the server can freeze them in the estimate", () => {
+    const payload = buildSubmitPayload(
+      { ...answers, toolKeys: ["tableur", "email"] },
+      { ...emptyContact(), fullName: "Claire", email: "c@example.com", consent: true },
+    );
+
+    expect(payload.toolKeys).toEqual(["tableur", "email"]);
+  });
+});
+
+describe("submitErrorMessage", () => {
+  it("names the quota when the server refuses a sixth submission", () => {
+    expect(submitErrorMessage(429)).toContain("Trop d\u2019envois");
+  });
+
+  it("says the server never answered when the request itself failed", () => {
+    expect(submitErrorMessage(0)).toContain("n\u2019a pas r\u00e9pondu");
+  });
+
+  it("exposes the status so a failure can be reported", () => {
+    expect(submitErrorMessage(422)).toContain("422");
+    expect(submitErrorMessage(500)).toContain("500");
   });
 });
 

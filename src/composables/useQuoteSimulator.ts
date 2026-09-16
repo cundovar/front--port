@@ -154,6 +154,23 @@ export const validateStep = (
   return errors;
 };
 
+/**
+ * A failed submission must stay reportable: the bare "l’envoi a échoué" hid
+ * whether the server refused the payload, crashed, or never answered at all.
+ * `status` is 0 when the request never got a response.
+ */
+export const submitErrorMessage = (status: number): string => {
+  if (status === 429) {
+    return "Trop d’envois depuis cette connexion. Réessayez dans quelques minutes.";
+  }
+
+  if (status === 0) {
+    return "Le serveur n’a pas répondu. Vérifiez votre connexion, puis réessayez : vos réponses sont conservées.";
+  }
+
+  return `L’envoi a échoué (erreur ${status}). Vos réponses sont conservées, vous pouvez réessayer.`;
+};
+
 export const validateContact = (contact: QuoteContact): Record<string, string> => {
   const errors: Record<string, string> = {};
 
@@ -191,6 +208,9 @@ export const buildPreviewPayload = (answers: QuoteAnswers) => ({
 
 export const buildSubmitPayload = (answers: QuoteAnswers, contact: QuoteContact) => ({
   ...buildPreviewPayload(answers),
+  // The server freezes the tools in the saved estimate: omitting them here left
+  // "Outils déjà utilisés" empty in the email and in the backoffice.
+  toolKeys: [...answers.toolKeys],
   fullName: contact.fullName.trim(),
   email: contact.email.trim(),
   company: contact.company.trim(),
@@ -468,10 +488,7 @@ export const useQuoteSimulator = () => {
 
       if (!response.ok) {
         submitState.value = "error";
-        feedback.value =
-          response.status === 429
-            ? "Trop d’envois depuis cette connexion. Réessayez dans quelques minutes."
-            : "L’envoi a échoué. Vos réponses sont conservées, vous pouvez réessayer.";
+        feedback.value = submitErrorMessage(response.status);
         return false;
       }
 
@@ -480,7 +497,7 @@ export const useQuoteSimulator = () => {
       return true;
     } catch {
       submitState.value = "error";
-      feedback.value = "L’envoi a échoué. Vos réponses sont conservées, vous pouvez réessayer.";
+      feedback.value = submitErrorMessage(0);
       return false;
     }
   };
