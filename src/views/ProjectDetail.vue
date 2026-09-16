@@ -104,6 +104,7 @@ import SiteFooter from "../components/SiteFooter.vue";
 import { useContent } from "../composables/useContent";
 import { useRoute } from "vue-router";
 import { api } from "../utils/api";
+import { pageTitle } from "../utils/pageTitle";
 
 interface ProjectCard {
   id: number;
@@ -144,6 +145,8 @@ const loadProject = async (): Promise<void> => {
     if (!response.ok) return;
     const data = await response.json();
     project.value = data;
+    // The router set a generic "Réalisation"; name the project now that we have it.
+    if (data?.name) document.title = pageTitle(data.name);
   } catch (error) {
     console.error("Failed to load project", error);
   }

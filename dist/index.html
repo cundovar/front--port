@@ -4,32 +4,55 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+    <!-- Secure Privacy (gestion du consentement).
+         Charge avant gtag : un CMP qui arrive apres la mesure d'audience
+         n'a plus rien a bloquer, le hit est deja parti. -->
+    <script src="https://app.secureprivacy.ai/script/6aaa82d71266cf57bfef6189.js"></script>
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-KH2LH77JF7"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-KH2LH77JF7');
+    </script>
+
     <!-- SEO Meta Tags -->
-    <title>Missions Fullstack | Automatisation, IA, Refonte, WordPress</title>
-    <meta name="description" content="Développeur fullstack pour missions critiques: automatisations métier, agents IA intégrés, refontes scalables, sites WordPress. Livraison rapide depuis cadrage court." />
-    <meta name="keywords" content="automatisation, agent IA, refonte site, développeur fullstack, Symfony, Vue.js, WordPress, freelance missions, consultance développement" />
+    <title>Développeur web à Paris 20e | Sites, automatisation, IA</title>
+    <meta
+      name="description"
+      content="Développeur web indépendant à Paris 20e. Création et refonte de sites, automatisation de vos tâches répétitives et outils sur mesure pour indépendants et TPE."
+    />
     <meta name="author" content="Facundo Varas" />
     <meta name="robots" content="index, follow" />
     <meta name="googlebot" content="index, follow" />
-    <link rel="canonical" href="https://facundovaras.dev/" />
+    <link rel="canonical" href="https://varascundo.com/" />
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://facundovaras.dev/" />
-    <meta property="og:title" content="Missions Fullstack | Automatisation, IA, Refonte" />
-    <meta property="og:description" content="Automatisations fiables • Agents IA encadrés • Refontes scalables • WordPress • Web sur mesure. Basé sur étapes: Comprendre → Cadrer → Développer → Livrer." />
-    <meta property="og:image" content="https://facundovaras.dev/og-image.png" />
+    <meta property="og:url" content="https://varascundo.com/" />
+    <meta property="og:title" content="Développeur web à Paris 20e | Sites, automatisation, IA" />
+    <meta
+      property="og:description"
+      content="Sites web, refonte, automatisation et assistants IA pour les indépendants, artisans et TPE de Paris et d'Île-de-France. Estimation en ligne en 2 minutes."
+    />
+    <meta property="og:image" content="https://varascundo.com/og-image.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="og:locale" content="fr_FR" />
-    <meta property="og:site_name" content="Facundo Varas | Missions Fullstack" />
+    <meta property="og:site_name" content="Facundo Varas | Développeur web à Paris" />
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:url" content="https://facundovaras.dev/" />
-    <meta name="twitter:title" content="Missions Fullstack | Automatisation, IA, Refonte" />
-    <meta name="twitter:description" content="Automatisations métier • Agents IA • Refontes • WordPress • Web sur mesure. Proof of concept rapide → production." />
-    <meta name="twitter:image" content="https://facundovaras.dev/og-image.png" />
+    <meta name="twitter:url" content="https://varascundo.com/" />
+    <meta name="twitter:title" content="Développeur web à Paris 20e | Sites, automatisation, IA" />
+    <meta
+      name="twitter:description"
+      content="Sites web, refonte, automatisation et assistants IA pour les indépendants, artisans et TPE de Paris et d'Île-de-France."
+    />
+    <meta name="twitter:image" content="https://varascundo.com/og-image.png" />
 
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -39,8 +62,8 @@
     <link rel="manifest" href="/site.webmanifest" />
 
     <!-- Theme Color -->
-    <meta name="theme-color" content="#0d1117" />
-    <meta name="msapplication-TileColor" content="#0d1117" />
+    <meta name="theme-color" content="#121827" />
+    <meta name="msapplication-TileColor" content="#121827" />
 
     <!-- Preconnect for performance -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -50,24 +73,46 @@
       rel="stylesheet"
     />
 
-    <!-- JSON-LD Structured Data -->
+    <!-- JSON-LD Structured Data.
+         ProfessionalService derives from LocalBusiness: address, geo and
+         areaServed are what let Google attach the site to a place. The postal
+         code is the arrondissement, no street address is claimed. -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "ProfessionalService",
-      "name": "Facundo Varas - Missions Fullstack",
-      "url": "https://facundovaras.dev",
-      "description": "Automatisations métier, agents IA encadrés, refontes scalables, sites WordPress, applications web sur mesure.",
-      "areaServed": {
-        "@type": "Country",
-        "name": "FR"
+      "@id": "https://varascundo.com/#business",
+      "name": "Facundo Varas — Développeur web",
+      "url": "https://varascundo.com",
+      "image": "https://varascundo.com/og-image.png",
+      "description": "Développeur web indépendant à Paris 20e : création et refonte de sites, automatisation des tâches répétitives, assistants IA et outils métier sur mesure pour indépendants, artisans et TPE.",
+      "priceRange": "200 € - 3500 €",
+      "currenciesAccepted": "EUR",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Paris",
+        "postalCode": "75020",
+        "addressRegion": "Île-de-France",
+        "addressCountry": "FR"
       },
-      "serviceType": ["Web Development", "Business Automation", "AI Integration", "Website Redesign"],
-      "knowsAbout": ["Symfony", "Vue.js", "React", "PHP", "JavaScript", "TypeScript", "Docker", "MySQL", "OpenAI"],
-      "contactPoint": {
-        "@type": "ContactPoint",
-        "contactType": "Service"
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": 48.8631,
+        "longitude": 2.3969
       },
+      "areaServed": [
+        { "@type": "City", "name": "Paris" },
+        { "@type": "AdministrativeArea", "name": "Île-de-France" },
+        { "@type": "Country", "name": "France" }
+      ],
+      "serviceType": [
+        "Création de site web",
+        "Refonte de site web",
+        "Automatisation de tâches",
+        "Assistant IA",
+        "Application web sur mesure"
+      ],
+      "knowsAbout": ["Symfony", "Vue.js", "React", "PHP", "JavaScript", "TypeScript", "WordPress", "MySQL"],
       "sameAs": [
         "https://github.com/cundovar",
         "https://www.linkedin.com/in/facundo-varas/"
@@ -79,21 +124,15 @@
     {
       "@context": "https://schema.org",
       "@type": "WebSite",
-      "name": "Facundo Varas | Missions Fullstack",
-      "url": "https://facundovaras.dev",
-      "description": "Portfolio de missions: automatisations, IA, refontes, WordPress, applications web sur mesure",
+      "name": "Facundo Varas | Développeur web à Paris",
+      "url": "https://varascundo.com",
+      "description": "Sites web, refonte, automatisation et outils sur mesure pour indépendants et TPE, depuis Paris 20e.",
       "inLanguage": "fr-FR",
-      "potentialAction": {
-        "@type": "SearchAction",
-        "target": {
-          "@type": "EntryPoint",
-          "urlTemplate": "https://facundovaras.dev/?q={search_term_string}"
-        }
-      }
+      "publisher": { "@id": "https://varascundo.com/#business" }
     }
     </script>
-    <script type="module" crossorigin src="/assets/index-NyVFdeUX.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-_z1qF8rm.css">
+    <script type="module" crossorigin src="/assets/index-zSAI-Hx2.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-DG2AkAxk.css">
   </head>
   <body>
     <div id="app"></div>

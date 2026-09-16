@@ -8,7 +8,5 @@ package.json
 package-lock.json
 vite.config.js
 tsconfig.json
-public/*
-!public/.htaccess
 documentation
 /.env.prod/

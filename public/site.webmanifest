@@ -1,17 +1,16 @@
 {
-  "name": "Facundo Varas - Portfolio",
-  "short_name": "FV Portfolio",
-  "description": "Formateur et developpeur web fullstack specialise en Symfony et Vue.js",
+  "name": "Facundo Varas — Développeur web à Paris 20e",
+  "short_name": "Facundo Varas",
+  "description": "Création et refonte de sites, automatisation et outils sur mesure pour indépendants et TPE, à Paris et en Île-de-France.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0d1117",
-  "theme_color": "#facc15",
+  "background_color": "#121827",
+  "theme_color": "#121827",
   "orientation": "portrait-primary",
   "icons": [
-    {
-      "src": "/favicon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml"
-    }
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" },
+    { "src": "/favicon-32x32.png", "sizes": "32x32", "type": "image/png" },
+    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
   ]
 }

@@ -1,9 +1,9 @@
-# Robots.txt for facundovaras.dev
+# Robots.txt for varascundo.com
 User-agent: *
 Allow: /
 
 # Sitemap
-Sitemap: https://facundovaras.dev/sitemap.xml
+Sitemap: https://varascundo.com/sitemap.xml
 
 # Disallow admin/backoffice
 Disallow: /admin

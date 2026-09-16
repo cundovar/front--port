@@ -11,19 +11,22 @@ import QuoteSimulator from "./views/QuoteSimulator.vue";
 import AdminQuoteEstimates from "./views/AdminQuoteEstimates.vue";
 import AdminQuotePricing from "./views/AdminQuotePricing.vue";
 import { api } from "./utils/api";
+import { pageTitle } from "./utils/pageTitle";
 
+// `title` is undefined on "/" so the home page keeps the full wording written
+// in index.html. ProjectDetail sets its own once the project is loaded.
 const routes = [
   { path: "/", component: PublicHome },
-  { path: "/realisations", component: RealisationsPage },
-  { path: "/devis", component: QuoteSimulator },
-  { path: "/realisations/:slug", component: ProjectDetail },
-  { path: "/admin/login", component: AdminLogin },
-  { path: "/admin", component: AdminDashboard },
-  { path: "/admin/projects", component: AdminProjects },
-  { path: "/admin/comments", component: AdminComments },
-  { path: "/admin/content", component: AdminContent },
-  { path: "/admin/quote-estimates", component: AdminQuoteEstimates },
-  { path: "/admin/quote-pricing", component: AdminQuotePricing },
+  { path: "/realisations", component: RealisationsPage, meta: { title: "Réalisations" } },
+  { path: "/devis", component: QuoteSimulator, meta: { title: "Estimer votre projet web" } },
+  { path: "/realisations/:slug", component: ProjectDetail, meta: { title: "Réalisation" } },
+  { path: "/admin/login", component: AdminLogin, meta: { title: "Connexion" } },
+  { path: "/admin", component: AdminDashboard, meta: { title: "Administration" } },
+  { path: "/admin/projects", component: AdminProjects, meta: { title: "Projets" } },
+  { path: "/admin/comments", component: AdminComments, meta: { title: "Commentaires" } },
+  { path: "/admin/content", component: AdminContent, meta: { title: "Contenu" } },
+  { path: "/admin/quote-estimates", component: AdminQuoteEstimates, meta: { title: "Demandes de devis" } },
+  { path: "/admin/quote-pricing", component: AdminQuotePricing, meta: { title: "Tarifs" } },
 ];
 
 export const router = createRouter({
@@ -45,4 +48,8 @@ router.beforeEach(async (to) => {
     }
   }
   return true;
+});
+
+router.afterEach((to) => {
+  document.title = pageTitle(to.meta.title as string | undefined);
 });
