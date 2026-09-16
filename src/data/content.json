@@ -59,12 +59,12 @@
       "actionLabel": "Estimer mon automatisation",
       "faqs": [
         {
-          "question": "Quels processus peut-on automatiser ?",
-          "answer": "Relances, synchronisation de donnees, creation de documents, notifications ou reporting, apres analyse du processus existant."
+          "question": "Quelles tâches peut-on automatiser au quotidien ?",
+          "answer": "Par exemple, envoyer automatiquement les relances clients, recopier les commandes d’un outil vers un autre, générer un devis ou préparer un rapport hebdomadaire. On part de votre façon de travailler actuelle, puis j’identifie les tâches répétitives qui peuvent tourner sans vous faire perdre la main."
         },
         {
-          "question": "L'automatisation remplace-t-elle le controle humain ?",
-          "answer": "Non. Les etapes sensibles peuvent rester soumises a validation et les actions importantes restent tracables."
+          "question": "Est-ce que je perds le contrôle si une tâche devient automatique ?",
+          "answer": "Non. On choisit ensemble ce qui part automatiquement et ce qui attend votre validation. Chaque action importante reste visible dans un tableau de suivi : vous pouvez vérifier, corriger ou arrêter à tout moment."
         }
       ]
     },
@@ -88,12 +88,12 @@
       "actionLabel": "Estimer mon assistant IA",
       "faqs": [
         {
-          "question": "A quoi sert un assistant IA dans une PME ?",
-          "answer": "Il peut trier, resumer, preparer des reponses ou assister une equipe a partir de regles et de donnees definies."
+          "question": "À quoi sert concrètement un assistant IA dans mon activité ?",
+          "answer": "Il prépare le travail répétitif : trier des demandes, résumer un dossier, proposer un premier brouillon de réponse ou remplir des informations à partir de vos règles. Vous gardez la décision finale et gagnez du temps sur la préparation."
         },
         {
-          "question": "Comment eviter des reponses IA incoherentes ?",
-          "answer": "En limitant son perimetre, en ajoutant des controles humains et en prevoyant un ecran de suivi."
+          "question": "Comment éviter qu’il donne une réponse incohérente ?",
+          "answer": "On lui fournit seulement les informations et règles utiles à votre métier, on limite les questions qu’il traite et on garde un écran de contrôle. Les réponses restent vérifiables et les cas sensibles passent par une validation humaine."
         }
       ]
     },
@@ -117,12 +117,12 @@
       "actionLabel": "Estimer ma refonte",
       "faqs": [
         {
-          "question": "Peut-on ameliorer l'existant sans tout refaire ?",
-          "answer": "Oui. Apres diagnostic, on peut corriger les priorites, moderniser progressivement et preserver ce qui fonctionne."
+          "question": "Peut-on remettre mon site au propre sans tout refaire ?",
+          "answer": "Oui. Je commence par un diagnostic pour comprendre ce qui fonctionne, ce qui bloque et ce qui présente un risque. On corrige ensuite les priorités par étapes, par exemple la mise en page, la vitesse ou la modification des contenus."
         },
         {
-          "question": "Que contient le diagnostic initial ?",
-          "answer": "L'etat technique, les blocages utilisateurs, les risques, les priorites et un plan de remise en ordre."
+          "question": "Que vais-je recevoir après le diagnostic ?",
+          "answer": "Un document simple : état technique, blocages pour vos utilisateurs ou vos clients, risques, priorités et plan de remise en ordre. Chaque point explique pourquoi il compte et ce qu’il va changer pour vous."
         }
       ]
     },
@@ -146,12 +146,12 @@
       "actionLabel": "Estimer mon outil",
       "faqs": [
         {
-          "question": "Quand faut-il creer un outil sur mesure ?",
-          "answer": "Quand les outils existants imposent trop de contournements ou ne couvrent pas un processus metier important."
+          "question": "Comment savoir si j’ai besoin d’un outil sur mesure ?",
+          "answer": "Quand vos équipes répètent des contournements, recopient des informations entre plusieurs outils ou renoncent à une étape parce que le logiciel ne la prévoit pas. Si un outil standard suffit, je le dis avant de développer."
         },
         {
-          "question": "Comment se deroule le projet ?",
-          "answer": "Cadrage court, premiere version utilisable, retours utilisateurs, puis evolutions priorisees."
+          "question": "Comment se déroule le projet ?",
+          "answer": "On commence par un cadrage court pour définir le résultat utile. Vous recevez ensuite une première version que votre équipe peut vraiment utiliser, puis on intègre les retours et on fait évoluer l’outil par priorités."
         }
       ]
     },
@@ -175,12 +175,12 @@
       "actionLabel": "Estimer mon WordPress",
       "faqs": [
         {
-          "question": "Peut-on ajouter une fonction specifique a WordPress ?",
-          "answer": "Oui : formulaire metier, espace client, connexion API, WooCommerce ou extension sur mesure selon le besoin."
+          "question": "Peut-on ajouter une fonction précise à mon WordPress ?",
+          "answer": "Oui : un formulaire métier, un espace client, une connexion à un autre outil, une boutique WooCommerce ou une extension adaptée. L’objectif est d’éviter les usines à gaz et de garder un site que vous savez utiliser."
         },
         {
-          "question": "Faut-il changer de theme pour ameliorer le site ?",
-          "answer": "Pas necessairement. Cela depend de la qualite du theme actuel, des plugins et des limites rencontrees."
+          "question": "Faut-il forcément changer de thème pour améliorer mon site ?",
+          "answer": "Pas forcément. Si le thème actuel est sain, on peut souvent améliorer la vitesse, la clarté ou une fonctionnalité précise. Je propose de le changer seulement quand il bloque vos évolutions ou devient un risque."
         }
       ]
     }
