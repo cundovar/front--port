@@ -1,9 +1,8 @@
 <template>
   <div class="row" :class="{ open, lit, dim }">
-    <span class="node" aria-hidden="true"></span>
-
     <button
       class="head"
+      data-head
       type="button"
       :aria-expanded="open"
       @click="emit('select', layer.key)"
@@ -52,10 +51,6 @@ const emit = defineEmits<{ select: [key: string] }>();
 .row {
   display: flex;
   flex-direction: column;
-}
-
-.node {
-  display: none;
 }
 
 .head {

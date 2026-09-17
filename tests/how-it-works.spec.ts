@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { hoodLayers, recommendArchitecture } from "../src/data/howItWorks";
+import { travellingLabelTop } from "../src/utils/hoodLabel";
 
 describe("recommendArchitecture", () => {
   it("keeps a simple editable site on WordPress", () => {
@@ -92,5 +93,19 @@ describe("hoodLayers", () => {
     const bridge = hoodLayers.filter((layer) => layer.position === "bridge");
 
     expect(bridge.map((layer) => layer.key)).toEqual(["interface", "api", "engine", "data"]);
+  });
+});
+
+describe("travellingLabelTop", () => {
+  it("centres the label on the row it is visiting", () => {
+    // Bridge at 900 in the viewport, third row at 1000, 60 tall, label 38 tall.
+    expect(travellingLabelTop(900, { top: 1000, height: 60 }, 38)).toBe(111);
+  });
+
+  it("refuses a row it cannot measure", () => {
+    // A display:none element reports zeros. Trusting them sent the label to
+    // minus the bridge's own offset, far above the section.
+    expect(travellingLabelTop(900, { top: 0, height: 0 }, 38)).toBeNull();
+    expect(travellingLabelTop(900, null, 38)).toBeNull();
   });
 });

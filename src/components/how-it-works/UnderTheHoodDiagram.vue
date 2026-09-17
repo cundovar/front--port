@@ -68,6 +68,7 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue"
 import LayerRow from "./LayerRow.vue";
 import { useTechnicalLevel } from "../../composables/useTechnicalLevel";
 import { hoodLayers } from "../../data/howItWorks";
+import { travellingLabelTop } from "../../utils/hoodLabel";
 
 const technical = useTechnicalLevel();
 
@@ -106,12 +107,18 @@ const placeAgainst = (key: string): void => {
   const bridge = bridgeEl.value;
   const index = bridgeLayers.findIndex((layer) => layer.key === key);
   const row = bridge?.children[index] as HTMLElement | undefined;
-  const head = row?.firstElementChild as HTMLElement | undefined;
+  const head = row?.querySelector<HTMLElement>("[data-head]");
   if (!bridge || !head) return;
 
-  const base = bridge.getBoundingClientRect();
-  const target = head.getBoundingClientRect();
-  labelTop.value = target.top - base.top + (target.height - LABEL_HEIGHT) / 2;
+  const top = travellingLabelTop(
+    bridge.getBoundingClientRect().top,
+    head.getBoundingClientRect(),
+    LABEL_HEIGHT,
+  );
+
+  // Keeping the previous position is the safe failure: the label stays on a row
+  // it already visited instead of leaving the diagram.
+  if (top !== null) labelTop.value = top;
 };
 
 watch(step, async (value) => {
