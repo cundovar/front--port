@@ -12,7 +12,7 @@
     "subtitle": "Vous partez de zéro, ou vous reprenez quelque chose qui existe déjà.",
     "primaryLabel": "Obtenir une estimation",
     "primaryHref": "/devis",
-    "secondaryLabel": "Voir les realisations",
+    "secondaryLabel": "Voir les réalisations",
     "secondaryHref": "#cases",
     "proofItems": [
       "De l’idée à la mise en ligne",
@@ -31,7 +31,7 @@
 
   "trust": {
     "items": [
-      "Developpeur fullstack freelance France",
+      "Développeur fullstack freelance France",
       "Automatisation IA pour PME",
       "Refonte Symfony Vue WordPress",
       "Backoffice sur mesure local"
@@ -46,7 +46,7 @@
       "problems": [
         "Copier-coller entre outils",
         "Relances manuelles",
-        "Donnees eparpillees",
+        "Données éparpillées",
         "Temps perdu sur des actions sans valeur"
       ],
       "deliverables": [
@@ -74,9 +74,9 @@
       "promise": "Triez, résumez, rédigez ou préparez des réponses plus rapidement, avec des contrôles humains clairs.",
       "problems": [
         "Tri manuel d'informations",
-        "Generation de contenus repetitifs",
+        "Génération de contenus répétitifs",
         "Besoin d'aide contextuelle dans un outil interne",
-        "Difficulte a industrialiser un prototype IA"
+        "Difficulté à industrialiser un prototype IA"
       ],
       "deliverables": [
         "Un premier assistant testable",
@@ -105,7 +105,7 @@
         "Site difficile a modifier",
         "Backoffice incomplet",
         "Dette technique bloquante",
-        "Experience mobile ou admin trop lente"
+        "Expérience mobile ou admin trop lente"
       ],
       "deliverables": [
         "Un diagnostic clair de l'existant",
@@ -131,9 +131,9 @@
       "title": "Créez un outil adapté à votre activité",
       "promise": "Transformez votre façon de travailler avec une application, un espace client ou un backoffice conçu pour vos besoins.",
       "problems": [
-        "Solution existante trop rigide ou limitee",
-        "Besoin specifique non couvert par les outils classiques",
-        "Projet requires integrations personnalisees",
+        "Solution existante trop rigide ou limitée",
+        "Besoin spécifique non couvert par les outils classiques",
+        "Projet avec intégrations personnalisées",
         "Croissance attendue, architecture de base requise"
       ],
       "deliverables": [
@@ -160,9 +160,9 @@
       "title": "Transformez votre WordPress en outil professionnel",
       "promise": "Améliorez votre design, vos performances et vos fonctionnalités pour obtenir un site plus utile à votre activité.",
       "problems": [
-        "Theme standard ne correspond pas au besoin",
+        "Thème standard ne correspond pas au besoin",
         "Plugin manquant ou incompatible",
-        "Performance ou securite degradee",
+        "Performance ou sécurité dégradée",
         "Migration d'un site legacy vers WordPress"
       ],
       "deliverables": [
@@ -227,11 +227,11 @@
   "expertise": [
     {
       "title": "Fullstack utile",
-      "description": "Front, API, base de donnees, admin et deploiement dans une meme logique produit."
+      "description": "Front, API, base de données, admin et déploiement dans une même logique produit."
     },
     {
       "title": "IA encadree",
-      "description": "Des agents et automatisations qui assistent le travail sans masquer les controles humains."
+      "description": "Des agents et automatisations qui assistent le travail sans masquer les contrôles humains."
     },
     {
       "title": "Transmission",
@@ -241,7 +241,7 @@
 
   "availability": {
     "title": "Disponible pour missions courtes ou refontes progressives",
-    "subtitle": "Ideal pour un cadrage Codeur.com, une automatisation metier ou une reprise d'application existante.",
+    "subtitle": "Idéal pour un cadrage Codeur.com, une automatisation métier ou une reprise d'application existante.",
     "items": [
       "Audit et plan d'action",
       "Prototype IA ou automatisation",
@@ -254,10 +254,10 @@
     "title": "Stack & pratiques",
     "subtitle": "L'essentiel, sans jargon.",
     "items": [
-      "Front : Vue + React, Vite, composants reutilisables",
+      "Front : Vue + React, Vite, composants réutilisables",
       "Back : Symfony API, auth, CRUD, uploads",
-      "WordPress : plugins personnalises",
-      "Qualite : Docker, migrations, Git propre"
+      "WordPress : plugins personnalisés",
+      "Qualité : Docker, migrations, Git propre"
     ]
   },
 
@@ -273,7 +273,7 @@
     "items": [
       {
         "name": "HTML",
-        "topics": ["Semantique HTML5", "Accessibilite", "SEO basics", "Formulaires"]
+        "topics": ["Sémantique HTML5", "Accessibilité", "SEO basics", "Formulaires"]
       },
       {
         "name": "CSS",
@@ -285,7 +285,7 @@
       },
       {
         "name": "PHP",
-        "topics": ["POO", "MVC", "PDO/MySQL", "Securite", "Sessions"]
+        "topics": ["POO", "MVC", "PDO/MySQL", "Sécurité", "Sessions"]
       },
       {
         "name": "Symfony",
@@ -320,19 +320,19 @@
   },
 
   "skills": {
-    "title": "IA detective de competences",
-    "subtitle": "Analyse basee sur les donnees GitHub.",
-    "summary": "Profil fullstack oriente pedagogie, fort en Symfony/Vue et structuration de contenus.",
+    "title": "IA détective de compétences",
+    "subtitle": "Analyse basée sur les données GitHub.",
+    "summary": "Profil fullstack orienté pédagogie, fort en Symfony/Vue et structuration de contenus.",
     "evidence": [
       { "label": "Commits tests", "value": "47" },
       { "label": "PR reviews", "value": "12" },
-      { "label": "Modules crees", "value": "3" }
+      { "label": "Modules créés", "value": "3" }
     ]
   },
 
   "cta": {
-    "title": "Decrivez votre mission",
-    "subtitle": "Partagez un apercu rapide de votre probleme et de ce que vous cherchez a accomplir.",
+    "title": "Décrivez votre mission",
+    "subtitle": "Partagez un aperçu rapide de votre problème et de ce que vous cherchez à accomplir.",
     "primaryLabel": "Envoyer mon besoin",
     "secondaryLabel": "Voir les services"
   },
