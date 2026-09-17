@@ -204,6 +204,14 @@
       "description": "Chaque évolution prend trop de temps ou risque de fragiliser ce qui fonctionne déjà."
     },
     {
+      "title": "Votre site fait moins sérieux que votre travail",
+      "description": "Il date, il s’affiche mal sur téléphone, et vous hésitez à en donner l’adresse à un client."
+    },
+    {
+      "title": "Vous avez monté quelque chose avec une IA, sans oser le montrer",
+      "description": "Cela fonctionne quand vous l’utilisez seul, mais rien n’est sécurisé ni sauvegardé pour le mettre devant de vrais clients."
+    },
+    {
       "title": "Vous souhaitez utiliser l'IA, mais ne savez pas par où commencer",
       "description": "Vous avez identifié un potentiel, mais pas encore le bon usage, les données nécessaires ou les contrôles à prévoir."
     }
