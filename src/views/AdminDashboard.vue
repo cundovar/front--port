@@ -40,11 +40,55 @@
         </div>
       </div>
     </section>
+
+    <section class="section tracking-section">
+      <h2>Suivi &amp; référencement</h2>
+      <p class="muted">Outils Google hébergés en dehors du site : ils s’ouvrent dans un nouvel onglet.</p>
+      <div class="grid grid-2">
+        <div class="card">
+          <h3>Google Analytics</h3>
+          <p class="muted">Audience et pages vues. Propriété GA4 <code>G-KH2LH77JF7</code>, celle déclarée dans index.html.</p>
+          <a
+            class="btn btn-secondary"
+            href="https://analytics.google.com/analytics/web/"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Ouvrir Analytics
+          </a>
+        </div>
+        <div class="card">
+          <h3>Search Console</h3>
+          <p class="muted">Indexation, requêtes et sitemaps du site <code>varascundo.com</code>.</p>
+          <div class="card-actions">
+            <a class="btn btn-secondary" :href="searchConsoleUrl()" target="_blank" rel="noreferrer">
+              Ouvrir Search Console
+            </a>
+            <a class="btn btn-secondary" :href="searchConsoleUrl('sitemaps')" target="_blank" rel="noreferrer">
+              Sitemaps
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
   </main>
 </template>
 
 <script setup lang="ts">
 import { RouterLink } from "vue-router";
+
+// index.html carries a google-site-verification meta tag, which is how a
+// URL-prefix property is verified — hence the trailing slash in the resource id
+// rather than the sc-domain: form a DNS-verified property would use.
+const SEARCH_CONSOLE_PROPERTY = "https://varascundo.com/";
+
+const searchConsoleUrl = (view?: "sitemaps"): string => {
+  const base = view
+    ? `https://search.google.com/search-console/${view}`
+    : "https://search.google.com/search-console";
+
+  return `${base}?resource_id=${encodeURIComponent(SEARCH_CONSOLE_PROPERTY)}`;
+};
 </script>
 
 <style scoped>
@@ -71,5 +115,26 @@ import { RouterLink } from "vue-router";
 
 .muted {
   color: var(--muted);
+}
+
+.tracking-section h2 {
+  margin: 0 0 8px;
+}
+
+.tracking-section > .muted {
+  margin: 0 0 24px;
+}
+
+.card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  /* An id split across two lines ("G-" / "KH2LH77JF7") reads as two things. */
+  white-space: nowrap;
 }
 </style>
