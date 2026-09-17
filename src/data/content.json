@@ -9,7 +9,7 @@
   "hero": {
     "title": "Sites web et automatisation pour les indépendants et TPE à Paris.",
     "tagline": "Développeur indépendant dans le 20e, je crée des sites, j’automatise vos tâches répétitives et je conçois des outils sur mesure, de l’idée à la mise en production.",
-    "subtitle": "Automatisation · IA pragmatique · Refonte · WordPress · Application métier",
+    "subtitle": "Vous partez de zéro, ou vous reprenez quelque chose qui existe déjà.",
     "primaryLabel": "Obtenir une estimation",
     "primaryHref": "/devis",
     "secondaryLabel": "Voir les realisations",
@@ -24,7 +24,7 @@
   "about": {
     "title": "A propos",
     "subtitle": "Qui suis-je ?",
-    "bio": "Developpeur web fullstack et formateur passionne, j'accompagne les apprenants dans leur montee en competences depuis plusieurs annees. Mon approche : des bases solides, des projets concrets, et une veille constante sur les meilleures pratiques.",
+    "bio": "Développeur web indépendant, je conçois et je remets d’aplomb des outils qui tournent pour de vrai : sites, applications métier, automatisations. Je travaille surtout avec des indépendants et des TPE, souvent seuls face à un site qui vieillit ou à une tâche qui revient chaque semaine. Ce que je livre est documenté et administrable — vous devez pouvoir vous en servir sans moi. Je forme aussi des développeurs depuis plusieurs années : expliquer fait partie du travail.",
     "location": "Paris 20e",
     "locationMapUrl": "https://www.openstreetmap.org/export/embed.html?bbox=2.375%2C48.850%2C2.430%2C48.880&layer=mapnik&marker=48.865%2C2.400"
   },
@@ -262,8 +262,8 @@
   },
 
   "ai": {
-    "title": "Compatibilite IA",
-    "subtitle": "Ancien bloc conserve pour migration progressive des contenus.",
+    "title": "Et l’IA, concrètement ?",
+    "subtitle": "Je m’en sers tous les jours, comme d’un outil. Elle écrit vite et ne relit rien : pas de tests, pas de sauvegardes, des accès laissés ouverts. C’est parce que je connais ses angles morts que je sais quoi vérifier — sur mon code comme sur le vôtre. Ce que vous payez, ce n’est pas le temps de frappe : c’est ce qui a été vérifié avant la mise en ligne.",
     "items": []
   },
 

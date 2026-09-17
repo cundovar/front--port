@@ -36,6 +36,8 @@
 
     <ProcessSection :process="content.process" />
 
+    <AiNoteSection :title="content.ai.title" :body="content.ai.subtitle" />
+
     <ExpertiseSection :expertise="content.expertise" />
 
     <ProfileSection
@@ -73,6 +75,7 @@ import ServicesSection from "../components/ServicesSection.vue";
 import ProblemsSection from "../components/ProblemsSection.vue";
 import FeaturedCasesSection from "../components/FeaturedCasesSection.vue";
 import ProcessSection from "../components/ProcessSection.vue";
+import AiNoteSection from "../components/AiNoteSection.vue";
 import ExpertiseSection from "../components/ExpertiseSection.vue";
 import ProfileSection from "../components/ProfileSection.vue";
 import ContactForm from "../components/ContactForm.vue";
