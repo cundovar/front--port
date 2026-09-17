@@ -5,6 +5,7 @@
       <nav class="nav-links" aria-label="Navigation principale">
         <a href="#services">Services</a>
         <RouterLink to="/comment-ca-marche">Comment ça marche ?</RouterLink>
+        <RouterLink to="/tarifs">Tarifs</RouterLink>
         <RouterLink to="/faq">FAQ</RouterLink>
         <a href="#cases">Réalisations</a>
         <a href="#process">Méthode</a>

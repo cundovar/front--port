@@ -8,6 +8,11 @@
       "description": "Site, application, automatisation ou IA : comment votre projet peut être construit, expliqué simplement, avec le détail technique en option."
     },
     {
+      "path": "/tarifs",
+      "title": "Tarifs",
+      "description": "Fourchettes de prix par situation : site, refonte, automatisation, assistant IA, outil sur mesure. Les montants réels, sans formulaire à remplir d’abord."
+    },
+    {
       "path": "/faq",
       "title": "Questions fréquentes",
       "description": "Délais, budget, déroulé d’une mission, maintenance : les réponses aux questions posées le plus souvent, service par service."

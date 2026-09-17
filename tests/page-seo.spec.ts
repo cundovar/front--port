@@ -3,6 +3,8 @@ import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import pageSeo from "../src/data/pageSeo.json";
 import { pageTitle } from "../src/utils/pageTitle";
+import { offerEntryAmount, priceableOffers, variantsByPrice } from "../src/utils/pricingPage";
+import type { QuoteOffer } from "../src/types";
 
 const sitemap = readFileSync(resolve(__dirname, "../public/sitemap.xml"), "utf8");
 
@@ -36,5 +38,42 @@ describe("pageSeo", () => {
     pageSeo.pages.forEach((page) =>
       expect(sitemap, page.path).toContain(`${pageSeo.origin}${page.path}<`),
     );
+  });
+});
+
+describe("pricingPage", () => {
+  const offer = (key: string, mins: number[]): QuoteOffer => ({
+    key,
+    label: key,
+    variants: mins.map((minimumAmount, index) => ({
+      key: `${key}-${index}`,
+      label: `${key} ${index}`,
+      pricingMode: "range" as const,
+      minimumAmount,
+      maximumAmount: minimumAmount * 2,
+      priorityAmount: 0,
+      includes: [],
+    })),
+    options: [],
+  });
+
+  it("announces the cheapest formula as the entry price", () => {
+    expect(offerEntryAmount(offer("refonte", [900, 200, 1100]))).toBe(200);
+  });
+
+  it("lists the formulas cheapest first, without touching the catalog", () => {
+    const source = offer("refonte", [900, 200, 1100]);
+    const order = variantsByPrice(source).map((variant) => variant.minimumAmount);
+
+    expect(order).toEqual([200, 900, 1100]);
+    expect(source.variants.map((variant) => variant.minimumAmount)).toEqual([900, 200, 1100]);
+  });
+
+  it("drops an offer whose grid has no formula yet", () => {
+    // Its entry price would read "à partir de ∞", and a block with a heading
+    // and nothing under it looks like a bug to the visitor.
+    const empty = { ...offer("vide", []), variants: [] };
+
+    expect(priceableOffers([offer("refonte", [200]), empty]).map((o) => o.key)).toEqual(["refonte"]);
   });
 });
