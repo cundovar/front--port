@@ -1,5 +1,5 @@
 <template>
-  <div class="row" :class="{ open, lit, dim }">
+  <div class="row" :class="{ open, lit }">
     <button
       class="head"
       data-head
@@ -37,8 +37,6 @@ defineProps<{
   open: boolean;
   lit: boolean;
   technical: boolean;
-  /** Faded while the request is travelling elsewhere, to keep the eye on the trip. */
-  dim?: boolean;
   /** What this layer is doing right now ("vérification…"), shown instead of its role. */
   busyLabel?: string;
   last?: boolean;
@@ -79,11 +77,7 @@ const emit = defineEmits<{ select: [key: string] }>();
 }
 
 .row .head {
-  transition: background 160ms var(--ease), box-shadow 160ms var(--ease), opacity 260ms var(--ease);
-}
-
-.row.dim .head {
-  opacity: 0.38;
+  transition: background 160ms var(--ease), box-shadow 160ms var(--ease);
 }
 
 .name {
@@ -169,12 +163,6 @@ const emit = defineEmits<{ select: [key: string] }>();
   font-size: 15px;
   font-weight: 900;
   text-align: center;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .row.dim .head {
-    opacity: 1;
-  }
 }
 
 @media (max-width: 640px) {

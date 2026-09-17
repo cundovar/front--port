@@ -13,22 +13,11 @@ export interface HoodLayer {
   role: string;
   explanation: string;
   technical: string;
-  /** "bridge" marks every row the request travels through, from interface to data. */
-  position: "top" | "bridge";
   /** Sub-parts revealed only when the layer is opened, so the jargon arrives on demand. */
   details?: HoodDetail[];
 }
 
 export const hoodLayers: HoodLayer[] = [
-  {
-    key: "visitor",
-    name: "Ce que vous voyez",
-    role: "Écran, textes, images",
-    explanation:
-      "La page telle qu’elle s’affiche. Tout ce qui suit sert à la produire, puis à la tenir à jour.",
-    technical: "Responsive design, accessibilité, performance perçue.",
-    position: "top",
-  },
   {
     key: "interface",
     name: "L’interface",
@@ -36,7 +25,6 @@ export const hoodLayers: HoodLayer[] = [
     explanation:
       "Ce qui construit l’écran et réagit à vos clics. Plusieurs briques y travaillent ensemble.",
     technical: "Sémantique HTML, styles CSS, composants réutilisables, état d’interface.",
-    position: "bridge",
     details: [
       { name: "HTML", explanation: "la structure de la page" },
       { name: "CSS", explanation: "l’apparence et la mise en page" },
@@ -51,7 +39,6 @@ export const hoodLayers: HoodLayer[] = [
     explanation:
       "Dans cette architecture, l’interface passe par une API plutôt que d’accéder directement à la base.",
     technical: "REST, JSON, authentification, validation des données.",
-    position: "bridge",
   },
   {
     key: "engine",
@@ -59,7 +46,6 @@ export const hoodLayers: HoodLayer[] = [
     role: "Symfony / CMS",
     explanation: "C’est ici que les règles métier, les droits et les traitements sont appliqués.",
     technical: "Symfony, contrôleurs, services, droits d’accès, CMS.",
-    position: "bridge",
   },
   {
     key: "data",
@@ -67,7 +53,6 @@ export const hoodLayers: HoodLayer[] = [
     role: "Mémoire",
     explanation: "L’endroit où les informations sont conservées, protégées et retrouvées.",
     technical: "PostgreSQL, MySQL, requêtes, sauvegardes.",
-    position: "bridge",
   },
 ];
 

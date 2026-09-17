@@ -5,22 +5,11 @@
     </p>
 
     <div class="stack">
-      <LayerRow
-        v-for="layer in topLayers"
-        :key="layer.key"
-        :layer="layer"
-        :open="openLayer === layer.key"
-        :lit="litLayer === layer.key"
-        :dim="step > 0"
-        :technical="technical.enabled.value"
-        @select="select"
-      />
-
-      <!-- Every row the request travels through. The label is placed against each
-           one in turn, measured, so it lands right whatever the rows' heights. -->
+      <!-- Every row is a stop on the trip. The sheet is placed against each one
+           in turn, measured, so it lands right whatever the rows' heights. -->
       <div ref="bridgeEl" class="bridge">
         <LayerRow
-          v-for="layer in bridgeLayers"
+          v-for="layer in hoodLayers"
           :key="layer.key"
           :layer="layer"
           :open="openLayer === layer.key"
@@ -85,8 +74,6 @@ import { travellingLabelTop } from "../../utils/hoodLabel";
 
 const technical = useTechnicalLevel();
 
-const topLayers = hoodLayers.filter((layer) => layer.position === "top");
-const bridgeLayers = hoodLayers.filter((layer) => layer.position === "bridge");
 const lastKey = hoodLayers[hoodLayers.length - 1].key;
 
 const beats = [
@@ -100,7 +87,7 @@ const beats = [
 // Which bridge row holds the request at each beat, and what it is busy doing.
 const holders = ["interface", "api", "engine", "data", "interface"];
 
-const openLayer = ref<string | null>("visitor");
+const openLayer = ref<string | null>("interface");
 const step = ref(0);
 const bridgeEl = ref<HTMLElement | null>(null);
 const travelEl = ref<HTMLElement | null>(null);
@@ -120,7 +107,7 @@ const FALLBACK_LABEL_HEIGHT = 78;
 // heights, and the label still has to line up with the row it is visiting.
 const placeAgainst = (key: string): void => {
   const bridge = bridgeEl.value;
-  const index = bridgeLayers.findIndex((layer) => layer.key === key);
+  const index = hoodLayers.findIndex((layer) => layer.key === key);
   const row = bridge?.children[index] as HTMLElement | undefined;
   const head = row?.querySelector<HTMLElement>("[data-head]");
   if (!bridge || !head) return;

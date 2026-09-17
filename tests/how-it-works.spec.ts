@@ -73,7 +73,7 @@ describe("hoodLayers", () => {
   it("groups the interface bricks instead of showing six blocks at once", () => {
     const names = hoodLayers.map((layer) => layer.name);
 
-    expect(hoodLayers).toHaveLength(5);
+    expect(hoodLayers).toHaveLength(4);
     expect(names).toContain("L’interface");
     expect(names).not.toContain("HTML + CSS + JavaScript");
   });
@@ -90,9 +90,8 @@ describe("hoodLayers", () => {
   });
 
   it("walks the request all the way down to the data, not just to the engine", () => {
-    const bridge = hoodLayers.filter((layer) => layer.position === "bridge");
-
-    expect(bridge.map((layer) => layer.key)).toEqual(["interface", "api", "engine", "data"]);
+    // Every row is a stop on the trip: nothing sits beside the journey.
+    expect(hoodLayers.map((layer) => layer.key)).toEqual(["interface", "api", "engine", "data"]);
   });
 });
 
