@@ -33,6 +33,99 @@ const replaceOnce = (html, pattern, value, what, page) => {
 
 const escapeAttribute = (value) => value.replace(/&/g, "&amp;").replace(/"/g, "&quot;");
 
+const escapeText = (value) =>
+  value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+// Same host api.ts falls back to in production. Overridable so a build against
+// another backend does not silently bake the live prices into the page.
+const PRICING_URL = `${process.env.PRERENDER_API_BASE ?? "https://backport.varascundo.com"}/api/quote-pricing`;
+
+/**
+ * The prices live in the database and reach /tarifs through a runtime fetch, so
+ * a crawler that does not execute JavaScript sees an empty page. Fetching the
+ * grid at build time lets the file carry the real amounts.
+ *
+ * Deliberately best-effort: a network hiccup must not block a deploy, because
+ * the page still works for every visitor — the browser fetches the live grid
+ * anyway. The warning is loud enough to be noticed in the build output.
+ */
+const fetchPricing = async () => {
+  try {
+    const response = await fetch(PRICING_URL, { signal: AbortSignal.timeout(10000) });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+    const { catalog } = await response.json();
+    const offers = (catalog?.offers ?? []).filter((offer) => offer.variants?.length);
+
+    return offers.length > 0 ? offers : null;
+  } catch (error) {
+    console.warn(`\n⚠  Tarifs non récupérés (${error.message}) : /tarifs partira sans prix dans le HTML.`);
+    console.warn(`   Les visiteurs les verront quand même, la page les charge depuis ${PRICING_URL}.\n`);
+    return null;
+  }
+};
+
+const formatAmount = (amount) => `${new Intl.NumberFormat("fr-FR").format(amount)} €`;
+
+const variantPrice = (variant) =>
+  variant.pricingMode === "range" && variant.minimumAmount !== variant.maximumAmount
+    ? `${formatAmount(variant.minimumAmount)} – ${formatAmount(variant.maximumAmount)}`
+    : variant.pricingMode === "from"
+      ? `à partir de ${formatAmount(variant.minimumAmount)}`
+      : formatAmount(variant.minimumAmount);
+
+/**
+ * Two things a crawler can read, appended before </body>:
+ *
+ *  - a <noscript> list, so a bot that runs no JavaScript still reads the offers
+ *    and their amounts as plain text;
+ *  - JSON-LD, so the amounts are machine-readable rather than inferred.
+ *
+ * Neither duplicates the Vue template: they carry the data, not the design, and
+ * they are regenerated from the same grid on every build.
+ */
+const pricingMarkup = (offers) => {
+  const blocks = offers
+    .map((offer) => {
+      const rows = offer.variants
+        .map((variant) => `<li>${escapeText(variant.label)} — ${escapeText(variantPrice(variant))}</li>`)
+        .join("");
+
+      return `<section><h2>${escapeText(offer.label)}</h2><ul>${rows}</ul></section>`;
+    })
+    .join("");
+
+  const structured = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    itemListElement: offers.map((offer, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      item: {
+        "@type": "Service",
+        name: offer.label,
+        description: offer.summary ?? undefined,
+        offers: offer.variants.map((variant) => ({
+          "@type": "Offer",
+          name: variant.label,
+          priceCurrency: "EUR",
+          priceSpecification: {
+            "@type": "PriceSpecification",
+            minPrice: variant.minimumAmount,
+            maxPrice: variant.maximumAmount,
+            priceCurrency: "EUR",
+          },
+        })),
+      },
+    })),
+  };
+
+  return [
+    `<noscript>${blocks}</noscript>`,
+    `<script type="application/ld+json">${JSON.stringify(structured).replace(/</g, "\\u003c")}</script>`,
+  ].join("");
+};
+
 // `[^>]*` crosses newlines, which the multi-line <meta> blocks in index.html need.
 const attribute = (selector) => new RegExp(`(<[a-z]+\\s+${selector}[^>]*?(?:content|href)=")([^"]*)(")`, "g");
 
@@ -61,9 +154,23 @@ const render = (page) => {
   return html;
 };
 
+const pricingOffers = seo.pages.some((page) => page.path === "/tarifs") ? await fetchPricing() : null;
+
 // Everything is rendered before anything is written: a half-updated dist would
 // leave pages carrying the metadata of the page next to them.
-const rendered = seo.pages.map((page) => [page, render(page)]);
+const rendered = seo.pages.map((page) => {
+  let html = render(page);
+
+  if (page.path === "/tarifs" && pricingOffers) {
+    const markup = pricingMarkup(pricingOffers);
+    if (!html.includes("</body>")) {
+      failures.push(`${page.path} : </body> introuvable dans dist/index.html`);
+    }
+    html = html.replace("</body>", `${markup}</body>`);
+  }
+
+  return [page, html];
+});
 
 if (failures.length > 0) {
   console.error("Le <head> de dist/index.html ne correspond plus au script :");
@@ -79,3 +186,8 @@ rendered.forEach(([page, html]) => {
 });
 
 console.log(`\n${seo.pages.length} routes préparées pour les moteurs de recherche.`);
+
+if (pricingOffers) {
+  const count = pricingOffers.reduce((total, offer) => total + offer.variants.length, 0);
+  console.log(`${count} formules chiffrées écrites dans dist/tarifs.html.`);
+}

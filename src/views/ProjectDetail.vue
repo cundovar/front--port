@@ -4,7 +4,7 @@
       <a class="brand" href="/">{{ header.logoText }}</a>
       <nav class="nav-links" aria-label="Navigation">
         <a href="/#services">Services</a>
-        <a href="/#cases">Réalisations</a>
+        <a href="/realisations">Réalisations</a>
         <a href="/#process">Méthode</a>
         <a href="/#profile">À propos</a>
         <a href="/#contact">Contact</a>
@@ -74,8 +74,10 @@
         </div>
 
         <footer class="project-footer">
-          <a href="/#cases" class="btn btn-secondary">← Retour aux réalisations</a>
-          <a href="/#contact" class="btn btn-primary">Décrire votre projet</a>
+          <!-- /realisations is a page of its own now: the old /#cases anchor sent
+               a visitor reading a case study back to the home page. -->
+          <a href="/realisations" class="btn btn-secondary">← Retour aux réalisations</a>
+          <a href="/devis" class="btn btn-primary">Estimer un projet comme celui-ci</a>
         </footer>
       </article>
     </div>
@@ -84,7 +86,7 @@
       <div class="not-found-content">
         <h1>Projet non trouvé</h1>
         <p>Désolé, cette étude de cas n'existe pas ou n'est pas encore publiée.</p>
-        <a href="/#cases" class="btn btn-primary">Retour aux réalisations</a>
+        <a href="/realisations" class="btn btn-primary">Retour aux réalisations</a>
       </div>
     </div>
 
