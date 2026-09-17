@@ -41,10 +41,10 @@ const submit = async (): Promise<void> => {
       body: JSON.stringify(form),
     });
     if (!response.ok) throw new Error();
-    const data = await response.json() as { notificationSent?: boolean };
-    feedback.value = data.notificationSent === false
-      ? "Merci, votre demande a bien été reçue. Je vous répondrai rapidement."
-      : "Merci, votre demande a bien été envoyée. Je vous répondrai rapidement.";
+    const data = await response.json() as { notificationSent?: boolean; confirmationSent?: boolean };
+    feedback.value = data.confirmationSent
+      ? "Merci, votre demande est bien reçue. Un récapitulatif vient de vous être envoyé par email."
+      : "Merci, votre demande est bien reçue. Je vous répondrai rapidement.";
     Object.assign(form, emptyForm());
   } catch {
     hasError.value = true;

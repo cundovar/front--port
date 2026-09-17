@@ -13,7 +13,7 @@
       <p class="section-subtitle">Décrivez votre besoin : vous recevez une première estimation sans engagement.</p>
       <div class="faq-actions">
         <RouterLink class="btn btn-primary" to="/devis">Estimer mon projet</RouterLink>
-        <a class="btn btn-secondary" :href="`mailto:${content.header.contactEmail}`">Écrire un email</a>
+        <RouterLink class="btn btn-secondary" to="/#contact">Écrire un message</RouterLink>
       </div>
     </section>
   </main>

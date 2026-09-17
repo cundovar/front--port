@@ -16,6 +16,7 @@ import AdminQuotePricing from "./views/AdminQuotePricing.vue";
 import { api } from "./utils/api";
 import { pageTitle, setRobotsNoindex } from "./utils/pageTitle";
 import pageSeo from "./data/pageSeo.json";
+import { scrollBehavior } from "./utils/routerScroll";
 
 // Titles for the prerendered routes come from pageSeo.json, the same file the
 // build reads to write the <title> a crawler sees. Throwing here surfaces a
@@ -51,6 +52,7 @@ const routes = [
 export const router = createRouter({
   history: createWebHistory(),
   routes,
+  scrollBehavior,
 });
 
 router.beforeEach(async (to) => {
