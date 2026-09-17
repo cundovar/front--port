@@ -180,10 +180,37 @@ const emit = defineEmits<{ select: [key: string] }>();
   .head {
     grid-template-columns: minmax(0, 1fr) auto;
     row-gap: 6px;
+    min-height: 64px;
+    padding: 12px;
+    gap: 5px 10px;
   }
 
   .role {
     grid-column: 1 / -1;
+    font-size: 10px;
+  }
+
+  .body {
+    padding: 14px 12px;
+  }
+
+  .details {
+    gap: 7px;
+  }
+
+  .details li {
+    display: grid;
+    gap: 3px;
+    padding-bottom: 7px;
+  }
+
+  .details strong {
+    min-width: 0;
+  }
+
+  .arrow {
+    padding: 2px 0;
+    font-size: 14px;
   }
 }
 </style>

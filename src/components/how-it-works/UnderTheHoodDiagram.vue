@@ -283,6 +283,84 @@ onBeforeUnmount(clearTimers);
   }
 }
 
+/* On a phone, the side ticket steals too much width from the layers. The
+   diagram becomes a full-width vertical trail: the rail carries the direction,
+   and the narration card under the button says where the request is. */
+@media (max-width: 640px) {
+  .hood {
+    gap: 8px;
+  }
+
+  .direction,
+  .direction.bottom {
+    text-align: left;
+  }
+
+  .stack {
+    position: relative;
+    padding-right: 0;
+    padding-left: 31px;
+  }
+
+  .stack::before {
+    content: "";
+    position: absolute;
+    top: 12px;
+    bottom: 12px;
+    left: 9px;
+    width: 3px;
+    background: repeating-linear-gradient(
+      to bottom,
+      var(--line) 0 7px,
+      transparent 7px 13px
+    );
+  }
+
+  .stack > :deep(.row) {
+    position: relative;
+  }
+
+  .stack > :deep(.row)::before {
+    content: "";
+    position: absolute;
+    top: 22px;
+    left: -27px;
+    z-index: 1;
+    width: 9px;
+    height: 9px;
+    border: 3px solid var(--line);
+    background: var(--bg-elev);
+  }
+
+  .stack > :deep(.row.lit)::before {
+    background: var(--accent);
+    box-shadow: 2px 2px 0 var(--line);
+  }
+
+  .travel {
+    display: none;
+  }
+
+  .controls {
+    display: grid;
+    gap: 10px;
+    padding-top: 2px;
+  }
+
+  .replay {
+    width: 100%;
+  }
+
+  .narration {
+    order: -1;
+    padding: 10px 12px;
+    border: 3px solid var(--line);
+    background: color-mix(in oklch, var(--bg-elev) 86%, var(--yellow));
+    box-shadow: 4px 4px 0 var(--line);
+    font-size: 14px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .travel,
   .direction {
