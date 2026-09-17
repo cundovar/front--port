@@ -62,6 +62,30 @@
       </div>
     </fieldset>
 
+    <fieldset v-if="answers.projectStage === 'existant' && stacks.length" class="quote-fieldset">
+      <legend class="quote-legend">Sur quoi est-ce construit ?</legend>
+      <p class="quote-hint">
+        Facultatif, et sans effet sur le prix. Reprendre un site WordPress et reprendre une
+        application sur mesure ne demandent pas le même travail.
+      </p>
+      <div class="quote-choices">
+        <label
+          v-for="stack in stacks"
+          :key="stack.key"
+          class="quote-choice"
+          :class="{ selected: answers.existingStackKey === stack.key }"
+        >
+          <input
+            type="radio"
+            name="existingStack"
+            :checked="answers.existingStackKey === stack.key"
+            @change="emit('update', { existingStackKey: stack.key })"
+          />
+          <span>{{ stack.label }}</span>
+        </label>
+      </div>
+    </fieldset>
+
     <fieldset v-if="asksAboutContent" class="quote-fieldset">
       <legend class="quote-legend">Avez-vous déjà vos textes et vos images ?</legend>
       <div class="quote-choices">
@@ -122,6 +146,7 @@ const props = defineProps<{
   errors: Record<string, string>;
   offer: QuoteOffer | null;
   tools: QuoteTool[];
+  stacks: QuoteTool[];
 }>();
 const emit = defineEmits<{ update: [Partial<QuoteAnswers>]; "toggle-tool": [string] }>();
 

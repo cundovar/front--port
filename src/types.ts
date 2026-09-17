@@ -256,6 +256,8 @@ export interface QuoteOffer {
 export interface QuoteCatalog {
   offers: QuoteOffer[];
   tools: QuoteTool[];
+  /** Asked only when something already exists. Context for the AI, never priced. */
+  stacks: QuoteTool[];
   adjustments: {
     contentWriting: { label: string; minimumAmount: number; maximumAmount: number };
   };
@@ -278,6 +280,8 @@ export interface QuoteAnswers {
   optionKeys: string[];
   /** Context for the recommendation only: a tool never changes an amount. */
   toolKeys: string[];
+  /** One stack key, empty unless the project stage is "existant". */
+  existingStackKey: string;
   projectStage: QuoteProjectStage;
   contentReadiness: QuoteContentReadiness;
   deadline: QuoteDeadline;

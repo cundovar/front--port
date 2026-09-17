@@ -192,6 +192,19 @@
             </label>
           </div>
 
+          <h3>Socles proposés quand quelque chose existe déjà</h3>
+          <p class="muted">
+            Affichés uniquement si le visiteur répond « Quelque chose existe déjà ». Comme les outils,
+            un socle ne porte aucun montant et ne change jamais un prix.
+          </p>
+          <div class="tools">
+            <label v-for="(stack, index) in draft.stacks ?? []" :key="index" class="label-field">
+              <span class="sr-only">Socle {{ index + 1 }}</span>
+              <input v-model="stack.label" type="text" :aria-invalid="!!errors[`stacks.${index}.label`]" />
+              <span class="field-error">{{ errors[`stacks.${index}.label`] || errors[`stacks.${index}.key`] }}</span>
+            </label>
+          </div>
+
           <div class="actions">
             <button class="btn btn-secondary" type="button" :disabled="saving" @click="load">
               Annuler

@@ -1,22 +1,23 @@
 import { describe, expect, it } from "vitest";
 import {
+  applicableStackKey,
+  applyProposalToAnswers,
   buildPreviewPayload,
+  buildRecommendationPayload,
   buildSubmitPayload,
+  canBeAnalysed,
+  contactFieldError,
   emptyAnswers,
   emptyContact,
   findOffer,
-  applyProposalToAnswers,
-  buildRecommendationPayload,
-  canBeAnalysed,
-  contactFieldError,
   formatQuotePrice,
+  isValidEmail,
   offerAsksAboutContent,
   pruneIncompatibleAnswers,
   reasonForKey,
-  suggestedKeys,
-  isValidEmail,
   resolvePreselectedOffer,
   submitErrorMessage,
+  suggestedKeys,
   validateContact,
   validateStep,
 } from "../src/composables/useQuoteSimulator";
@@ -389,5 +390,22 @@ describe("contactFieldError", () => {
   it("keeps the generic banner for anything not on the contact screen", () => {
     expect(contactFieldError("offerKey")).toBeNull();
     expect(contactFieldError(undefined)).toBeNull();
+  });
+});
+
+describe("applicableStackKey", () => {
+  it("sends the stack when something already exists", () => {
+    const answers = { ...emptyAnswers(), projectStage: "existant" as const, existingStackKey: "genere-ia" };
+
+    expect(applicableStackKey(answers)).toBe("genere-ia");
+  });
+
+  it("drops a stale answer when the visitor goes back to a new project", () => {
+    // The question is hidden again at that point, so leaving the key in the
+    // payload would file the estimate against a stack nobody claimed.
+    const answers = { ...emptyAnswers(), projectStage: "nouveau" as const, existingStackKey: "wordpress" };
+
+    expect(applicableStackKey(answers)).toBe("");
+    expect(buildSubmitPayload(answers, emptyContact()).existingStackKey).toBe("");
   });
 });

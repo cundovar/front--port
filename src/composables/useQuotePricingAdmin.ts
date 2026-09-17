@@ -153,7 +153,8 @@ export const validateCatalogDraft = (catalog: QuoteCatalog): QuoteCatalogError[]
     });
   });
 
-  errors.push(...toolErrors(catalog.tools ?? []));
+  errors.push(...namedListErrors(catalog.tools ?? [], "tools"));
+  errors.push(...namedListErrors(catalog.stacks ?? [], "stacks"));
 
   if (catalog.adjustments?.contentWriting) {
     errors.push(...rangeErrors(catalog.adjustments.contentWriting, "adjustments.contentWriting"));
@@ -168,21 +169,25 @@ export const validateCatalogDraft = (catalog: QuoteCatalog): QuoteCatalogError[]
   return errors;
 };
 
-const toolErrors = (tools: { key: unknown; label: unknown }[]): QuoteCatalogError[] => {
+/** Tools and stacks share one contract: a key, a label, no duplicate, no amount. */
+const namedListErrors = (
+  items: { key: unknown; label: unknown }[],
+  root: "tools" | "stacks",
+): QuoteCatalogError[] => {
   const errors: QuoteCatalogError[] = [];
   const seen: string[] = [];
 
-  tools.forEach((tool, index) => {
-    const path = `tools.${index}`;
+  items.forEach((item, index) => {
+    const path = `${root}.${index}`;
 
-    if (isBlank(tool.label)) errors.push({ path: `${path}.label`, message: "Champ texte requis." });
+    if (isBlank(item.label)) errors.push({ path: `${path}.label`, message: "Champ texte requis." });
 
-    if (isBlank(tool.key)) {
+    if (isBlank(item.key)) {
       errors.push({ path: `${path}.key`, message: "Champ texte requis." });
-    } else if (seen.includes(tool.key as string)) {
-      errors.push({ path: `${path}.key`, message: "Clé d’outil en double." });
+    } else if (seen.includes(item.key as string)) {
+      errors.push({ path: `${path}.key`, message: "Clé en double." });
     } else {
-      seen.push(tool.key as string);
+      seen.push(item.key as string);
     }
   });
 

@@ -35,6 +35,7 @@
         :errors="errors"
         :offer="currentOffer"
         :tools="catalog?.tools ?? []"
+        :stacks="catalog?.stacks ?? []"
         @update="Object.assign(answers, $event)"
         @toggle-tool="toggleTool"
       />

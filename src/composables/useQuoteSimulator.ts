@@ -81,6 +81,7 @@ export const emptyAnswers = (): QuoteAnswers => ({
   variantKey: "",
   optionKeys: [],
   toolKeys: [],
+  existingStackKey: "",
   projectStage: "nouveau",
   contentReadiness: "pret",
   deadline: "normal",
@@ -219,6 +220,14 @@ export const validateContact = (contact: QuoteContact): Record<string, string> =
   return errors;
 };
 
+/**
+ * The question is only asked when something already exists. Going back and
+ * switching to "nouveau" must not leave a stale answer in the payload, so the
+ * stage decides, not whatever the radio last held.
+ */
+export const applicableStackKey = (answers: QuoteAnswers): string =>
+  answers.projectStage === "existant" ? answers.existingStackKey : "";
+
 export const buildRecommendationPayload = (answers: QuoteAnswers) => ({
   offerKey: answers.offerKey,
   projectDescription: answers.projectDescription.trim(),
@@ -243,6 +252,7 @@ export const buildSubmitPayload = (answers: QuoteAnswers, contact: QuoteContact)
   // The server freezes the tools in the saved estimate: omitting them here left
   // "Outils déjà utilisés" empty in the email and in the backoffice.
   toolKeys: [...answers.toolKeys],
+  existingStackKey: applicableStackKey(answers),
   fullName: contact.fullName.trim(),
   email: contact.email.trim(),
   company: contact.company.trim(),
