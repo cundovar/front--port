@@ -14,6 +14,15 @@ RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_URI} \.[a-zA-Z0-9]{0,5}$
 RewriteRule ^ - [R=404,L]
 
+# A public route prerendered by scripts/prerender-seo.mjs has its own file, with
+# the real <title> and description in the <head>. Serving it here is what a
+# crawler that does not run JavaScript reads. Flat file, so the URL keeps no
+# trailing slash and Apache adds no redirect.
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}.html -f
+RewriteRule ^(.+)$ $1.html [L]
+
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^ index.html [L]

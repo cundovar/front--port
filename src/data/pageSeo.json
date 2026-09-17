@@ -1,0 +1,21 @@
+{
+  "siteName": "Facundo Varas",
+  "origin": "https://varascundo.com",
+  "pages": [
+    {
+      "path": "/comment-ca-marche",
+      "title": "Comment ça marche ?",
+      "description": "Site, application, automatisation ou IA : comment votre projet peut être construit, expliqué simplement, avec le détail technique en option."
+    },
+    {
+      "path": "/realisations",
+      "title": "Réalisations",
+      "description": "Projets web réalisés pour des indépendants, artisans et TPE : sites, refontes, outils métier et automatisations, avec le contexte et le résultat."
+    },
+    {
+      "path": "/devis",
+      "title": "Estimer votre projet web",
+      "description": "Estimez le budget de votre site, application ou automatisation en 2 minutes. Une fourchette de prix claire, sans engagement et sans inscription."
+    }
+  ]
+}

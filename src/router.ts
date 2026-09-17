@@ -14,14 +14,24 @@ import AdminQuoteEstimates from "./views/AdminQuoteEstimates.vue";
 import AdminQuotePricing from "./views/AdminQuotePricing.vue";
 import { api } from "./utils/api";
 import { pageTitle, setRobotsNoindex } from "./utils/pageTitle";
+import pageSeo from "./data/pageSeo.json";
+
+// Titles for the prerendered routes come from pageSeo.json, the same file the
+// build reads to write the <title> a crawler sees. Throwing here surfaces a
+// missing entry at startup rather than serving two different titles.
+const seoTitle = (path: string): string => {
+  const page = pageSeo.pages.find((candidate) => candidate.path === path);
+  if (!page) throw new Error(`pageSeo.json has no entry for ${path}`);
+  return page.title;
+};
 
 // `title` is undefined on "/" so the home page keeps the full wording written
 // in index.html. ProjectDetail sets its own once the project is loaded.
 const routes = [
   { path: "/", component: PublicHome },
-  { path: "/comment-ca-marche", component: HowItWorksPage, meta: { title: "Comment ça marche ?" } },
-  { path: "/realisations", component: RealisationsPage, meta: { title: "Réalisations" } },
-  { path: "/devis", component: QuoteSimulator, meta: { title: "Estimer votre projet web" } },
+  { path: "/comment-ca-marche", component: HowItWorksPage, meta: { title: seoTitle("/comment-ca-marche") } },
+  { path: "/realisations", component: RealisationsPage, meta: { title: seoTitle("/realisations") } },
+  { path: "/devis", component: QuoteSimulator, meta: { title: seoTitle("/devis") } },
   { path: "/realisations/:slug", component: ProjectDetail, meta: { title: "Réalisation" } },
   { path: "/admin/login", component: AdminLogin, meta: { title: "Connexion" } },
   { path: "/admin", component: AdminDashboard, meta: { title: "Administration" } },

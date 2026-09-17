@@ -1,9 +1,14 @@
+import pageSeo from "../data/pageSeo.json";
+
 /**
  * Every screen used to share the <title> written in index.html, because nothing
  * ever touched document.title. Google then showed the same line for the home
  * page, the quote simulator and each project — and the local wording was lost.
  */
-export const SITE_NAME = "Facundo Varas";
+
+/** Read from pageSeo.json, which the build-time prerender also reads, so the
+ *  title a crawler is served and the one the router sets cannot drift apart. */
+export const SITE_NAME = pageSeo.siteName;
 export const DEFAULT_TITLE = "Développeur web à Paris 20e | Sites, automatisation, IA";
 
 /**
