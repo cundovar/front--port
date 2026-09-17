@@ -230,7 +230,7 @@
       "description": "Front, API, base de données, admin et déploiement dans une même logique produit."
     },
     {
-      "title": "IA encadree",
+      "title": "IA encadrée",
       "description": "Des agents et automatisations qui assistent le travail sans masquer les contrôles humains."
     },
     {
@@ -239,16 +239,6 @@
     }
   ],
 
-  "availability": {
-    "title": "Disponible pour missions courtes ou refontes progressives",
-    "subtitle": "Idéal pour un cadrage Codeur.com, une automatisation métier ou une reprise d'application existante.",
-    "items": [
-      "Audit et plan d'action",
-      "Prototype IA ou automatisation",
-      "Refonte front/back",
-      "Backoffice administrable"
-    ]
-  },
 
   "stack": {
     "title": "Stack & pratiques",

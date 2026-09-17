@@ -64,12 +64,6 @@ export interface ExpertiseItem {
   description: string;
 }
 
-export interface AvailabilityContent {
-  title: string;
-  subtitle: string;
-  items: string[];
-}
-
 // === AI ===
 export interface AiToolItem {
   name: string;
@@ -194,7 +188,6 @@ export interface ContentData {
   problems: ProblemContent[];
   process: ProcessStep[];
   expertise: ExpertiseItem[];
-  availability: AvailabilityContent;
   stack: StackContent;
   ai: AiContent;
   teaching: TeachingContent;

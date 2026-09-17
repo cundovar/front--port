@@ -10,7 +10,6 @@ const contentSections = [
   "problems",
   "process",
   "expertise",
-  "availability",
   "stack",
   "ai",
   "teaching",
