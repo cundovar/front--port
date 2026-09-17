@@ -7,7 +7,10 @@ import { pageTitle } from "../src/utils/pageTitle";
 const sitemap = readFileSync(resolve(__dirname, "../public/sitemap.xml"), "utf8");
 
 describe("pageSeo", () => {
-  it("names each route once", () => {
+  it("names each route once, on a single path segment", () => {
+    // Apache splits /realisations/<slug> into the filename dist/realisations
+    // plus PATH_INFO, so a two-segment prerendered route would make the rewrite
+    // in public/.htaccess capture every child URL and 404 it.
     const paths = pageSeo.pages.map((page) => page.path);
 
     expect(new Set(paths).size).toBe(paths.length);

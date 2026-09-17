@@ -1,7 +1,6 @@
-# Left on, MultiViews resolves /realisations to realisations.html by itself and
-# treats the rest of the path as PATH_INFO, so /realisations/<slug> answered 404
-# the moment the prerendered files landed. The rewrite below must be the only
-# thing mapping a URL to a file here.
+# Left on, MultiViews maps /realisations to realisations.html by itself and reads
+# the rest of the path as PATH_INFO, so /realisations/<slug> would 404. The rule
+# below must be the only thing that maps a URL to a file here.
 Options -MultiViews
 
 RewriteEngine On
@@ -24,10 +23,15 @@ RewriteRule ^ - [R=404,L]
 # the real <title> and description in the <head>. Serving it here is what a
 # crawler that does not run JavaScript reads. Flat file, so the URL keeps no
 # trailing slash and Apache adds no redirect.
+#
+# One segment only. Apache splits /realisations/<slug> into the filename
+# dist/realisations plus PATH_INFO /<slug>, so REQUEST_FILENAME.html matched
+# realisations.html and every project page 404'd. pageSeo.json is checked to
+# hold single-segment paths for the same reason.
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME}.html -f
-RewriteRule ^(.+)$ $1.html [L]
+RewriteRule ^([^/]+)$ $1.html [L]
 
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
