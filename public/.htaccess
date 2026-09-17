@@ -1,3 +1,9 @@
+# Left on, MultiViews resolves /realisations to realisations.html by itself and
+# treats the rest of the path as PATH_INFO, so /realisations/<slug> answered 404
+# the moment the prerendered files landed. The rewrite below must be the only
+# thing mapping a URL to a file here.
+Options -MultiViews
+
 RewriteEngine On
 
 # Vue Router history mode fallback for files served from dist/.
