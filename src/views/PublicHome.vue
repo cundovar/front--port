@@ -5,7 +5,7 @@
       <nav class="nav-links" aria-label="Navigation principale">
         <a href="#services">Services</a>
         <RouterLink to="/comment-ca-marche">Comment ça marche ?</RouterLink>
-        <a href="#faq">FAQ</a>
+        <RouterLink to="/faq">FAQ</RouterLink>
         <a href="#cases">Réalisations</a>
         <a href="#process">Méthode</a>
         <a href="#profile">À propos</a>
@@ -46,7 +46,6 @@
       :teaching-items="content.teaching.items"
     />
 
-    <FaqSection :services="content.services" />
 
     <section id="contact" class="section contact-section" aria-labelledby="contact-form-title">
       <h2 id="contact-form-title" class="section-title">Parlons de votre projet</h2>
@@ -71,7 +70,6 @@ import { RouterLink } from "vue-router";
 import HeroSection from "../components/HeroSection.vue";
 import ProofBar from "../components/ProofBar.vue";
 import ServicesSection from "../components/ServicesSection.vue";
-import FaqSection from "../components/FaqSection.vue";
 import ProblemsSection from "../components/ProblemsSection.vue";
 import FeaturedCasesSection from "../components/FeaturedCasesSection.vue";
 import ProcessSection from "../components/ProcessSection.vue";

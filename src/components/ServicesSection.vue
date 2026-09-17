@@ -18,13 +18,14 @@
           {{ service.actionLabel }}
         </a>
         <span class="estimate-note">Estimation sans engagement</span>
-        <a href="#faq" class="faq-anchor">Voir la FAQ</a>
+        <RouterLink to="/faq" class="faq-anchor">Voir la FAQ</RouterLink>
       </article>
     </div>
   </section>
 </template>
 
 <script setup lang="ts">
+import { RouterLink } from "vue-router";
 import { buildQuoteCtaHref } from "../composables/useQuoteSimulator";
 import type { QuoteServiceKey } from "../types";
 

@@ -8,6 +8,11 @@
       "description": "Site, application, automatisation ou IA : comment votre projet peut être construit, expliqué simplement, avec le détail technique en option."
     },
     {
+      "path": "/faq",
+      "title": "Questions fréquentes",
+      "description": "Délais, budget, déroulé d’une mission, maintenance : les réponses aux questions posées le plus souvent, service par service."
+    },
+    {
       "path": "/realisations",
       "title": "Réalisations",
       "description": "Projets web réalisés pour des indépendants, artisans et TPE : sites, refontes, outils métier et automatisations, avec le contexte et le résultat."

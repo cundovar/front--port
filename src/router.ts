@@ -3,6 +3,7 @@ import PublicHome from "./views/PublicHome.vue";
 import ProjectDetail from "./views/ProjectDetail.vue";
 import RealisationsPage from "./views/RealisationsPage.vue";
 import HowItWorksPage from "./views/HowItWorksPage.vue";
+import FaqPage from "./views/FaqPage.vue";
 import AdminDashboard from "./views/AdminDashboard.vue";
 import AdminProjects from "./views/AdminProjects.vue";
 import AdminComments from "./views/AdminComments.vue";
@@ -30,6 +31,7 @@ const seoTitle = (path: string): string => {
 const routes = [
   { path: "/", component: PublicHome },
   { path: "/comment-ca-marche", component: HowItWorksPage, meta: { title: seoTitle("/comment-ca-marche") } },
+  { path: "/faq", component: FaqPage, meta: { title: seoTitle("/faq") } },
   { path: "/realisations", component: RealisationsPage, meta: { title: seoTitle("/realisations") } },
   { path: "/devis", component: QuoteSimulator, meta: { title: seoTitle("/devis") } },
   { path: "/realisations/:slug", component: ProjectDetail, meta: { title: "Réalisation" } },

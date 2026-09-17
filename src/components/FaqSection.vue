@@ -1,13 +1,8 @@
 <template>
-  <section v-if="groups.length" id="faq" class="section faq-section" aria-labelledby="faq-title">
-    <div class="faq-header">
-      <h2 id="faq-title" class="section-title">Questions fréquentes</h2>
-      <p class="section-subtitle">Des réponses concrètes sur les missions proposées.</p>
-    </div>
-
+  <section v-if="groups.length" class="section faq-section" aria-label="Questions fréquentes">
     <div class="faq-groups">
       <article v-for="group in groups" :key="group.title" class="faq-group">
-        <h3 class="faq-group-title">{{ group.title }}</h3>
+        <h2 class="faq-group-title">{{ group.title }}</h2>
         <div class="faq-list">
           <details v-for="item in group.items" :key="item.question" class="faq-item">
             <summary>{{ item.question }}</summary>
@@ -43,10 +38,6 @@ const groups = computed(() =>
 </script>
 
 <style scoped>
-.faq-header {
-  margin-bottom: clamp(40px, 8vw, 80px);
-}
-
 .faq-groups {
   display: grid;
   gap: clamp(28px, 5vw, 56px);

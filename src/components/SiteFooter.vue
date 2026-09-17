@@ -14,13 +14,14 @@
       >
         {{ link.label }}
       </a>
-      <a href="#faq">FAQ</a>
+      <RouterLink to="/faq">FAQ</RouterLink>
       <a :href="`mailto:${contactEmail}`">Email</a>
     </div>
   </footer>
 </template>
 
 <script setup lang="ts">
+import { RouterLink } from "vue-router";
 import type { FooterLink } from "../types";
 
 interface Props {
