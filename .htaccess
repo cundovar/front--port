@@ -1,5 +1,18 @@
 RewriteEngine On
 
+# http:// served the site instead of redirecting, so every page existed at two
+# addresses and a link to the http one passed nothing to the https one.
+#
+# It belongs here, before anything is rewritten: in dist/.htaccess the request
+# has already become /dist/<path>, and the redirect sent visitors there.
+#
+# Cannot loop: both signals were read from this server before writing the rule.
+# Over https it reports HTTPS=on and X-Forwarded-Proto=https, so the conditions
+# are false and the rule never fires.
+RewriteCond %{HTTPS} !=on
+RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+
 # Serve the built Vite app from dist/ when this file is deployed at the
 # frontend project root. Do not rewrite requests that are already in dist/.
 RewriteRule ^dist/ - [L]

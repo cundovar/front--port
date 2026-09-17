@@ -9,15 +9,17 @@ Options -MultiViews
 
 RewriteEngine On
 
-# http:// served the site instead of redirecting, so every page existed at two
-# addresses and a link to the http one passed nothing to the https one.
+# Every page also answered at /dist/<path>, a second address for the same
+# content, and the rules at the site root never see it: mod_rewrite does not
+# inherit into a directory that enables rewriting of its own, which this one
+# does.
 #
-# Cannot loop: both signals were read from this server before writing the rule.
-# Over https it reports HTTPS=on and X-Forwarded-Proto=https, so the conditions
-# are false and the rule never fires.
-RewriteCond %{HTTPS} !=on
-RewriteCond %{HTTP:X-Forwarded-Proto} !=https
-RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+# THE_REQUEST holds the line the client actually sent, untouched by internal
+# rewrites, so this tells a visitor who typed /dist/ apart from the root's own
+# rewrite of /<path> to dist/<path> — the two are indistinguishable here
+# otherwise. No loop: the redirected request no longer carries /dist/.
+RewriteCond %{THE_REQUEST} \s\S*/dist/
+RewriteRule ^(.*)$ /$1 [R=301,L]
 
 # Vue Router history mode fallback for files served from dist/.
 RewriteRule ^api(/.*)?$ - [L]
