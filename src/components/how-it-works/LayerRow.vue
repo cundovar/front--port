@@ -1,5 +1,7 @@
 <template>
   <div class="row" :class="{ open, lit, dim }">
+    <span class="node" aria-hidden="true"></span>
+
     <button
       class="head"
       type="button"
@@ -50,6 +52,10 @@ const emit = defineEmits<{ select: [key: string] }>();
 .row {
   display: flex;
   flex-direction: column;
+}
+
+.node {
+  display: none;
 }
 
 .head {
@@ -177,6 +183,27 @@ const emit = defineEmits<{ select: [key: string] }>();
 }
 
 @media (max-width: 640px) {
+  .row {
+    position: relative;
+  }
+
+  .node {
+    display: block;
+    position: absolute;
+    top: 22px;
+    left: -27px;
+    z-index: 1;
+    width: 9px;
+    height: 9px;
+    border: 3px solid var(--line);
+    background: var(--bg-elev);
+  }
+
+  .row.lit .node {
+    background: var(--accent);
+    box-shadow: 2px 2px 0 var(--line);
+  }
+
   .head {
     grid-template-columns: minmax(0, 1fr) auto;
     row-gap: 6px;

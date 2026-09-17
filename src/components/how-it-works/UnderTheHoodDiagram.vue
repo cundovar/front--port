@@ -1,6 +1,6 @@
 <template>
   <div class="hood">
-    <p class="direction top" :class="{ active: step >= 1 && step <= 4 }" aria-hidden="true">
+    <p class="direction" :class="{ active: step >= 1 && step <= 4 }" aria-hidden="true">
       Votre facture descend ↓
     </p>
 
@@ -41,8 +41,6 @@
         </span>
       </div>
     </div>
-
-    <p class="direction bottom" :class="{ active: step === 5 }" aria-hidden="true">↑ La confirmation remonte</p>
 
     <div class="controls">
       <button class="replay" type="button" :disabled="step > 0" @click="playRequest">
@@ -167,10 +165,6 @@ onBeforeUnmount(clearTimers);
   transition: color 200ms var(--ease);
 }
 
-.direction.bottom {
-  text-align: right;
-}
-
 .direction.active {
   color: var(--accent);
 }
@@ -291,11 +285,6 @@ onBeforeUnmount(clearTimers);
     gap: 8px;
   }
 
-  .direction,
-  .direction.bottom {
-    text-align: left;
-  }
-
   .stack {
     position: relative;
     padding-right: 0;
@@ -314,27 +303,6 @@ onBeforeUnmount(clearTimers);
       var(--line) 0 7px,
       transparent 7px 13px
     );
-  }
-
-  .stack > :deep(.row) {
-    position: relative;
-  }
-
-  .stack > :deep(.row)::before {
-    content: "";
-    position: absolute;
-    top: 22px;
-    left: -27px;
-    z-index: 1;
-    width: 9px;
-    height: 9px;
-    border: 3px solid var(--line);
-    background: var(--bg-elev);
-  }
-
-  .stack > :deep(.row.lit)::before {
-    background: var(--accent);
-    box-shadow: 2px 2px 0 var(--line);
   }
 
   .travel {
