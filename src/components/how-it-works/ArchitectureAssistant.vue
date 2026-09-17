@@ -1,7 +1,7 @@
 <template>
   <div class="assistant" :style="{ '--questions': asksWhoEdits(kind) ? 3 : 2 }">
     <fieldset>
-      <legend>1. Que voulez-vous créer ?</legend>
+      <legend><span class="step">1</span>Que voulez-vous créer ?</legend>
       <div class="choices">
         <button
           v-for="choice in kinds"
@@ -17,7 +17,7 @@
 
     <!-- Only shown where it changes the answer; see asksWhoEdits. -->
     <fieldset v-if="asksWhoEdits(kind)">
-      <legend>2. Le contenu devra-t-il être modifié ?</legend>
+      <legend><span class="step">2</span>Le contenu devra-t-il être modifié ?</legend>
       <div class="choices">
         <button
           v-for="choice in owners"
@@ -32,7 +32,7 @@
     </fieldset>
 
     <fieldset>
-      <legend>{{ asksWhoEdits(kind) ? "3." : "2." }} Votre projet est-il très spécifique ?</legend>
+      <legend><span class="step">{{ asksWhoEdits(kind) ? 3 : 2 }}</span>Votre projet est-il très spécifique ?</legend>
       <div class="choices">
         <button
           v-for="choice in specificities"
@@ -138,6 +138,16 @@ legend {
   font-size: 11px;
   font-weight: 900;
   text-transform: uppercase;
+}
+
+/* Inline rather than a flex item: the question wraps around it on a narrow
+   column instead of being pushed onto its own line. */
+.step {
+  margin-right: 7px;
+  color: var(--accent);
+  font-family: var(--font-display);
+  font-size: 26px;
+  line-height: 0.9;
 }
 
 .choices {
