@@ -15,7 +15,7 @@ describe("pageTitle", () => {
   });
 
   it("stays inside what Google renders before truncating", () => {
-    ["Réalisations", "Estimer votre projet web", "Réalisation", "Demandes de devis"].forEach((name) =>
+    ["Réalisations", "Estimer votre projet web", "Comment ça marche ?", "Réalisation", "Demandes de devis"].forEach((name) =>
       expect(pageTitle(name).length, name).toBeLessThanOrEqual(60),
     );
     expect(DEFAULT_TITLE.length).toBeLessThanOrEqual(60);

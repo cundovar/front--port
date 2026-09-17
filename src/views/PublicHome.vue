@@ -4,6 +4,7 @@
       <a class="brand" href="#top">{{ content.header.logoText }}</a>
       <nav class="nav-links" aria-label="Navigation principale">
         <a href="#services">Services</a>
+        <RouterLink to="/comment-ca-marche">Comment ça marche ?</RouterLink>
         <a href="#faq">FAQ</a>
         <a href="#cases">Réalisations</a>
         <a href="#process">Méthode</a>
@@ -66,6 +67,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
+import { RouterLink } from "vue-router";
 import HeroSection from "../components/HeroSection.vue";
 import ProofBar from "../components/ProofBar.vue";
 import ServicesSection from "../components/ServicesSection.vue";

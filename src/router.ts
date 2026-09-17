@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from "vue-router";
 import PublicHome from "./views/PublicHome.vue";
 import ProjectDetail from "./views/ProjectDetail.vue";
 import RealisationsPage from "./views/RealisationsPage.vue";
+import HowItWorksPage from "./views/HowItWorksPage.vue";
 import AdminDashboard from "./views/AdminDashboard.vue";
 import AdminProjects from "./views/AdminProjects.vue";
 import AdminComments from "./views/AdminComments.vue";
@@ -18,6 +19,7 @@ import { pageTitle, setRobotsNoindex } from "./utils/pageTitle";
 // in index.html. ProjectDetail sets its own once the project is loaded.
 const routes = [
   { path: "/", component: PublicHome },
+  { path: "/comment-ca-marche", component: HowItWorksPage, meta: { title: "Comment ça marche ?" } },
   { path: "/realisations", component: RealisationsPage, meta: { title: "Réalisations" } },
   { path: "/devis", component: QuoteSimulator, meta: { title: "Estimer votre projet web" } },
   { path: "/realisations/:slug", component: ProjectDetail, meta: { title: "Réalisation" } },
