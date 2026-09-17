@@ -31,13 +31,26 @@
           @select="select"
         />
 
+        <!-- Drawn rather than written: the narration under the button already
+             names what is travelling, so the object only has to be followed. -->
         <span
+          ref="travelEl"
           class="travel"
           :class="{ idle: step === 0, back: step === 5 }"
           :style="{ top: `${labelTop}px` }"
           aria-hidden="true"
         >
-          {{ step === 5 ? "« Validée ✓ »" : "« Ma facture »" }}
+          <svg class="sheet" viewBox="0 0 48 62" focusable="false">
+            <path class="paper" d="M3 3 H31 L45 17 V59 H3 Z" />
+            <path class="fold" d="M31 3 V17 H45" />
+            <g class="lines">
+              <path d="M11 30 H37" />
+              <path d="M11 38 H37" />
+              <path d="M11 46 H28" />
+            </g>
+            <path class="check" d="M12 41 L20 49 L38 31" />
+          </svg>
+          <span class="word">{{ step === 5 ? "Validée" : "Facture" }}</span>
         </span>
       </div>
     </div>
@@ -90,6 +103,7 @@ const holders = ["interface", "api", "engine", "data", "interface"];
 const openLayer = ref<string | null>("visitor");
 const step = ref(0);
 const bridgeEl = ref<HTMLElement | null>(null);
+const travelEl = ref<HTMLElement | null>(null);
 const labelTop = ref(0);
 
 const litLayer = computed(() => (step.value ? holders[step.value - 1] : null));
@@ -99,7 +113,8 @@ const busyLabels = computed<Record<string, string | undefined>>(() => ({
   data: step.value === 4 ? "enregistrement…" : undefined,
 }));
 
-const LABEL_HEIGHT = 38;
+/** Only used before the label has been laid out once. */
+const FALLBACK_LABEL_HEIGHT = 78;
 
 // Measured rather than computed from percentages: an opened row changes the
 // heights, and the label still has to line up with the row it is visiting.
@@ -113,7 +128,7 @@ const placeAgainst = (key: string): void => {
   const top = travellingLabelTop(
     bridge.getBoundingClientRect().top,
     head.getBoundingClientRect(),
-    LABEL_HEIGHT,
+    travelEl.value?.offsetHeight || FALLBACK_LABEL_HEIGHT,
   );
 
   // Keeping the previous position is the safe failure: the label stays on a row
@@ -184,8 +199,8 @@ onBeforeUnmount(clearTimers);
 .stack {
   display: flex;
   flex-direction: column;
-  /* Gutter the travelling label rides in, clear of the rows. */
-  padding-right: 164px;
+  /* Gutter the travelling sheet rides in, clear of the rows. */
+  padding-right: 110px;
 }
 
 .bridge {
@@ -197,24 +212,69 @@ onBeforeUnmount(clearTimers);
 .travel {
   position: absolute;
   left: calc(100% + 14px);
-  width: 150px;
-  padding: 8px 10px;
-  border: 3px solid var(--line);
-  background: var(--accent);
-  color: #fffef8;
-  box-shadow: 4px 4px 0 var(--line);
-  font-family: var(--font-mono);
-  font-size: 11px;
-  font-weight: 900;
-  transition: top 450ms var(--ease), background 220ms var(--ease), opacity 220ms var(--ease);
+  width: 96px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  transition: top 450ms var(--ease), opacity 220ms var(--ease);
 }
 
 .travel.idle {
   opacity: 0;
 }
 
-.travel.back {
-  background: var(--blue);
+.sheet {
+  width: 52px;
+  height: auto;
+  /* The hard shadow is part of the page's language; it must not be clipped. */
+  overflow: visible;
+  filter: drop-shadow(4px 4px 0 var(--line));
+}
+
+.sheet path {
+  fill: none;
+  stroke: var(--line);
+  stroke-width: 3;
+}
+
+.paper {
+  fill: var(--accent);
+  transition: fill 220ms var(--ease);
+}
+
+.lines {
+  transition: opacity 180ms var(--ease);
+}
+
+/* Stamped on arrival, in the colour of the paper it is stamped on. */
+.check {
+  stroke: #fffef8;
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0;
+  transition: opacity 180ms var(--ease);
+}
+
+.travel .word {
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.travel.back .paper {
+  fill: var(--blue);
+}
+
+.travel.back .lines {
+  opacity: 0;
+}
+
+.travel.back .check {
+  opacity: 1;
 }
 
 .controls {
@@ -282,13 +342,19 @@ onBeforeUnmount(clearTimers);
 
 @media (max-width: 760px) {
   .stack {
-    padding-right: 104px;
+    padding-right: 84px;
   }
 
   .travel {
     left: calc(100% + 8px);
-    width: 96px;
-    padding: 6px 7px;
+    width: 72px;
+  }
+
+  .sheet {
+    width: 40px;
+  }
+
+  .travel .word {
     font-size: 10px;
   }
 }
@@ -347,7 +413,10 @@ onBeforeUnmount(clearTimers);
 
 @media (prefers-reduced-motion: reduce) {
   .travel,
-  .direction {
+  .direction,
+  .paper,
+  .lines,
+  .check {
     transition: none;
   }
 
