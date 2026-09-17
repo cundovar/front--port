@@ -19,6 +19,7 @@
             : "Envie d’aller plus loin ? Affichez les technologies utilisées derrière chaque solution."
         }}
       </p>
+      <TechStackMarquee v-if="technical.enabled.value" :items="stackItems" />
     </header>
 
     <section class="section entry-section" aria-labelledby="entry-title">
@@ -74,7 +75,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import { RouterLink } from "vue-router";
 import { provideTechnicalLevel } from "../composables/useTechnicalLevel";
 import SiteSolutionExplorer from "../components/how-it-works/SiteSolutionExplorer.vue";
@@ -83,6 +84,8 @@ import AutomationExplorer from "../components/how-it-works/AutomationExplorer.vu
 import AiExplorer from "../components/how-it-works/AiExplorer.vue";
 import UnderTheHoodDiagram from "../components/how-it-works/UnderTheHoodDiagram.vue";
 import ArchitectureAssistant from "../components/how-it-works/ArchitectureAssistant.vue";
+import TechStackMarquee from "../components/how-it-works/TechStackMarquee.vue";
+import { useContent } from "../composables/useContent";
 
 type EntryKey = "site" | "application" | "automation" | "ai";
 
@@ -115,6 +118,13 @@ const entries = [
 
 const activeEntry = ref<EntryKey>("site");
 const technical = provideTechnicalLevel();
+
+const { content } = useContent();
+
+/** The band shows what the backoffice lists under "Stack", nothing hardcoded. */
+const stackItems = computed(() =>
+  (content.value.stack.items ?? []).map((item) => item.trim()).filter(Boolean),
+);
 </script>
 
 <style scoped>
