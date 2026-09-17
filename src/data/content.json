@@ -92,6 +92,10 @@
           "answer": "Il prépare le travail répétitif : trier des demandes, résumer un dossier, proposer un premier brouillon de réponse ou remplir des informations à partir de vos règles. Vous gardez la décision finale et gagnez du temps sur la préparation."
         },
         {
+          "question": "Mon assistant IA peut-il agir dans mes outils, pas seulement répondre ?",
+          "answer": "Oui. Un assistant peut se contenter de répondre, ou aller jusqu’à créer un devis, mettre à jour une fiche client ou préparer une relance directement dans vos outils. Techniquement, cela passe par le protocole MCP, qui lui ouvre des actions précises et rien d’autre. Chaque action passe par votre validation, et tout ce qu’il a fait reste consigné."
+        },
+        {
           "question": "Comment éviter qu’il donne une réponse incohérente ?",
           "answer": "On lui fournit seulement les informations et règles utiles à votre métier, on limite les questions qu’il traite et on garde un écran de contrôle. Les réponses restent vérifiables et les cas sensibles passent par une validation humaine."
         }
@@ -247,6 +251,7 @@
       "Front : Vue + React, Vite, composants réutilisables",
       "Back : Symfony API, auth, CRUD, uploads",
       "WordPress : plugins personnalisés",
+      "IA : agents, MCP, RAG et garde-fous",
       "Qualité : Docker, migrations, Git propre"
     ]
   },
