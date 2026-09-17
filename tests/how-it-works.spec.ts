@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { asksWhoEdits, hoodLayers, recommendArchitecture } from "../src/data/howItWorks";
+import {
+  asksWhoEdits,
+  definitionsFor,
+  hoodLayers,
+  plainGlossary,
+  recommendArchitecture,
+} from "../src/data/howItWorks";
 import { travellingLabelTop } from "../src/utils/hoodLabel";
 
 describe("recommendArchitecture", () => {
@@ -83,6 +89,31 @@ describe("recommendArchitecture", () => {
         expect(new Set(answers).size === 2, `${kind}/${specificity}`).toBe(asksWhoEdits(kind));
       });
     });
+  });
+
+  it("defines only words the visitor is actually shown", () => {
+    const shown = new Set(
+      kinds.flatMap((kind) =>
+        owners.flatMap((owner) =>
+          specificities.flatMap((specificity) => recommendArchitecture(kind, owner, specificity).plain),
+        ),
+      ),
+    );
+
+    // A definition for a step no chain contains is a footnote nobody can reach.
+    Object.keys(plainGlossary).forEach((term) => expect(shown).toContain(term));
+  });
+
+  it("explains the jargon without introducing more of it", () => {
+    const products = /wordpress|symfony|react|vue|payload|postgresql|mysql|n8n|php|api rest|webhook/i;
+
+    Object.values(plainGlossary).forEach((definition) => expect(definition).not.toMatch(products));
+  });
+
+  it("shows a definition once, for the steps of the answer on screen", () => {
+    const definitions = definitionsFor(["Déclencheur", "Automatisation", "Règles métier", "Déclencheur"]);
+
+    expect(definitions.map((entry) => entry.term)).toEqual(["Déclencheur", "Règles métier"]);
   });
 
   it("describes every recommendation in client words before naming any tool", () => {

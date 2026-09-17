@@ -227,6 +227,38 @@ const aiRecommendation = (specificity: Specificity): ArchitectureRecommendation 
 };
 
 /**
+ * Words the chain cannot avoid but a client should not have to guess.
+ *
+ * Only the genuinely opaque ones are here: a definition beside every step
+ * would bury the recommendation it is meant to clarify.
+ */
+export const plainGlossary: Record<string, string> = {
+  "Règles métier":
+    "Ce que votre activité impose : qui a le droit de faire quoi, ce qui est obligatoire, ce qui est interdit. Les mêmes règles qu’aujourd’hui, écrites une fois pour toutes dans l’outil.",
+  "Logique métier":
+    "La part du logiciel qui applique vos règles de travail, plutôt que de se contenter d’afficher et d’enregistrer.",
+  "API métier":
+    "Le passage obligé entre l’écran et vos données : il vérifie chaque demande avant de la laisser aboutir.",
+  "Back-office": "La partie privée du site, où vous modifiez les contenus. Vos visiteurs ne la voient jamais.",
+  "Back-office séparé":
+    "La partie privée vit à part de la partie publique : l’écran du visiteur peut être refait sans toucher à la gestion des contenus.",
+  "Back-office prêt à l’emploi":
+    "L’interface d’administration existe déjà et n’est pas développée pour vous : vous la configurez plutôt que de la construire.",
+  "Déclencheur":
+    "L’événement qui lance l’automatisation : un formulaire rempli, un email reçu, ou simplement une heure de la journée.",
+  "Contenu intégré":
+    "Les textes et les images vivent dans le site : ils changent lors d’une mise à jour, pas depuis une interface de gestion.",
+  "Reprise d’erreur":
+    "Ce qui se passe quand un outil ne répond pas : l’action est réessayée, et vous êtes prévenu si elle échoue quand même.",
+};
+
+/** The definitions worth showing for one recommendation: those it actually uses. */
+export const definitionsFor = (plain: string[]): Array<{ term: string; definition: string }> =>
+  plain
+    .filter((step, index) => plainGlossary[step] !== undefined && plain.indexOf(step) === index)
+    .map((step) => ({ term: step, definition: plainGlossary[step] }));
+
+/**
  * Whether the content question is worth asking.
  *
  * Only a site branches on it: for an automation or an assistant the answer was

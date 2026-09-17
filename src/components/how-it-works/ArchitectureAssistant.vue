@@ -51,7 +51,7 @@
 
       <div class="chain plain">
         <span v-for="(step, index) in recommendation.plain" :key="step">
-          <em>{{ step }}</em>
+          <em>{{ step }}<sup v-if="plainGlossary[step]" aria-hidden="true">*</sup></em>
           <strong v-if="index < recommendation.plain.length - 1" aria-hidden="true">→</strong>
         </span>
       </div>
@@ -68,6 +68,13 @@
       </ul>
       <p class="reason">{{ recommendation.reason }}</p>
 
+      <dl v-if="definitions.length" class="glossary">
+        <template v-for="entry in definitions" :key="entry.term">
+          <dt>{{ entry.term }}<sup aria-hidden="true">*</sup></dt>
+          <dd>{{ entry.definition }}</dd>
+        </template>
+      </dl>
+
       <div class="result-actions">
         <RouterLink class="estimate-link" to="/devis">En parler concrètement</RouterLink>
         <span>Estimation indicative · Sans engagement</span>
@@ -82,6 +89,8 @@ import { RouterLink } from "vue-router";
 import { useTechnicalLevel } from "../../composables/useTechnicalLevel";
 import {
   asksWhoEdits,
+  definitionsFor,
+  plainGlossary,
   recommendArchitecture,
   type ContentOwner,
   type ProjectKind,
@@ -114,6 +123,7 @@ const owner = ref<ContentOwner>("someone");
 const specificity = ref<Specificity>("low");
 
 const recommendation = computed(() => recommendArchitecture(kind.value, owner.value, specificity.value));
+const definitions = computed(() => definitionsFor(recommendation.value.plain));
 </script>
 
 <style scoped>
@@ -134,20 +144,17 @@ fieldset {
 
 legend {
   padding: 0 6px;
-  font-family: var(--font-mono);
-  font-size: 11px;
+  color: var(--accent);
+  font-family: var(--font-display);
+  font-size: clamp(18px, 2.2vw, 23px);
   font-weight: 900;
-  text-transform: uppercase;
+  line-height: 0.95;
 }
 
 /* Inline rather than a flex item: the question wraps around it on a narrow
    column instead of being pushed onto its own line. */
 .step {
-  margin-right: 7px;
-  color: var(--accent);
-  font-family: var(--font-display);
-  font-size: 26px;
-  line-height: 0.9;
+  margin-right: 8px;
 }
 
 .choices {
@@ -236,6 +243,42 @@ legend {
 
 .chain strong {
   color: var(--accent);
+}
+
+.chain.plain sup {
+  font-size: 0.45em;
+  color: var(--accent);
+  vertical-align: super;
+}
+
+/* The definitions sit inside the card, under the reason: a visitor who reads
+   the chain and stops is not sent looking elsewhere for the words in it. */
+.glossary {
+  margin: 4px 0 0;
+  padding-top: 12px;
+  border-top: 2px solid var(--line);
+}
+
+.glossary dt {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.glossary dt sup {
+  color: var(--accent);
+}
+
+.glossary dd {
+  margin: 2px 0 10px;
+  max-width: 70ch;
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.glossary dd:last-child {
+  margin-bottom: 0;
 }
 
 .result ul {
