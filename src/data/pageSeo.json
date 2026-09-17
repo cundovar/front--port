@@ -5,7 +5,25 @@
     {
       "path": "/comment-ca-marche",
       "title": "Comment ça marche ?",
-      "description": "Site, application, automatisation ou IA : comment votre projet peut être construit, expliqué simplement, avec le détail technique en option."
+      "description": "Site, application, automatisation ou IA : comment votre projet peut être construit, expliqué simplement, avec le détail technique en option.",
+      "outline": [
+        {
+          "heading": "Construire mon projet",
+          "text": "Quatre besoins : créer un site, créer une application, automatiser une tâche répétitive, mettre l’IA au travail. Chacun s’ouvre sur les chemins possibles et sur ce qui les distingue."
+        },
+        {
+          "heading": "Sous le capot",
+          "text": "Le trajet d’une demande, de l’écran jusqu’aux données : l’interface qui réagit à vos clics, l’API qui transporte la demande, le moteur qui applique vos règles, la base qui conserve les informations."
+        },
+        {
+          "heading": "Construisez votre projet",
+          "text": "Trois questions — ce que vous voulez créer, qui gère le contenu, la part de cas particuliers — et l’architecture qui en découle, décrite en mots courants avant d’être nommée."
+        },
+        {
+          "heading": "On garde le même langage",
+          "text": "Deux niveaux de lecture sur toute la page : la version client par défaut, le détail technique en option, sans changer de page ni de vocabulaire."
+        }
+      ]
     },
     {
       "path": "/tarifs",

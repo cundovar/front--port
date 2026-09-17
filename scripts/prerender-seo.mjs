@@ -37,33 +37,49 @@ const escapeText = (value) =>
   value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
 // Same host api.ts falls back to in production. Overridable so a build against
-// another backend does not silently bake the live prices into the page.
-const PRICING_URL = `${process.env.PRERENDER_API_BASE ?? "https://backport.varascundo.com"}/api/quote-pricing`;
+// another backend does not silently bake live data into the pages.
+const API_BASE = process.env.PRERENDER_API_BASE ?? "https://backport.varascundo.com";
 
 /**
- * The prices live in the database and reach /tarifs through a runtime fetch, so
- * a crawler that does not execute JavaScript sees an empty page. Fetching the
- * grid at build time lets the file carry the real amounts.
+ * Every word of this site reaches the browser through JavaScript, so a crawler
+ * that does not execute it reads an empty <body>. These fetches let the built
+ * files carry the real text, taken from the same API the app reads — generated,
+ * never a second copy to keep in sync.
  *
  * Deliberately best-effort: a network hiccup must not block a deploy, because
- * the page still works for every visitor — the browser fetches the live grid
- * anyway. The warning is loud enough to be noticed in the build output.
+ * every page still works for every visitor. The warning is loud enough to be
+ * noticed in the build output.
  */
-const fetchPricing = async () => {
+const fetchJson = async (path, what) => {
   try {
-    const response = await fetch(PRICING_URL, { signal: AbortSignal.timeout(10000) });
+    const response = await fetch(`${API_BASE}${path}`, { signal: AbortSignal.timeout(10000) });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
-    const { catalog } = await response.json();
-    const offers = (catalog?.offers ?? []).filter((offer) => offer.variants?.length);
-
-    return offers.length > 0 ? offers : null;
+    return await response.json();
   } catch (error) {
-    console.warn(`\n⚠  Tarifs non récupérés (${error.message}) : /tarifs partira sans prix dans le HTML.`);
-    console.warn(`   Les visiteurs les verront quand même, la page les charge depuis ${PRICING_URL}.\n`);
+    console.warn(`\n⚠  ${what} non récupéré (${error.message}) : le HTML partira sans.`);
+    console.warn(`   Les visiteurs le verront quand même, l’application le charge depuis ${API_BASE}.\n`);
     return null;
   }
 };
+
+/** Text out of a field that may carry HTML written in the back-office. */
+const plain = (value) => String(value ?? "").replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+
+const paragraph = (value) => (plain(value) ? `<p>${escapeText(plain(value))}</p>` : "");
+
+const heading = (level, value) =>
+  plain(value) ? `<h${level}>${escapeText(plain(value))}</h${level}>` : "";
+
+// Guarded: several project fields are free text in the back-office and reach
+// the API as a string, or as an empty list.
+const bullets = (values) =>
+  Array.isArray(values) && values.length > 0
+    ? `<ul>${values.map((value) => `<li>${escapeText(plain(value))}</li>`).join("")}</ul>`
+    : "";
+
+/** A section is dropped entirely when its source is empty, never left as a bare title. */
+const section = (title, body) => (body ? `<section>${heading(2, title)}${body}</section>` : "");
 
 const formatAmount = (amount) => `${new Intl.NumberFormat("fr-FR").format(amount)} €`;
 
@@ -75,26 +91,10 @@ const variantPrice = (variant) =>
       : formatAmount(variant.minimumAmount);
 
 /**
- * Two things a crawler can read, appended before </body>:
- *
- *  - a <noscript> list, so a bot that runs no JavaScript still reads the offers
- *    and their amounts as plain text;
- *  - JSON-LD, so the amounts are machine-readable rather than inferred.
- *
- * Neither duplicates the Vue template: they carry the data, not the design, and
- * they are regenerated from the same grid on every build.
+ * The amounts, machine-readable rather than inferred from the page text.
+ * Regenerated from the same grid on every build, so it cannot drift.
  */
-const pricingMarkup = (offers) => {
-  const blocks = offers
-    .map((offer) => {
-      const rows = offer.variants
-        .map((variant) => `<li>${escapeText(variant.label)} — ${escapeText(variantPrice(variant))}</li>`)
-        .join("");
-
-      return `<section><h2>${escapeText(offer.label)}</h2><ul>${rows}</ul></section>`;
-    })
-    .join("");
-
+const pricingStructuredData = (offers) => {
   const structured = {
     "@context": "https://schema.org",
     "@type": "ItemList",
@@ -120,10 +120,90 @@ const pricingMarkup = (offers) => {
     })),
   };
 
-  return [
-    `<noscript>${blocks}</noscript>`,
-    `<script type="application/ld+json">${JSON.stringify(structured).replace(/</g, "\\u003c")}</script>`,
+  return `<script type="application/ld+json">${JSON.stringify(structured).replace(/</g, "\\u003c")}</script>`;
+};
+
+const homeBody = (content) =>
+  [
+    heading(1, content.hero?.title),
+    paragraph(content.hero?.tagline),
+    paragraph(content.hero?.subtitle),
+    section(
+      "Vous vous reconnaissez ?",
+      (content.problems ?? []).map((item) => heading(3, item.title) + paragraph(item.description)).join(""),
+    ),
+    section(
+      "Services",
+      (content.services ?? [])
+        .map((item) => heading(3, item.title) + paragraph(item.promise) + bullets(item.deliverables))
+        .join(""),
+    ),
+    section(
+      "Comment se déroule une mission",
+      (content.process ?? []).map((item) => heading(3, item.title) + paragraph(item.description)).join(""),
+    ),
+    section(
+      "Ce que je fais",
+      (content.expertise ?? []).map((item) => heading(3, item.title) + paragraph(item.description)).join(""),
+    ),
+    section("À propos", paragraph(content.about?.bio)),
   ].join("");
+
+const faqBody = (content) =>
+  (content.services ?? [])
+    .map((service) =>
+      section(
+        service.title,
+        (service.faqs ?? []).map((faq) => heading(3, faq.question) + paragraph(faq.answer)).join(""),
+      ),
+    )
+    .join("");
+
+const projectsBody = (projects) =>
+  projects.map((project) => heading(2, project.name) + paragraph(project.summary)).join("");
+
+const projectBody = (project) =>
+  [
+    heading(1, project.name),
+    paragraph(project.summary),
+    section("Le problème", paragraph(project.clientProblem)),
+    section("La mission", paragraph(project.mission)),
+    section("La solution", paragraph(project.solution)),
+    section("Résultat", bullets(project.outcomes)),
+    section("Technologies", bullets(project.stack) || paragraph(project.stack)),
+  ].join("");
+
+const offersBody = (offers) =>
+  offers
+    .map((offer) =>
+      section(
+        offer.label,
+        paragraph(offer.summary) +
+          `<ul>${offer.variants
+            .map((variant) => `<li>${escapeText(variant.label)} — ${escapeText(variantPrice(variant))}</li>`)
+            .join("")}</ul>`,
+      ),
+    )
+    .join("");
+
+/**
+ * What each route puts in its <noscript>.
+ *
+ * <noscript> rather than the page itself: Vue empties #app when it mounts, so
+ * markup placed there would be thrown away, and a copy outside it would flash
+ * before being hidden. A crawler that runs no JavaScript reads this; one that
+ * does reads the real application.
+ */
+const outlineBody = (page) =>
+  (page.outline ?? []).map((item) => heading(2, item.heading) + paragraph(item.text)).join("");
+
+const bodyForRoute = (path, { content, projects, offers }) => {
+  if (path === "/" && content) return homeBody(content);
+  if (path === "/faq" && content) return faqBody(content);
+  if (path === "/realisations" && projects.length > 0) return projectsBody(projects);
+  if ((path === "/tarifs" || path === "/devis") && offers) return offersBody(offers);
+
+  return "";
 };
 
 // `[^>]*` crosses newlines, which the multi-line <meta> blocks in index.html need.
@@ -154,23 +234,95 @@ const render = (page) => {
   return html;
 };
 
-const pricingOffers = seo.pages.some((page) => page.path === "/tarifs") ? await fetchPricing() : null;
+const [pricingPayload, contentPayload, projectsPayload] = await Promise.all([
+  fetchJson("/api/quote-pricing", "Tarifs"),
+  fetchJson("/api/content", "Contenu"),
+  fetchJson("/api/projects", "Projets"),
+]);
+
+const offers = (pricingPayload?.catalog?.offers ?? []).filter((offer) => offer.variants?.length);
+const content = contentPayload?.content ?? contentPayload;
+const projects = (Array.isArray(projectsPayload) ? projectsPayload : (projectsPayload?.projects ?? []))
+  .filter((project) => project.status === "published" && project.slug);
+
+const data = { content, projects, offers: offers.length > 0 ? offers : null };
+
+/** Google keeps about 160 characters; a description cut mid-word reads as broken. */
+const shorten = (value, limit) => {
+  const text = plain(value);
+  if (text.length <= limit) return text;
+
+  return `${text.slice(0, text.lastIndexOf(" ", limit - 1))}…`;
+};
+
+/**
+ * One flat file per project, named projet-<slug>.html.
+ *
+ * Not dist/realisations/<slug>.html: creating that folder makes mod_dir
+ * redirect /realisations to /realisations/, which shadows the list page that
+ * already lives at realisations.html. public/.htaccess maps the URL to the
+ * flat name; the rule was checked against a local Apache before shipping.
+ */
+const projectPages = projects.map((project) => ({
+  path: `/realisations/${project.slug}`,
+  file: `projet-${project.slug}`,
+  title: plain(project.name),
+  description: shorten(project.summary || project.clientProblem || project.mission, 155),
+  body: projectBody(project),
+}));
+
+const pages = [
+  ...seo.pages.map((page) => ({ ...page, file: page.path.slice(1) })),
+  ...projectPages,
+];
+
+// The sitemap is hand-written while project pages come from the database, so
+// publishing a project in the back-office can leave its page unlisted. Its
+// canonical would then point at a URL nothing declares.
+const sitemap = readFileSync(resolve(root, "public/sitemap.xml"), "utf8");
+const unlisted = projectPages.filter((page) => !sitemap.includes(`${seo.origin}${page.path}<`));
+
+if (unlisted.length > 0) {
+  console.warn(`\n⚠  ${unlisted.length} projet(s) publié(s) absent(s) de public/sitemap.xml :`);
+  unlisted.forEach((page) => console.warn(`   ${seo.origin}${page.path}`));
+  console.warn("   Leur page est générée, mais rien ne la déclare aux moteurs.\n");
+}
+
+/**
+ * The text goes in <noscript>, not in the page.
+ *
+ * Vue empties #app when it mounts, so markup put there would be discarded, and
+ * a copy outside it would flash before being hidden — which is cloaking anyway.
+ * A crawler that runs no JavaScript reads this; one that does reads the app.
+ */
+const withBody = (html, body, path) => {
+  if (!body) return html;
+
+  if (!html.includes("</body>")) {
+    failures.push(`${path} : </body> introuvable dans dist/index.html`);
+    return html;
+  }
+
+  return html.replace("</body>", `<noscript>${body}</noscript></body>`);
+};
 
 // Everything is rendered before anything is written: a half-updated dist would
 // leave pages carrying the metadata of the page next to them.
-const rendered = seo.pages.map((page) => {
-  let html = render(page);
+const rendered = pages.map((page) => {
+  // A page whose text lives in its components carries an outline instead.
+  const body = page.body ?? bodyForRoute(page.path, data) ?? "";
+  let html = withBody(render(page), body || outlineBody(page), page.path);
 
-  if (page.path === "/tarifs" && pricingOffers) {
-    const markup = pricingMarkup(pricingOffers);
-    if (!html.includes("</body>")) {
-      failures.push(`${page.path} : </body> introuvable dans dist/index.html`);
-    }
-    html = html.replace("</body>", `${markup}</body>`);
+  if (page.path === "/tarifs" && data.offers) {
+    html = html.replace("</body>", `${pricingStructuredData(data.offers)}</body>`);
   }
 
   return [page, html];
 });
+
+// The home page is index.html itself: it already carries its own <head>, and
+// only its text was missing.
+const homeHtml = withBody(template, bodyForRoute("/", data), "/");
 
 if (failures.length > 0) {
   console.error("Le <head> de dist/index.html ne correspond plus au script :");
@@ -179,15 +331,36 @@ if (failures.length > 0) {
 }
 
 rendered.forEach(([page, html]) => {
-  // A flat file next to index.html: the .htaccess serves `<route>.html` when it
-  // exists, so the URL keeps no trailing slash and no redirect is added.
-  writeFileSync(resolve(root, `dist${page.path}.html`), html, "utf8");
-  console.log(`prerender  ${page.path}  →  dist${page.path}.html`);
+  // A flat file next to index.html: the .htaccess serves it when it exists, so
+  // the URL keeps no trailing slash and no redirect is added.
+  writeFileSync(resolve(root, `dist/${page.file}.html`), html, "utf8");
+  console.log(`prerender  ${page.path}  →  dist/${page.file}.html`);
 });
 
-console.log(`\n${seo.pages.length} routes préparées pour les moteurs de recherche.`);
+writeFileSync(resolve(root, "dist/index.html"), homeHtml, "utf8");
+console.log(`prerender  /  →  dist/index.html`);
 
-if (pricingOffers) {
-  const count = pricingOffers.reduce((total, offer) => total + offer.variants.length, 0);
-  console.log(`${count} formules chiffrées écrites dans dist/tarifs.html.`);
+const withText = [["/", homeHtml], ...rendered.map(([page, html]) => [page.path, html])].filter(
+  ([, html]) => html.includes("<noscript><"),
+);
+
+const silent = [["/", homeHtml], ...rendered.map(([page, html]) => [page.path, html])].filter(
+  ([, html]) => !html.includes("<noscript><"),
+);
+
+console.log(`\n${pages.length + 1} routes préparées pour les moteurs de recherche.`);
+
+if (silent.length > 0) {
+  console.warn(`⚠  ${silent.length} sans texte dans le HTML : ${silent.map(([path]) => path).join(", ")}`);
+  console.warn("   Ajoutez-leur une source de contenu, ou un outline dans pageSeo.json.");
+}
+console.log(`${withText.length} d’entre elles portent leur texte dans le HTML :`);
+withText.forEach(([path, html]) => {
+  const words = html.slice(html.indexOf("<noscript><")).replace(/<[^>]*>/g, " ").split(/\s+/).length;
+  console.log(`  ${path.padEnd(42)} ~${words} mots`);
+});
+
+if (data.offers) {
+  const count = data.offers.reduce((total, offer) => total + offer.variants.length, 0);
+  console.log(`\n${count} formules chiffrées écrites dans dist/tarifs.html.`);
 }

@@ -19,6 +19,19 @@ RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_URI} \.[a-zA-Z0-9]{0,5}$
 RewriteRule ^ - [R=404,L]
 
+# Project pages, the only two-segment public route. Their prerendered files are
+# flat — projet-<slug>.html — because a dist/realisations/ folder would make
+# mod_dir redirect /realisations to /realisations/, shadowing the list page that
+# already lives at realisations.html. Checked against a local Apache.
+#
+# The first condition captures the directory the site is served from, so the
+# existence check works both at a document root and in a test subfolder. A slug
+# with no file falls through to the SPA below: a project published after the
+# last build still opens.
+RewriteCond %{REQUEST_URI} ^(.*)/realisations/([^/]+)$
+RewriteCond %{DOCUMENT_ROOT}%1/projet-%2.html -f
+RewriteRule ^realisations/([^/]+)$ projet-$1.html [L]
+
 # A public route prerendered by scripts/prerender-seo.mjs has its own file, with
 # the real <title> and description in the <head>. Serving it here is what a
 # crawler that does not run JavaScript reads. Flat file, so the URL keeps no
@@ -26,8 +39,9 @@ RewriteRule ^ - [R=404,L]
 #
 # One segment only. Apache splits /realisations/<slug> into the filename
 # dist/realisations plus PATH_INFO /<slug>, so REQUEST_FILENAME.html matched
-# realisations.html and every project page 404'd. pageSeo.json is checked to
-# hold single-segment paths for the same reason.
+# realisations.html and every project page 404'd — hence the dedicated rule
+# above. pageSeo.json is checked to hold single-segment paths for the same
+# reason.
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME}.html -f
