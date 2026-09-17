@@ -118,6 +118,23 @@
                 <input v-model="variant.includes[includeIndex]" type="text" />
               </label>
             </details>
+
+            <details v-if="(draft?.stacks ?? []).length">
+              <summary>Présélectionnée pour ({{ (variant.stackKeys ?? []).length }} socle(s))</summary>
+              <p class="muted">
+                Si le visiteur répond que son existant est construit avec l’un de ces socles, cette
+                formule est cochée d’avance à l’étape suivante. Il peut toujours en choisir une autre.
+              </p>
+              <label v-for="stack in draft?.stacks ?? []" :key="stack.key" class="stack-link">
+                <input
+                  type="checkbox"
+                  :checked="(variant.stackKeys ?? []).includes(stack.key)"
+                  @change="toggleVariantStack(variant, stack.key)"
+                />
+                <span>{{ stack.label }}</span>
+              </label>
+              <span class="field-error">{{ errorFor(offerIndex, "variants", index, "stackKeys") }}</span>
+            </details>
           </div>
 
           <h3>Options</h3>
@@ -267,6 +284,21 @@ const selectMode = (
   if (mode !== "range") mirrorCommittedAmount(variant);
 };
 
+/**
+ * A formula points at the stacks it answers. The list is optional in the grid,
+ * so it is created on first tick and removed again when the last one is undone:
+ * an empty array would be saved for nothing.
+ */
+const toggleVariantStack = (variant: { stackKeys?: string[] }, stackKey: string): void => {
+  const current = variant.stackKeys ?? [];
+  const next = current.includes(stackKey)
+    ? current.filter((key) => key !== stackKey)
+    : [...current, stackKey];
+
+  if (next.length === 0) delete variant.stackKeys;
+  else variant.stackKeys = next;
+};
+
 const errorFor = (
   offer: number,
   collection: string,
@@ -390,6 +422,17 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: 4px;
+}
+
+.stack-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+}
+
+.stack-link input {
+  width: auto;
 }
 
 .amounts {

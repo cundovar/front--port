@@ -221,6 +221,35 @@ export const validateContact = (contact: QuoteContact): Record<string, string> =
 };
 
 /**
+ * The formula a stack points at, or "" when the grid links none. First match
+ * wins, so the order in the backoffice is the order of preference.
+ */
+export const variantForStack = (offer: QuoteOffer | null, stackKey: string): string => {
+  if (!offer || stackKey === "") return "";
+
+  return offer.variants.find((variant) => (variant.stackKeys ?? []).includes(stackKey))?.key ?? "";
+};
+
+/**
+ * Preselection must never overwrite a human choice. It fills an empty slot, or
+ * replaces a value it put there itself when the visitor changes their answer —
+ * nothing else.
+ */
+export const nextVariantAfterStackChange = (
+  offer: QuoteOffer | null,
+  stackKey: string,
+  currentVariantKey: string,
+  lastPreselected: string,
+): string => {
+  const target = variantForStack(offer, stackKey);
+
+  if (target === "") return currentVariantKey;
+  if (currentVariantKey === "" || currentVariantKey === lastPreselected) return target;
+
+  return currentVariantKey;
+};
+
+/**
  * The question is only asked when something already exists. Going back and
  * switching to "nouveau" must not leave a stale answer in the payload, so the
  * stage decides, not whatever the radio last held.
@@ -377,12 +406,34 @@ export const useQuoteSimulator = () => {
     }
   };
 
+  // What the preselection last wrote, so a formula the visitor picked by hand is
+  // never replaced behind their back.
+  let preselectedVariantKey = "";
+
   const selectOffer = (offerKey: string): void => {
     if (answers.offerKey !== offerKey) {
       resetRecommendation();
+      preselectedVariantKey = "";
     }
     answers.offerKey = offerKey;
     pruneIncompatibleAnswers(catalog.value, answers);
+  };
+
+  /**
+   * Answering "built with an AI tool" lands on the matching formula, so the
+   * visitor is not asked the same thing twice. The grid decides which formula:
+   * nothing is hardcoded here.
+   */
+  const selectStack = (stackKey: string): void => {
+    answers.existingStackKey = stackKey;
+
+    const offer = findOffer(catalog.value, answers.offerKey);
+    const next = nextVariantAfterStackChange(offer, stackKey, answers.variantKey, preselectedVariantKey);
+
+    if (next !== answers.variantKey) {
+      answers.variantKey = next;
+      preselectedVariantKey = next;
+    }
   };
 
   const toggleTool = (toolKey: string): void => {
@@ -572,6 +623,7 @@ export const useQuoteSimulator = () => {
     result,
     submission,
     selectOffer,
+    selectStack,
     toggleOption,
     toggleTool,
     recommendationState,

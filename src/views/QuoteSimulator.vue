@@ -36,7 +36,7 @@
         :offer="currentOffer"
         :tools="catalog?.tools ?? []"
         :stacks="catalog?.stacks ?? []"
-        @update="Object.assign(answers, $event)"
+        @update="applySituation"
         @toggle-tool="toggleTool"
       />
 
@@ -99,6 +99,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
+import type { QuoteAnswers } from "../types";
 import QuoteProgress from "../components/quote/QuoteProgress.vue";
 import QuoteNeedStep from "../components/quote/QuoteNeedStep.vue";
 import QuoteScopeStep from "../components/quote/QuoteScopeStep.vue";
@@ -128,6 +129,7 @@ const {
   result,
   submission,
   selectOffer,
+  selectStack,
   toggleOption,
   toggleTool,
   recommendationState,
@@ -138,6 +140,16 @@ const {
   back,
   submit,
 } = useQuoteSimulator();
+
+/**
+ * The stack answer is not a plain field: it can preselect a formula, so it goes
+ * through the composable instead of being written straight into `answers`.
+ */
+const applySituation = (patch: Partial<QuoteAnswers>): void => {
+  const { existingStackKey, ...rest } = patch;
+  Object.assign(answers, rest);
+  if (existingStackKey !== undefined) selectStack(existingStackKey);
+};
 
 const stepHeading = ref<HTMLElement | null>(null);
 const stepLabels = STEP_LABELS;

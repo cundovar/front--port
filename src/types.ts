@@ -235,6 +235,8 @@ export interface QuoteVariant extends QuotePricedItem {
   pricingMode: QuotePricingMode;
   /** Flat supplement for a priority deadline, never a multiplier. */
   priorityAmount: number;
+  /** Stack keys this formula answers, so picking one preselects it. */
+  stackKeys?: string[];
 }
 
 /** Tool the visitor can tick. Context for the AI only: it never carries an amount. */

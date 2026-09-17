@@ -12,6 +12,7 @@ import {
   findOffer,
   formatQuotePrice,
   isValidEmail,
+  nextVariantAfterStackChange,
   offerAsksAboutContent,
   pruneIncompatibleAnswers,
   reasonForKey,
@@ -19,7 +20,9 @@ import {
   submitErrorMessage,
   suggestedKeys,
   validateContact,
+  useQuoteSimulator,
   validateStep,
+  variantForStack,
 } from "../src/composables/useQuoteSimulator";
 import type { QuoteCatalog, QuotePricingMode, QuoteProposal } from "../src/types";
 
@@ -407,5 +410,131 @@ describe("applicableStackKey", () => {
 
     expect(applicableStackKey(answers)).toBe("");
     expect(buildSubmitPayload(answers, emptyContact()).existingStackKey).toBe("");
+  });
+});
+
+describe("variantForStack", () => {
+  const offer = {
+    key: "refonte",
+    label: "Remettre au propre",
+    variants: [
+      { key: "reprise-wordpress", label: "Reprendre un site WordPress", pricingMode: "range" as QuotePricingMode, minimumAmount: 900, maximumAmount: 1800, priorityAmount: 200, includes: [], stackKeys: ["wordpress"] },
+      { key: "fiabiliser-ia", label: "Fiabiliser une application générée par IA", pricingMode: "range" as QuotePricingMode, minimumAmount: 1200, maximumAmount: 2600, priorityAmount: 200, includes: [], stackKeys: ["genere-ia", "inconnu"] },
+    ],
+    options: [],
+  };
+
+  it("finds the formula a stack points at", () => {
+    expect(variantForStack(offer, "genere-ia")).toBe("fiabiliser-ia");
+  });
+
+  it("returns nothing when the grid links no formula to that stack", () => {
+    expect(variantForStack(offer, "constructeur")).toBe("");
+    expect(variantForStack(offer, "")).toBe("");
+    expect(variantForStack(null, "wordpress")).toBe("");
+  });
+
+  it("ignores formulas that declare no stack at all", () => {
+    const plain = { ...offer, variants: [{ ...offer.variants[0], stackKeys: undefined }] };
+
+    expect(variantForStack(plain, "wordpress")).toBe("");
+  });
+
+  it("keeps the first match, so the backoffice order is the order of preference", () => {
+    const both = {
+      ...offer,
+      variants: [
+        { ...offer.variants[0], stackKeys: ["inconnu"] },
+        { ...offer.variants[1], stackKeys: ["inconnu"] },
+      ],
+    };
+
+    expect(variantForStack(both, "inconnu")).toBe("reprise-wordpress");
+  });
+
+  describe("nextVariantAfterStackChange", () => {
+    it("fills an empty choice", () => {
+      expect(nextVariantAfterStackChange(offer, "wordpress", "", "")).toBe("reprise-wordpress");
+    });
+
+    it("never overwrites a formula the visitor picked themselves", () => {
+      expect(nextVariantAfterStackChange(offer, "wordpress", "fiabiliser-ia", "")).toBe("fiabiliser-ia");
+    });
+
+    it("follows the visitor when they change their mind about the stack", () => {
+      // "reprise-wordpress" is there because the preselection put it there, so
+      // replacing it takes nothing away from them.
+      expect(nextVariantAfterStackChange(offer, "genere-ia", "reprise-wordpress", "reprise-wordpress")).toBe(
+        "fiabiliser-ia",
+      );
+    });
+
+    it("leaves the choice alone when the new stack points at nothing", () => {
+      expect(nextVariantAfterStackChange(offer, "constructeur", "reprise-wordpress", "reprise-wordpress")).toBe(
+        "reprise-wordpress",
+      );
+      expect(nextVariantAfterStackChange(offer, "", "", "")).toBe("");
+    });
+  });
+});
+
+describe("the stack answer preselects a formula", () => {
+  const withStacks: QuoteCatalog = {
+    ...catalog,
+    stacks: [
+      { key: "wordpress", label: "WordPress" },
+      { key: "genere-ia", label: "Créé avec un outil d’IA" },
+    ],
+    offers: [
+      {
+        key: "refonte",
+        label: "Remettre au propre",
+        variants: [
+          { key: "reprise-wordpress", label: "Reprendre un site WordPress", pricingMode: "range" as QuotePricingMode, minimumAmount: 900, maximumAmount: 1800, priorityAmount: 200, includes: [], stackKeys: ["wordpress"] },
+          { key: "fiabiliser-ia", label: "Fiabiliser une application générée par IA", pricingMode: "range" as QuotePricingMode, minimumAmount: 1200, maximumAmount: 2600, priorityAmount: 200, includes: [], stackKeys: ["genere-ia"] },
+        ],
+        options: [],
+      },
+      ...catalog.offers,
+    ],
+  };
+
+  const start = () => {
+    const simulator = useQuoteSimulator();
+    simulator.catalog.value = withStacks;
+    simulator.selectOffer("refonte");
+
+    return simulator;
+  };
+
+  it("arrives at the scope step with the matching formula already chosen", () => {
+    const { answers, selectStack } = start();
+    selectStack("genere-ia");
+
+    expect(answers.existingStackKey).toBe("genere-ia");
+    expect(answers.variantKey).toBe("fiabiliser-ia");
+  });
+
+  it("follows a change of mind, then stops as soon as the visitor decides", () => {
+    const { answers, selectStack } = start();
+    selectStack("wordpress");
+    selectStack("genere-ia");
+    expect(answers.variantKey).toBe("fiabiliser-ia");
+
+    answers.variantKey = "reprise-wordpress";
+    selectStack("wordpress");
+    expect(answers.variantKey).toBe("reprise-wordpress");
+  });
+
+  it("forgets what it preselected when the offer changes", () => {
+    const { answers, selectStack, selectOffer } = start();
+    selectStack("wordpress");
+
+    selectOffer("site-vitrine");
+    expect(answers.variantKey).toBe("");
+
+    // Nothing in this offer answers a stack, so the empty choice stays empty.
+    selectStack("wordpress");
+    expect(answers.variantKey).toBe("");
   });
 });
