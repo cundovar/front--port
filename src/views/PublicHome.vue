@@ -27,8 +27,6 @@
       :proof-items="content.hero.proofItems"
     />
 
-    <ProofBar :items="proofItems" />
-
     <ProblemsSection :problems="content.problems" />
 
     <ServicesSection :services="content.services" />
@@ -71,7 +69,6 @@
 import { computed, onMounted, ref } from "vue";
 import { RouterLink } from "vue-router";
 import HeroSection from "../components/HeroSection.vue";
-import ProofBar from "../components/ProofBar.vue";
 import ServicesSection from "../components/ServicesSection.vue";
 import ProblemsSection from "../components/ProblemsSection.vue";
 import FeaturedCasesSection from "../components/FeaturedCasesSection.vue";
@@ -91,17 +88,6 @@ const { content } = useContent();
 
 const projects = ref(content.value.projects.items ?? projectsSeed);
 const isDark = ref(true);
-
-const defaultProofItems = [
-  "Developpeur fullstack freelance France",
-  "Automatisation IA pour PME",
-  "Refonte Symfony Vue WordPress",
-  "Backoffice sur mesure local"
-];
-
-const proofItems = computed(() => {
-  return content.value.trust.items.length ? content.value.trust.items : defaultProofItems;
-});
 
 const featuredProjects = computed(() => {
   return projects.value.filter((p) => p.featured !== false) || projects.value;
