@@ -1,6 +1,6 @@
 <template>
   <div class="explorer">
-    <p class="intro">Une application devient utile quand il faut centraliser des données, appliquer des règles ou faciliter le travail d’une équipe.</p>
+    <p class="intro">Trois situations mènent à faire développer une application : les informations sont éparpillées, les outils ne se parlent pas, ou le projet doit pouvoir grandir.</p>
     <div class="options">
       <button
         v-for="option in options"
@@ -10,9 +10,9 @@
         :aria-expanded="selected === option.key"
         @click="selected = selected === option.key ? null : option.key"
       >
-        <span>{{ option.label }}</span>
-        <strong>{{ option.stack }}</strong>
-        <em>{{ option.description }}</em>
+        <strong>{{ option.label }}</strong>
+        <span class="purpose">{{ option.description }}</span>
+        <small v-if="technical.enabled.value" class="stack">{{ option.stack }}</small>
       </button>
     </div>
 
@@ -49,7 +49,7 @@ const options: ApplicationOption[] = [
     key: "internal",
     label: "Outil interne",
     stack: "Vue + Symfony",
-    description: "Centraliser un travail d’équipe",
+    description: "Vos informations sont éparpillées",
     title: "Un outil construit autour de votre façon de travailler",
     detail: "Suivi clients, préparation de devis, gestion de documents, backoffice : l’outil enregistre ce qui aujourd’hui vit dans plusieurs fichiers.",
     points: ["Un seul endroit fiable", "Rôles et permissions", "Historique des actions"],
@@ -59,7 +59,7 @@ const options: ApplicationOption[] = [
     key: "connected",
     label: "Application connectée",
     stack: "API + intégrations",
-    description: "Faire dialoguer vos outils",
+    description: "Vos outils ne se parlent pas",
     title: "Des données qui circulent sans copier-coller",
     detail: "L’application devient le point de passage entre votre site, votre CRM, vos emails et vos documents.",
     points: ["Connexions maîtrisées", "Reprise en cas d’erreur", "Traçabilité des échanges"],
@@ -69,7 +69,7 @@ const options: ApplicationOption[] = [
     key: "product",
     label: "Produit évolutif",
     stack: "React + API + SQL",
-    description: "Préparer la croissance",
+    description: "Votre projet doit pouvoir grandir",
     title: "Une base technique qui grandit avec le projet",
     detail: "Interface riche, API documentée et base de données structurée pour ajouter des fonctionnalités sans tout réécrire.",
     points: ["Évolutions progressives", "Tests automatisables", "Backoffice dédié"],
@@ -126,17 +126,18 @@ const activeOption = computed(() => options.find((option) => option.key === sele
   background: color-mix(in oklch, var(--bg-elev) 88%, var(--blue));
 }
 
-.options span,
-.options em {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  font-style: normal;
-  font-weight: 800;
-  text-transform: uppercase;
+.options .purpose {
+  color: var(--muted);
+  font-size: 15px;
 }
 
-.options span {
+.options .stack {
+  margin-top: auto;
   color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
 }
 
 .options strong {
