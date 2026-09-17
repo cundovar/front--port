@@ -239,6 +239,8 @@ export const plainGlossary: Record<string, string> = {
     "La part du logiciel qui applique vos règles de travail, plutôt que de se contenter d’afficher et d’enregistrer.",
   "API métier":
     "Le passage obligé entre l’écran et vos données : il vérifie chaque demande avant de la laisser aboutir.",
+  "Intégrations":
+    "Les liens avec vos autres outils — facturation, fichier clients, messagerie. L’application leur transmet l’information et reçoit la leur, sans que personne recopie.",
   "Back-office": "La partie privée du site, où vous modifiez les contenus. Vos visiteurs ne la voient jamais.",
   "Back-office séparé":
     "La partie privée vit à part de la partie publique : l’écran du visiteur peut être refait sans toucher à la gestion des contenus.",
