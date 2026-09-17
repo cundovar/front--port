@@ -46,7 +46,12 @@
       <button class="replay" type="button" :disabled="step > 0" @click="playRequest">
         {{ step > 0 ? "Envoi en cours…" : "Envoyer une facture" }}
       </button>
-      <p v-if="step > 0" class="narration" aria-live="polite">
+      <!-- Before the first click the button reads like a real action. It is a
+           demonstration, and saying so is what tells the visitor to press it. -->
+      <p v-if="step === 0" class="narration hint">
+        Démonstration : rien n’est envoyé. Cliquez pour suivre le trajet d’une facture.
+      </p>
+      <p v-else class="narration" aria-live="polite">
         <strong>{{ step }}/5</strong> {{ beats[step - 1] }}
       </p>
     </div>
@@ -242,6 +247,10 @@ onBeforeUnmount(clearTimers);
   margin: 0;
   color: var(--text);
   font-size: clamp(15px, 2.2vw, 17px);
+}
+
+.hint {
+  color: var(--muted);
 }
 
 .narration strong {
