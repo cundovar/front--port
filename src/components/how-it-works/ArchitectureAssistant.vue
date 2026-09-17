@@ -1,5 +1,5 @@
 <template>
-  <div class="assistant">
+  <div class="assistant" :style="{ '--questions': asksWhoEdits(kind) ? 3 : 2 }">
     <fieldset>
       <legend>1. Que voulez-vous créer ?</legend>
       <div class="choices">
@@ -15,8 +15,9 @@
       </div>
     </fieldset>
 
-    <fieldset>
-      <legend>2. Qui doit gérer le contenu ?</legend>
+    <!-- Only shown where it changes the answer; see asksWhoEdits. -->
+    <fieldset v-if="asksWhoEdits(kind)">
+      <legend>2. Le contenu devra-t-il être modifié ?</legend>
       <div class="choices">
         <button
           v-for="choice in owners"
@@ -31,7 +32,7 @@
     </fieldset>
 
     <fieldset>
-      <legend>3. Votre projet est-il très spécifique ?</legend>
+      <legend>{{ asksWhoEdits(kind) ? "3." : "2." }} Votre projet est-il très spécifique ?</legend>
       <div class="choices">
         <button
           v-for="choice in specificities"
@@ -80,6 +81,7 @@ import { computed, ref } from "vue";
 import { RouterLink } from "vue-router";
 import { useTechnicalLevel } from "../../composables/useTechnicalLevel";
 import {
+  asksWhoEdits,
   recommendArchitecture,
   type ContentOwner,
   type ProjectKind,
@@ -93,10 +95,11 @@ const kinds = [
   { value: "ai" as ProjectKind, label: "Outil IA" },
 ];
 
+// Which person edits never changed the recommendation; whether anyone does,
+// does. Two honest buttons rather than three, one of them decorative.
 const owners = [
-  { value: "me" as ContentOwner, label: "Moi" },
-  { value: "team" as ContentOwner, label: "Mon équipe" },
-  { value: "nobody" as ContentOwner, label: "Personne" },
+  { value: "someone" as ContentOwner, label: "Oui, régulièrement" },
+  { value: "nobody" as ContentOwner, label: "Non, il est figé" },
 ];
 
 const specificities = [
@@ -107,7 +110,7 @@ const specificities = [
 
 const technical = useTechnicalLevel();
 const kind = ref<ProjectKind>("site");
-const owner = ref<ContentOwner>("me");
+const owner = ref<ContentOwner>("someone");
 const specificity = ref<Specificity>("low");
 
 const recommendation = computed(() => recommendArchitecture(kind.value, owner.value, specificity.value));
@@ -116,7 +119,7 @@ const recommendation = computed(() => recommendArchitecture(kind.value, owner.va
 <style scoped>
 .assistant {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(var(--questions, 3), minmax(0, 1fr));
   gap: clamp(16px, 3vw, 26px);
   align-items: start;
 }

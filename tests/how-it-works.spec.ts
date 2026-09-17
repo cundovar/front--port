@@ -1,24 +1,24 @@
 import { describe, expect, it } from "vitest";
-import { hoodLayers, recommendArchitecture } from "../src/data/howItWorks";
+import { asksWhoEdits, hoodLayers, recommendArchitecture } from "../src/data/howItWorks";
 import { travellingLabelTop } from "../src/utils/hoodLabel";
 
 describe("recommendArchitecture", () => {
   it("keeps a simple editable site on WordPress", () => {
-    const recommendation = recommendArchitecture("site", "me", "low");
+    const recommendation = recommendArchitecture("site", "someone", "low");
 
     expect(recommendation.stack).toContain("WordPress");
     expect(recommendation.qualities).toContain("Contenus modifiables");
   });
 
   it("moves a highly specific site to a custom stack", () => {
-    const recommendation = recommendArchitecture("site", "team", "high");
+    const recommendation = recommendArchitecture("site", "someone", "high");
 
     expect(recommendation.stack).toContain("Symfony");
     expect(recommendation.reason).toContain(" développement personnalisé");
   });
 
-  it("offers a headless CMS to a team that edits but wants its own interface", () => {
-    const recommendation = recommendArchitecture("site", "team", "medium");
+  it("offers a headless CMS when someone edits but wants their own interface", () => {
+    const recommendation = recommendArchitecture("site", "someone", "medium");
 
     expect(recommendation.stack).toContain("Payload");
     expect(recommendation.qualities).toContain("Interface personnalisée");
@@ -46,15 +46,48 @@ describe("recommendArchitecture", () => {
   });
 
   it("always frames AI output as a possible architecture, never a final verdict", () => {
-    const recommendation = recommendArchitecture("ai", "me", "high");
+    const recommendation = recommendArchitecture("ai", "someone", "high");
 
     expect(recommendation.qualities).toContain("Validation humaine");
     expect(recommendation.plain.at(-1)).toBe("Validation");
   });
 
+  const kinds = ["site", "application", "automation", "ai"] as const;
+  const owners = ["someone", "nobody"] as const;
+  const specificities = ["low", "medium", "high"] as const;
+
+  // The assistant's whole point is that the answer follows from the need. A
+  // button that leaves the recommendation untouched says the opposite, and the
+  // questionnaire had ten of them.
+  it("gives every button offered to the visitor an effect on the answer", () => {
+    kinds.forEach((kind) => {
+      owners.forEach((owner) => {
+        if (!asksWhoEdits(kind) && owner !== owners[0]) return;
+
+        const answers = specificities.map((specificity) =>
+          JSON.stringify(recommendArchitecture(kind, owner, specificity)),
+        );
+
+        expect(new Set(answers).size, `${kind}/${owner}: deux niveaux donnent la même réponse`).toBe(3);
+      });
+    });
+  });
+
+  it("asks who edits the content exactly where the answer depends on it", () => {
+    kinds.forEach((kind) => {
+      specificities.forEach((specificity) => {
+        const answers = owners.map((owner) =>
+          JSON.stringify(recommendArchitecture(kind, owner, specificity)),
+        );
+
+        expect(new Set(answers).size === 2, `${kind}/${specificity}`).toBe(asksWhoEdits(kind));
+      });
+    });
+  });
+
   it("describes every recommendation in client words before naming any tool", () => {
     const combinations = (["site", "application", "automation", "ai"] as const).flatMap((kind) =>
-      (["me", "team", "nobody"] as const).flatMap((owner) =>
+      (["someone", "nobody"] as const).flatMap((owner) =>
         (["low", "medium", "high"] as const).map((specificity) =>
           recommendArchitecture(kind, owner, specificity),
         ),

@@ -1,5 +1,6 @@
 export type ProjectKind = "site" | "application" | "automation" | "ai";
-export type ContentOwner = "me" | "team" | "nobody";
+/** Whether anyone will edit the content. Which person it is never changed the answer. */
+export type ContentOwner = "someone" | "nobody";
 export type Specificity = "low" | "medium" | "high";
 
 export interface HoodDetail {
@@ -65,12 +66,46 @@ export interface ArchitectureRecommendation {
   reason: string;
 }
 
+// Nobody to edit: a back-office would only add upkeep for no benefit, so the
+// effort goes into the interface and the rules instead.
+const unmanagedSiteRecommendation = (specificity: Specificity): ArchitectureRecommendation => {
+  if (specificity === "high") {
+    return {
+      plain: ["Interface sur mesure", "Logique métier", "Contenu intégré"],
+      stack: ["React", "Symfony", "Contenu structuré"],
+      qualities: ["Logique métier sur mesure", "Rien à administrer", "Hébergement peu coûteux"],
+      reason:
+        "Les règles de travail demandent un développement personnalisé, mais sans contenu à gérer aucun back-office n’est ajouté : le texte vit dans le site.",
+    };
+  }
+
+  if (specificity === "medium") {
+    return {
+      plain: ["Interface sur mesure", "Contenu intégré", "Hébergement simple"],
+      stack: ["Vue", "Contenu structuré", "Hébergement statique"],
+      qualities: ["Interface personnalisée", "Rien à administrer", "Pages très rapides"],
+      reason:
+        "Sans contenu à gérer, l’effort va dans l’interface plutôt que dans l’administration : elle est dessinée sur mesure, et le contenu change avec le site.",
+    };
+  }
+
+  return {
+    plain: ["Site rapide", "Contenu intégré", "Hébergement simple"],
+    stack: ["Vue", "Contenu structuré", "Hébergement statique"],
+    qualities: ["Pages très rapides", "Rien à administrer", "Hébergement peu coûteux"],
+    reason:
+      "Si le contenu bouge rarement, un back-office ajoute de l’entretien sans bénéfice : le contenu vit dans le site et change lors des mises à jour.",
+  };
+};
+
 const siteRecommendation = (owner: ContentOwner, specificity: Specificity): ArchitectureRecommendation => {
+  if (owner === "nobody") return unmanagedSiteRecommendation(specificity);
+
   // Business rules first: past a certain point no CMS is worth bending.
   if (specificity === "high") {
     return {
-      plain: ["Interface sur mesure", "Logique métier", "Base de données"],
-      stack: ["React", "Symfony", "PostgreSQL"],
+      plain: ["Interface sur mesure", "Logique métier", "Back-office", "Base de données"],
+      stack: ["React", "Symfony", "Backoffice dédié", "PostgreSQL"],
       qualities: [
         "Logique métier sur mesure",
         "Fonctionnalités ajoutées selon vos besoins",
@@ -78,17 +113,6 @@ const siteRecommendation = (owner: ContentOwner, specificity: Specificity): Arch
       ],
       reason:
         "Quand les règles de travail deviennent le cœur du projet, un développement personnalisé évite de contourner les limites d’un CMS.",
-    };
-  }
-
-  // Nobody to edit: a back-office would only add upkeep for no benefit.
-  if (owner === "nobody") {
-    return {
-      plain: ["Site rapide", "Contenu intégré", "Hébergement simple"],
-      stack: ["Vue", "Contenu structuré", "Hébergement statique"],
-      qualities: ["Pages très rapides", "Rien à administrer", "Hébergement peu coûteux"],
-      reason:
-        "Si le contenu bouge rarement, un back-office ajoute de l’entretien sans bénéfice : le contenu vit dans le site et change lors des mises à jour.",
     };
   }
 
@@ -123,23 +147,43 @@ const applicationRecommendation = (specificity: Specificity): ArchitectureRecomm
     };
   }
 
+  if (specificity === "medium") {
+    return {
+      plain: ["Interface claire", "API métier", "Droits et validations", "Base de données"],
+      stack: ["Vue", "Symfony", "Droits par rôle", "MySQL"],
+      qualities: ["Rôles et validations", "Historique des actions", "Déploiement simple"],
+      reason:
+        "Dès que plusieurs personnes saisissent, les droits et les validations comptent autant que l’écran : ils vivent dans l’API, jamais dans l’interface seule.",
+    };
+  }
+
   return {
     plain: ["Interface claire", "API métier", "Intégrations", "Base de données"],
     stack: ["Vue", "Symfony", "API REST", "PostgreSQL"],
-    qualities: ["Rôles et validations", "Intégrations possibles", "Base documentée"],
+    qualities: ["Règles métier sur mesure", "Intégrations possibles", "Base documentée"],
     reason:
-      "Dès que plusieurs rôles, règles ou intégrations entrent en jeu, l’API structure les échanges et protège les données.",
+      "Quand des outils extérieurs entrent dans la boucle et que les cas particuliers se multiplient, l’API devient le point de passage qui protège les données.",
   };
 };
 
 const automationRecommendation = (specificity: Specificity): ArchitectureRecommendation => {
-  if (specificity === "low" || specificity === "medium") {
+  if (specificity === "low") {
     return {
       plain: ["Déclencheur", "Automatisation", "Vos outils"],
       stack: ["Formulaire ou webhook", "n8n", "CRM · Email · Document"],
       qualities: ["Mise en place rapide", "Actions traçables", "Validation humaine possible"],
       reason:
         "Un workflow peut suffire quand le besoin est d’enchaîner des actions entre des outils existants.",
+    };
+  }
+
+  if (specificity === "medium") {
+    return {
+      plain: ["Déclencheur", "Automatisation", "Reprise d’erreur", "Vos outils"],
+      stack: ["Webhook", "n8n", "Journal et relances", "Outils métier"],
+      qualities: ["Échecs rattrapés", "Journal des exécutions", "Alerte en cas de blocage"],
+      reason:
+        "Une automatisation qui tourne tous les jours finira par trouver un outil indisponible : ce qui compte alors, c’est ce qui se passe à ce moment-là.",
     };
   }
 
@@ -181,6 +225,16 @@ const aiRecommendation = (specificity: Specificity): ArchitectureRecommendation 
       "Pour un métier sensible, l’assistant travaille sur un périmètre documenté et explique ce qu’il utilise avant d’agir.",
   };
 };
+
+/**
+ * Whether the content question is worth asking.
+ *
+ * Only a site branches on it: for an automation or an assistant the answer was
+ * the same whatever the visitor clicked, and three inert buttons read as a
+ * questionnaire that ignores you. Pinned by a test, so the day another branch
+ * starts reading the owner the question comes back on its own.
+ */
+export const asksWhoEdits = (kind: ProjectKind): boolean => kind === "site";
 
 export const recommendArchitecture = (
   kind: ProjectKind,
