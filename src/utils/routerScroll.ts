@@ -13,6 +13,23 @@ export const hashScrollTarget = (
   to.hash ? { el: to.hash, behavior: "smooth" } : undefined;
 
 /**
+ * The element a hash link should really land on.
+ *
+ * #contact is a whole section: its heading and intro run 491px before the
+ * first field, so on a laptop the form sat at the very bottom of the screen
+ * and the visitor read "you arrived too high". A section can therefore mark
+ * the element worth showing with data-scroll-target, and the anchor in the
+ * URL stays the public, readable one.
+ *
+ * `exists` is injected so the rule can be checked without a DOM.
+ */
+export const preferredTarget = (hash: string, exists: (selector: string) => boolean): string => {
+  const inner = `${hash} [data-scroll-target]`;
+
+  return exists(inner) ? inner : hash;
+};
+
+/**
  * Waits until the target stops moving.
  *
  * The home page fetches its projects after mounting, so the cards appear a
@@ -93,7 +110,10 @@ export const scrollBehavior: RouterScrollBehavior = async (to) => {
   const target = hashScrollTarget(to);
   if (!target) return undefined;
 
+  // Resolved after the wait: the marked element may be rendered late too.
   await waitUntilStable(() => absoluteTop(target.el), animationFrame);
 
-  return { ...target, top: stickyHeaderHeight() };
+  const el = preferredTarget(target.el, (selector) => document.querySelector(selector) !== null);
+
+  return { ...target, el, top: stickyHeaderHeight() + 12 };
 };

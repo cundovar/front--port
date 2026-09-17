@@ -1,5 +1,5 @@
 <template>
-  <form class="contact-form" @submit.prevent="submit">
+  <form class="contact-form" data-scroll-target @submit.prevent="submit">
     <div class="contact-form-grid">
       <label>Nom complet<input v-model.trim="form.fullName" required autocomplete="name" /></label>
       <label>Email<input v-model.trim="form.email" required type="email" autocomplete="email" /></label>

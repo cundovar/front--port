@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { hashScrollTarget, waitUntilStable } from "../src/utils/routerScroll";
+import { hashScrollTarget, preferredTarget, waitUntilStable } from "../src/utils/routerScroll";
 
 describe("hashScrollTarget", () => {
   it("scrolls to the section a cross-page hash link points at", () => {
@@ -59,5 +59,19 @@ describe("waitUntilStable", () => {
     await waitUntilStable(read, next, { stableFrames: 3, maxFrames: 10 });
 
     expect(frame).toBe(10);
+  });
+});
+
+describe("preferredTarget", () => {
+  it("aims at the element the section marked rather than the section itself", () => {
+    // #contact starts 491px above its form: landing on the section put the
+    // first field at the very bottom of a laptop screen.
+    expect(preferredTarget("#contact", (selector) => selector === "#contact [data-scroll-target]")).toBe(
+      "#contact [data-scroll-target]",
+    );
+  });
+
+  it("keeps the plain anchor for a section that marked nothing", () => {
+    expect(preferredTarget("#a-propos", () => false)).toBe("#a-propos");
   });
 });
