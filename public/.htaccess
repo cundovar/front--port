@@ -18,8 +18,10 @@ RewriteEngine On
 # rewrites, so this tells a visitor who typed /dist/ apart from the root's own
 # rewrite of /<path> to dist/<path> — the two are indistinguishable here
 # otherwise. No loop: the redirected request no longer carries /dist/.
+# The host is written out rather than left to Apache, which built the URL from
+# the server port and answered https://varascundo.com:443/tarifs.
 RewriteCond %{THE_REQUEST} \s\S*/dist/
-RewriteRule ^(.*)$ /$1 [R=301,L]
+RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
 
 # Vue Router history mode fallback for files served from dist/.
 RewriteRule ^api(/.*)?$ - [L]
