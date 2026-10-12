@@ -17,6 +17,9 @@
               Slug (auto-généré)
               <input v-model="form.slug" type="text" disabled />
             </label>
+            <p v-if="!editingId && form.slug" class="public-url-preview">
+              URL publique : <code>/realisations/{{ form.slug }}</code>
+            </p>
             <label>
               Stack *
               <input v-model="form.stack" type="text" required placeholder="Ex: Vue.js, Symfony, MySQL" />
@@ -150,10 +153,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from "vue";
+import { computed, onMounted, reactive, ref, watch } from "vue";
 import type { ProjectCard } from "../types";
 import RichTextEditor from "./RichTextEditor.vue";
 import { api } from "../utils/api";
+import { slugifyProjectName } from "../utils/projectSlug";
 
 const projects = ref<ProjectCard[]>([]);
 const editingId = ref<number | null>(null);
@@ -178,6 +182,17 @@ const form = reactive({
   featured: false,
   sortOrder: 0,
 });
+
+// A saved project keeps its current URL when its title is edited. New projects
+// preview the same slug the backend will generate if JavaScript is bypassed.
+watch(
+  () => form.name,
+  (name) => {
+    if (!editingId.value) {
+      form.slug = slugifyProjectName(name);
+    }
+  },
+);
 
 const outcomesText = ref<string>("");
 const serviceTagsText = ref<string>("");
@@ -422,6 +437,16 @@ onMounted(() => {
   text-transform: uppercase;
   color: var(--muted);
   margin: 0;
+}
+
+.public-url-preview {
+  margin: -4px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.public-url-preview code {
+  color: var(--text);
 }
 
 label {
